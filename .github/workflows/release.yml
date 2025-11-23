@@ -1,0 +1,74 @@
+name: Release
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types:
+      - completed
+
+jobs:
+  release:
+    name: Release signed build
+    runs-on: ubuntu-24.04
+    # Only run if CI workflow succeeded and branch is main
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main'
+    concurrency: release
+    permissions:
+      id-token: write
+      contents: write
+      attestations: write
+    outputs:
+      released: ${{ steps.release.outputs.released }}
+      version: ${{ steps.release.outputs.version }}
+      tag: ${{ steps.release.outputs.tag }}
+      signed_artifact_name: ${{ steps.signed_inspect.outputs.artifact-name }}
+      package_version: ${{ steps.signed_inspect.outputs.package-version }}
+
+    steps:
+      - name: Checkout Repository at workflow sha
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.workflow_run.head_sha }}
+      - name: Force correct release branch on workflow sha
+        run: |
+          git checkout -B ${{ github.event.workflow_run.head_branch || github.ref_name }} ${{ github.event.workflow_run.head_sha || github.sha }}
+      - name: Semantic Version Release
+        id: release
+        uses: python-semantic-release/python-semantic-release@v9.17.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          git_committer_name: "github-actions"
+          git_committer_email: "actions@users.noreply.github.com"
+      - name: Publish to GitHub Releases
+        if: steps.release.outputs.released == 'true'
+        uses: python-semantic-release/publish-action@v9.17.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ steps.release.outputs.tag }}
+      - name: Signed Attestation Build
+        if: steps.release.outputs.released == 'true'
+        id: signed_inspect
+        uses: hynek/build-and-inspect-python-package@v2
+        with:
+          attest-build-provenance-github: "true"
+
+  publish:
+    name: Publish to PyPI
+    needs: release
+    if: needs.release.outputs.released == 'true'
+    runs-on: ubuntu-24.04
+    environment:
+      name: pypi
+      url: https://pypi.org/project/cloud-connectors/${{ needs.release.outputs.package_version }}
+    permissions:
+      id-token: write
+
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: Packages
+          path: dist
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1

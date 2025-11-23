@@ -44,6 +44,13 @@ tests = [
     "pytest-cov>=5.0.0",
     "pytest-mock>=3.14.0",
     "pytest-asyncio>=0.23.0",
+    "coverage[toml]>=7.6.0",
+]
+
+typing = [
+    "mypy>=1.0.0",
+    "boto3-stubs[s3,sts]>=1.34.0",
+    "types-requests>=2.32.0",
 ]
 
 [tool.hatch.version]
@@ -51,3 +58,104 @@ path = "src/cloud_connectors/__init__.py"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/cloud_connectors"]
+
+[tool.pytest.ini_options]
+addopts = ["-ra", "--strict-markers", "--strict-config"]
+testpaths = "tests"
+xfail_strict = true
+filterwarnings = []
+
+[tool.coverage.paths]
+source = [
+    "src/cloud_connectors",
+    ".tox/*/lib/python*/site-packages/cloud_connectors",
+]
+
+[tool.coverage.run]
+branch = true
+parallel = true
+source = ["cloud_connectors"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+fail_under = 0
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if __name__ == '__main__':",
+    "if TYPE_CHECKING:",
+    "raise NotImplementedError",
+    "raise ImportError",
+    "except ImportError:",
+    "pass",
+]
+
+[tool.ruff]
+src = ["cloud_connectors", "tests"]
+exclude = ["docs"]
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    "ANN",     # Type annotations checks are better handled by Mypy
+    "C901",    # Ignore overly complex functions
+    "COM",     # Black handles commas
+    "D205",    # One blank line required between summary and description
+    "D415",    # First line should end with a period
+    "DTZ007",  # Naive datetime usage
+    "E501",    # Line length managed by Black
+    "EM102",   # Using f-string without variable assignments
+    "FBT",     # Allow boolean arguments
+    "FIX",     # FIXME markers
+    "PLR0911", # Too many return statements
+    "PLR0913", # Too many arguments
+    "RET505",  # Unnecessary elif after return
+    "TCH",     # TYPE_CHECKING blocks
+    "TD",      # TODO comments
+    "TID252",  # Relative imports
+    "TRY003",  # Simple strings in exceptions
+    "TRY300",  # Broad exception catches
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = [
+    "B018",    # Useless expressions in tests
+    "BLE",     # Exception handling in tests
+    "DTZ",     # Datetime handling in tests
+    "EM",      # Exception handling in tests
+    "LOG001",  # Log messages in tests
+    "PLC0415", # Imports in test functions
+    "PLC1901", # Empty strings as test values
+    "PLR2004", # Magic values in tests
+    "RUF012",  # Type hints in tests
+    "S",       # Security rules in tests
+    "SIM300",  # Yoda conditions
+    "TRY",     # Exception handling in tests
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.isort]
+lines-between-types = 1
+lines-after-imports = 2
+
+[tool.mypy]
+strict = true
+pretty = true
+show_error_codes = true
+enable_error_code = ["ignore-without-code"]
+ignore_missing_imports = true
+warn_return_any = false
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+ignore_errors = true
+
+[tool.semantic_release]
+branch = "main"
+allow_zero_version = false
+version_variables = [
+    "src/cloud_connectors/__init__.py:__version__",
+]

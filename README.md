@@ -1,5 +1,10 @@
 # Cloud Connectors
 
+[![CI](https://github.com/jbcom/cloud-connectors/workflows/CI/badge.svg)](https://github.com/jbcom/cloud-connectors/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/jbcom/cloud-connectors/branch/main/graph/badge.svg)](https://codecov.io/gh/jbcom/cloud-connectors)
+[![PyPI version](https://badge.fury.io/py/cloud-connectors.svg)](https://badge.fury.io/py/cloud-connectors)
+[![Python versions](https://img.shields.io/pypi/pyversions/cloud-connectors.svg)](https://pypi.org/project/cloud-connectors/)
+
 Universal cloud provider connectors with transparent secret management and standardized interfaces.
 
 ## Features

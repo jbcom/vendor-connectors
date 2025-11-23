@@ -1,0 +1,161 @@
+name: CI
+
+permissions:
+  contents: read
+  actions: write
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build-package:
+    name: Build & verify package
+    runs-on: ubuntu-24.04
+    outputs:
+      python-versions: ${{ steps.baipp.outputs.supported_python_classifiers_json_array }}
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: hynek/build-and-inspect-python-package@v2
+        id: baipp
+
+  tests:
+    name: Tests on ${{ matrix.python-version }}
+    runs-on: ubuntu-24.04
+    needs: build-package
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ${{ fromJson(needs.build-package.outputs.python-versions) }}
+
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          python-version: ${{ matrix.python-version }}
+          enable-cache: true
+          cache-dependency-glob: "**/pyproject.toml"
+      - name: Download pre-built packages
+        uses: actions/download-artifact@v6
+        with:
+          name: Packages
+          path: dist
+      - name: Install package with test dependencies
+        run: |
+          uv venv
+          uv pip install dist/*.whl
+          uv pip install pytest pytest-cov pytest-mock pytest-asyncio
+      - name: Run tests
+        run: |
+          source .venv/bin/activate
+          pytest --cov=cloud_connectors --cov-report=xml --cov-report=term
+      - name: Upload coverage data
+        uses: actions/upload-artifact@v5
+        with:
+          name: coverage-data-${{ matrix.python-version }}
+          path: .coverage.*
+          include-hidden-files: true
+          if-no-files-found: ignore
+
+  typechecking:
+    name: Type checking
+    runs-on: ubuntu-24.04
+    needs: build-package
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          python-version: "3.12"
+          enable-cache: true
+          cache-dependency-glob: "**/pyproject.toml"
+      - name: Install dependencies
+        run: |
+          uv venv
+          uv pip install -e ".[typing]"
+      - name: Run mypy
+        run: |
+          source .venv/bin/activate
+          mypy src/cloud_connectors
+
+  linting:
+    name: Lint checks
+    runs-on: ubuntu-24.04
+    needs: build-package
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          python-version: "3.12"
+          enable-cache: true
+          cache-dependency-glob: "**/pyproject.toml"
+      - name: Install ruff
+        run: uv tool install ruff
+      - name: Run ruff check
+        run: uvx ruff check src/cloud_connectors
+
+  coverage:
+    name: Coverage Report
+    runs-on: ubuntu-24.04
+    needs: tests
+    if: always()
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          python-version: "3.12"
+          enable-cache: true
+          cache-dependency-glob: "**/pyproject.toml"
+      - name: Download coverage data
+        uses: actions/download-artifact@v6
+        with:
+          pattern: coverage-data-*
+          merge-multiple: true
+        continue-on-error: true
+      - name: Generate coverage report
+        run: |
+          uv tool install coverage
+
+          if [ -f .coverage.* ]; then
+            coverage combine
+            coverage html --skip-covered --skip-empty
+
+            echo "## Coverage Report" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            coverage report --format=markdown >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+
+            coverage report
+          else
+            echo "No coverage data found" >> $GITHUB_STEP_SUMMARY
+          fi
+      - name: Upload HTML report
+        if: hashFiles('.coverage.*') != ''
+        uses: actions/upload-artifact@v5
+        with:
+          name: coverage-report
+          path: htmlcov
+          if-no-files-found: ignore
+      - name: Upload coverage to Codecov
+        if: hashFiles('.coverage.*') != ''
+        uses: codecov/codecov-action@v5
+        with:
+          files: coverage.xml
+          fail_ci_if_error: false
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
