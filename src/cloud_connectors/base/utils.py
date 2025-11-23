@@ -36,11 +36,24 @@ from ruamel.yaml import YAML, StringIO, YAMLError, scalarstring
 from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.constructor import SafeConstructor
 from sortedcontainers import SortedDict
-from dopplersdk import DopplerSDK
 
-from terraform_modules import settings
-from terraform_modules.errors import FormattingError
-from terraform_modules.logging import Logging
+try:
+    from dopplersdk import DopplerSDK
+except ImportError:
+    DopplerSDK = None
+
+from cloud_connectors.base.settings import (
+    DEFAULT_LOG_LEVEL,
+    DOPPLER_CONFIG,
+    DOPPLER_PROJECT,
+    LOG_FILE_NAME,
+    MAX_DESCRIPTION_LENGTH,
+    MAX_FILE_LOCK_WAIT,
+    VERBOSITY,
+    VERBOSE,
+)
+from cloud_connectors.base.errors import FormattingError
+from cloud_connectors.base.logging import Logging
 
 FilePath = Union[str, bytes, os.PathLike]
 
@@ -728,12 +741,12 @@ def make_hashable(value: Any) -> Any:
 
 def get_log_level(level):
     if level is None:
-        return settings.DEFAULT_LOG_LEVEL
+        return DEFAULT_LOG_LEVEL
 
     if isinstance(level, int):
         return level
 
-    return getattr(logging, level.upper(), settings.DEFAULT_LOG_LEVEL)
+    return getattr(logging, level.upper(), DEFAULT_LOG_LEVEL)
 
 
 def get_loggers():
@@ -834,7 +847,7 @@ def sanitize_asset(d: Any):
             else:
                 if k == "description":
                     filtered[k] = truncate(
-                        v, max_length=settings.MAX_DESCRIPTION_LENGTH
+                        v, max_length=MAX_DESCRIPTION_LENGTH
                     )
                     continue
 
@@ -964,13 +977,13 @@ class Utils:
         self.inputs = CaseInsensitiveDict(inputs)
 
         doppler_token = os.getenv('DOPPLER_TOKEN')
-        if doppler_token:
+        if doppler_token and DopplerSDK is not None:
             try:
                 doppler = DopplerSDK()
                 doppler.set_access_token(doppler_token)
                 secrets_response = doppler.secrets.list(
-                    project=settings.DOPPLER_PROJECT,
-                    config=settings.DOPPLER_CONFIG,
+                    project=DOPPLER_PROJECT,
+                    config=DOPPLER_CONFIG,
                     accepts="application/json"
                 ).secrets
 
@@ -983,7 +996,7 @@ class Utils:
             "verbose",
             self.get_input(
                 "verbose",
-                default=settings.VERBOSE,
+                default=VERBOSE,
                 is_bool=True,
             ),
         )
@@ -992,7 +1005,7 @@ class Utils:
             "verbosity",
             self.get_input(
                 "verbosity",
-                default=settings.VERBOSITY,
+                default=VERBOSITY,
             ),
         )
 
@@ -1009,7 +1022,7 @@ class Utils:
             "log_file_name",
             self.get_input(
                 "log_file_name",
-                default=settings.LOG_FILE_NAME,
+                default=LOG_FILE_NAME,
             ),
         )
 
@@ -1530,7 +1543,7 @@ class Utils:
             file_data = str(file_data)
 
         self.logged_statement(f"Updating local file {file_path}", verbose=True)
-        lock = FileLock(f"{file_path}.lock", timeout=settings.MAX_FILE_LOCK_WAIT)
+        lock = FileLock(f"{file_path}.lock", timeout=MAX_FILE_LOCK_WAIT)
 
         try:
             with lock.acquire():

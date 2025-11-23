@@ -8,7 +8,7 @@ from typing import Mapping, Literal, Any
 from extended_data_types import strtobool, get_unique_signature, is_nothing, wrap_raw_data_for_export, all_non_empty
 from rich.logging import RichHandler
 
-from terraform_modules.settings import DEFAULT_LOG_LEVEL, VERBOSITY
+from cloud_connectors.base.settings import DEFAULT_LOG_LEVEL, VERBOSITY
 
 
 def get_log_level(level: int | str) -> int:
