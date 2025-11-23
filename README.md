@@ -1,5 +1,9 @@
 # Cloud Connectors
 
+[![CI](https://github.com/jbcom/cloud-connectors/actions/workflows/ci.yml/badge.svg)](https://github.com/jbcom/cloud-connectors/actions/workflows/ci.yml)
+[![Python Version](https://img.shields.io/badge/python-3.9%2B-blue)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 Universal cloud provider connectors with transparent secret management and standardized interfaces.
 
 ## Features
@@ -44,3 +48,39 @@ All connectors inherit from a base `Utils` class that provides:
 - Standardized error handling
 
 Connectors use lazy initialization and credential caching for optimal performance.
+
+## Documentation
+
+- [Contributing Guide](CONTRIBUTING.md)
+- [Security Policy](SECURITY.md)
+- [Changelog](CHANGELOG.md)
+
+## Development Status
+
+**Current Version:** 0.1.0 (Beta)
+
+✅ **Implemented:**
+- All advertised connectors (AWS, GitHub, Google, Slack, Vault, Zoom)
+- Base Utils class with full feature set
+- Type hints throughout codebase
+- Error handling infrastructure
+
+🚧 **In Progress:**
+- Comprehensive test suite
+- CI/CD pipelines
+- API documentation
+- PyPI publication
+
+## License
+
+MIT License - see [LICENSE](LICENSE) for details.
+
+## Contributing
+
+Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+## Support
+
+- **Issues:** [GitHub Issues](https://github.com/jbcom/cloud-connectors/issues)
+- **Security:** See [SECURITY.md](SECURITY.md) for vulnerability reporting
+- **Email:** jon@jonbogaty.com
