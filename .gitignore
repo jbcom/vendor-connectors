@@ -192,3 +192,46 @@ cython_debug/
 #  refer to https://docs.cursor.com/context/ignore-files
 .cursorignore
 .cursorindexingignore
+
+# Testing
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+.tox/
+.hypothesis/
+
+# Logs
+*.log
+logs/
+
+# Generated agent config files (managed by ruler)
+AGENTS.md
+CLAUDE.md
+CRUSH.md
+WARP.md
+.clinerules
+.goosehints
+.aider.conf.yml
+.mcp.json
+.cursor/mcp.json
+.vscode/mcp.json
+.windsurf/mcp_config.json
+.amazonq/rules/
+.amazonq/mcp.json
+.idx/airules.md
+.idx/mcp.json
+.openhands/microagents/repo.md
+.gemini/settings.json
+.junie/guidelines.md
+.augment/rules/
+.kilocode/rules/
+.kilocode/mcp.json
+opencode.json
+.qwen/settings.json
+.roo/mcp.json
+.zed/settings.json
+.trae/rules/
+.kiro/steering/
+.kiro/settings/mcp.json
+firebender.json

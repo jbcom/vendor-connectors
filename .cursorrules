@@ -1,0 +1,153 @@
+# Cloud Connectors Memory Bank
+
+## Project Overview
+This repository provides universal cloud provider connectors with transparent secret management and standardized interfaces. The project is a Python package that offers a base `Utils` class and specialized connectors for multiple cloud services.
+
+## Architecture
+
+### Package Structure
+```
+src/cloud_connectors/
+├── __init__.py          # Package entry point, exports all connectors
+├── base/
+│   ├── __init__.py
+│   ├── utils.py         # Base Utils class with directed inputs, logging, caching
+│   ├── errors.py        # Custom error classes
+│   └── logging.py       # Lifecycle logging implementation
+├── aws/
+│   └── __init__.py      # AWSConnector implementation
+├── github/
+│   └── __init__.py      # GithubConnector implementation
+├── google/
+│   └── __init__.py      # GoogleConnector implementation
+├── slack/
+│   └── __init__.py      # SlackConnector implementation
+├── vault/
+│   └── __init__.py      # VaultConnector implementation
+└── zoom/
+    └── __init__.py      # ZoomConnector implementation
+```
+
+### Key Components
+
+#### Base Utils Class (`src/cloud_connectors/base/utils.py`)
+All connectors inherit from `Utils` which provides:
+- **Directed inputs**: Environment variables, config files, stdin support
+- **Lifecycle logging**: Rich formatted logging with markers and verbosity controls
+- **Caching**: Method result caching and memoization
+- **Standardized error handling**: Custom error classes and error tracking
+- **File operations**: Read/write with multiple format support (JSON, YAML, HCL2)
+- **Configuration management**: Input decoding, sanitization, filtering
+- **Git integration**: Repository path detection and management
+
+#### Implemented Connectors
+
+1. **AWSConnector** (`src/cloud_connectors/aws/__init__.py`)
+   - Role assumption with STS
+   - Session caching by role ARN
+   - Client and resource creation with retry logic
+   - Standard retry configuration (5 attempts by default)
+
+2. **GithubConnector** (`src/cloud_connectors/github/__init__.py`)
+   - Repository and organization management
+   - Branch creation and management
+   - File CRUD operations
+   - GraphQL query support
+   - Encoding detection and handling
+
+3. **GoogleConnector** (`src/cloud_connectors/google/__init__.py`)
+   - Lazy credential loading for Workspace and Cloud Platform APIs
+   - Service account authentication with delegation
+   - Credential caching per subject
+   - Support for both Workspace and Cloud services
+
+4. **SlackConnector** (`src/cloud_connectors/slack/__init__.py`)
+   - Message sending with rich text blocks
+   - Channel and user management
+   - Rate limiting with automatic retry
+   - Conversation members and usergroups support
+
+5. **VaultConnector** (`src/cloud_connectors/vault/__init__.py`)
+   - Token and AppRole authentication
+   - Lazy client initialization
+   - Token expiration tracking
+   - Namespace support
+
+6. **ZoomConnector** (`src/cloud_connectors/zoom/__init__.py`)
+   - OAuth2 authentication
+   - User management (list, create, remove)
+   - Paginated API calls
+
+### Dependencies
+The project uses:
+- `boto3` - AWS SDK
+- `PyGithub` - GitHub API wrapper
+- `google-api-python-client`, `google-cloud-*` - Google Cloud APIs
+- `slack-sdk` - Slack SDK
+- `hvac` - HashiCorp Vault client
+- `requests` - HTTP library
+- `directed-inputs-class` - Input management
+- `lifecyclelogging` - Logging framework
+
+Note: The Utils class has some legacy imports from a `terraform_modules` package that may need refactoring.
+
+## Current State
+
+### What Exists
+- ✅ All advertised connectors are implemented
+- ✅ Base Utils class with comprehensive features
+- ✅ Type hints throughout the codebase
+- ✅ Error handling classes
+- ✅ Logging infrastructure
+
+### What's Missing
+- ❌ Tests (no test files exist)
+- ❌ CI/CD pipelines (no GitHub Actions workflows)
+- ❌ Documentation beyond README
+- ❌ CHANGELOG.md
+- ❌ CONTRIBUTING.md
+- ❌ SECURITY.md
+- ❌ Code examples and usage guides
+- ❌ API reference documentation
+
+## Development Guidelines
+
+### Code Style
+- Use type hints for all function signatures
+- Follow PEP 8 naming conventions
+- Add docstrings to all public methods
+- Use structured logging via the Utils base class
+- Handle errors with custom error classes from `base.errors`
+
+### Common Patterns
+1. **Connector Initialization**: All connectors accept kwargs and pass them to `super().__init__(**kwargs)`
+2. **Logging**: Use `self.logged_statement()` for structured logging
+3. **Input Retrieval**: Use `self.get_input()` or `self.decode_input()` for configuration
+4. **Caching**: Connectors cache clients/sessions to avoid repeated authentication
+5. **Error Handling**: Use try/except with appropriate logging and error raising
+
+### Testing (To Be Implemented)
+- Unit tests for each connector with mocked cloud APIs
+- Integration tests with service mocks
+- Test fixtures for common scenarios
+- Coverage reporting
+
+### Building and Packaging
+- Build system: hatchling
+- Version source: `src/cloud_connectors/__init__.py`
+- Package name: `cloud-connectors`
+- Python: >=3.9
+
+## Known Issues
+1. The `Utils` class imports from `terraform_modules` which appears to be a different package (legacy dependency)
+2. Some imports in base files may be circular or unnecessary
+3. No validation of credentials or required parameters in some connectors
+
+## Next Steps (Priority Order)
+1. Add comprehensive test suite
+2. Set up CI/CD (GitHub Actions for lint, test, build)
+3. Add documentation (API reference, usage examples, tutorials)
+4. Add CHANGELOG, CONTRIBUTING, SECURITY files
+5. Review and refactor the base Utils class dependencies
+6. Add dependency version pinning strategy
+7. Create publishing workflow for PyPI

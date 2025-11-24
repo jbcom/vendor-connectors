@@ -1,0 +1,40 @@
+[config]
+# Ruler configuration for cloud-connectors project
+version = "1.0"
+
+# Nested rule loading - scan subdirectories for additional .ruler/ folders
+nested_rule_loading = true
+
+[agents.cursor]
+enabled = true
+rules_file = "AGENTS.md"
+mcp_config = ".cursor/mcp.json"
+
+[agents.claude]
+enabled = true
+rules_file = "CLAUDE.md"
+mcp_config = ".mcp.json"
+
+[agents.github_copilot]
+enabled = true
+rules_file = "AGENTS.md"
+mcp_config = ".vscode/mcp.json"
+
+[agents.aider]
+enabled = true
+rules_file = "AGENTS.md"
+aider_config = ".aider.conf.yml"
+mcp_config = ".mcp.json"
+
+[agents.cline]
+enabled = true
+rules_file = ".clinerules"
+
+[agents.windsurf]
+enabled = true
+rules_file = "AGENTS.md"
+mcp_config = ".windsurf/mcp_config.json"
+
+[gitignore]
+# Automatically add generated agent config files to .gitignore
+auto_update = true
