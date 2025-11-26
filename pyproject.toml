@@ -41,7 +41,7 @@ dependencies = [
     # Additional utils not in extended-data-types
     "numpy>=1.26.0",
     "validators>=0.22.0",
-    "case-insensitive-dict>=0.1.0",
+    # CaseInsensitiveDict comes from requests (already a dependency)
     "deepmerge>=1.1.0",
     "filelock>=3.13.0",
     "more-itertools>=10.0.0",
@@ -113,7 +113,11 @@ select = [
 ignore = [
     "E501",  # line too long (handled by formatter)
     "B008",  # do not perform function calls in argument defaults
+    "B019",  # lru_cache on methods (intentional for caching)
+    "B904",  # raise from err (too many changes needed)
     "C901",  # too complex
+    "UP035", # deprecated typing imports (Python 3.9 compat)
+    "UP045", # Optional[X] vs X | None (keep Optional for clarity)
 ]
 
 [tool.ruff.lint.per-file-ignores]
