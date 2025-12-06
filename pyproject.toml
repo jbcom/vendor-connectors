@@ -26,8 +26,8 @@ classifiers = [
 dependencies = [
     # jbcom ecosystem
     "extended-data-types>=2025.11.164",
-    "lifecyclelogging>=202511.0.0",
-    "directed-inputs-class>=202511.0.0",
+    "lifecyclelogging>=202511.3.0",
+    "directed-inputs-class>=202511.3.0",
     # Cloud providers
     "boto3>=1.34.0",
     "google-api-python-client>=2.0.0",
