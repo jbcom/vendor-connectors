@@ -7,9 +7,10 @@ from datetime import datetime, timezone
 from typing import Any
 
 from meshy import base
+from meshy.webhooks.schemas import MeshyWebhookPayload
+
 from ..persistence.repository import TaskRepository
 from ..persistence.schemas import ArtifactRecord
-from meshy.webhooks.schemas import MeshyWebhookPayload
 
 
 def _utc_now() -> datetime:
@@ -115,9 +116,7 @@ class WebhookHandler:
             "artifacts_downloaded": len(artifacts),
         }
 
-    def _download_glb_artifact(
-        self, project: str, spec_hash: str, service: str, glb_url: str
-    ) -> ArtifactRecord | None:
+    def _download_glb_artifact(self, project: str, spec_hash: str, service: str, glb_url: str) -> ArtifactRecord | None:
         """Download GLB artifact and create record."""
         try:
             project_dir = self.repository.base_path / project

@@ -71,9 +71,7 @@ class TaskRepository:
         manifest_dict = manifest.model_dump(mode="json")
 
         # Atomic write: write to temp file, then rename
-        with tempfile.NamedTemporaryFile(
-            mode="w", dir=manifest_path.parent, delete=False, suffix=".tmp"
-        ) as tmp_file:
+        with tempfile.NamedTemporaryFile(mode="w", dir=manifest_path.parent, delete=False, suffix=".tmp") as tmp_file:
             json.dump(manifest_dict, tmp_file, indent=2)
             tmp_path = tmp_file.name
 
@@ -216,17 +214,13 @@ class TaskRepository:
         terminal_statuses = {"SUCCEEDED", "FAILED", "EXPIRED", "CANCELED"}
 
         for asset_record in manifest.asset_specs.values():
-            has_pending = any(
-                task.status not in terminal_statuses for task in asset_record.task_graph
-            )
+            has_pending = any(task.status not in terminal_statuses for task in asset_record.task_graph)
             if has_pending:
                 pending.append(asset_record)
 
         return pending
 
-    def find_task_by_id(
-        self, task_id: str, project: str | None = None
-    ) -> tuple[str, str, AssetManifest] | None:
+    def find_task_by_id(self, task_id: str, project: str | None = None) -> tuple[str, str, AssetManifest] | None:
         """Find asset by task ID (for webhook lookups).
 
         Args:
@@ -241,11 +235,7 @@ class TaskRepository:
             project_list = [project]
         else:
             # Search all project directories
-            project_list = [
-                d.name
-                for d in self.base_path.iterdir()
-                if d.is_dir() and (d / "manifest.json").exists()
-            ]
+            project_list = [d.name for d in self.base_path.iterdir() if d.is_dir() and (d / "manifest.json").exists()]
 
         for sp in project_list:
             manifest = self.load_project_manifest(sp)

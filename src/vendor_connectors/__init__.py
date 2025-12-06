@@ -29,6 +29,8 @@ from __future__ import annotations
 
 __version__ = "202511.12.0"
 
+# Meshy AI connector for 3D asset generation
+from vendor_connectors import meshy
 from vendor_connectors.aws import (
     AWSConnector,
     AWSConnectorFull,
@@ -54,9 +56,6 @@ from vendor_connectors.google import (
 from vendor_connectors.slack import SlackConnector
 from vendor_connectors.vault import VaultConnector
 from vendor_connectors.zoom import ZoomConnector
-
-# Meshy AI connector for 3D asset generation
-from vendor_connectors import meshy
 
 __all__ = [
     # AWS

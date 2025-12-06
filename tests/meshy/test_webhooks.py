@@ -135,9 +135,7 @@ class TestWebhookHandler:
             download_artifacts=True,
         )
 
-    def test_handle_webhook_success(
-        self, webhook_handler, mock_repository, webhook_payload_succeeded
-    ):
+    def test_handle_webhook_success(self, webhook_handler, mock_repository, webhook_payload_succeeded):
         """Test handling successful webhook."""
         with patch("mesh_toolkit.webhooks.handler.base") as mock_base:
             mock_base.download.return_value = 1000
@@ -167,9 +165,7 @@ class TestWebhookHandler:
         assert result["status"] == "error"
         assert "not found" in result["message"]
 
-    def test_handle_webhook_failed_task(
-        self, webhook_handler, mock_repository, webhook_payload_failed
-    ):
+    def test_handle_webhook_failed_task(self, webhook_handler, mock_repository, webhook_payload_failed):
         """Test handling failed webhook."""
         # Update mock to find this task
         asset_manifest = AssetManifest(
@@ -249,9 +245,7 @@ class TestWebhookHandler:
             assert result["artifacts_downloaded"] == 1
             mock_base.download.assert_called_once()
 
-    def test_handle_webhook_no_download_when_disabled(
-        self, mock_repository, webhook_payload_succeeded
-    ):
+    def test_handle_webhook_no_download_when_disabled(self, mock_repository, webhook_payload_succeeded):
         """Test that downloads are skipped when disabled."""
         handler = WebhookHandler(
             repository=mock_repository,

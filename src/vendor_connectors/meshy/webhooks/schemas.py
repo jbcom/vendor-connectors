@@ -59,9 +59,7 @@ class MeshyWebhookPayload(BaseModel):
     """
 
     id: str = Field(..., description="Task ID")
-    status: str = Field(
-        ..., description="Task status: PENDING, IN_PROGRESS, SUCCEEDED, FAILED, EXPIRED"
-    )
+    status: str = Field(..., description="Task status: PENDING, IN_PROGRESS, SUCCEEDED, FAILED, EXPIRED")
     progress: int = Field(default=0, description="Progress percentage (0-100)")
     created_at: int = Field(..., description="Unix timestamp")
     started_at: int | None = None

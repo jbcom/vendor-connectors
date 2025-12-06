@@ -297,6 +297,4 @@ class AssetSpec(BaseModel):
     enable_pbr: bool = True
     output_path: str = Field(description="Relative output path for downloaded assets")
     metadata: dict[str, Any] = Field(default_factory=dict)
-    asset_id: str | None = Field(
-        default=None, description="Unique asset identifier (auto-generated if not provided)"
-    )
+    asset_id: str | None = Field(default=None, description="Unique asset identifier (auto-generated if not provided)")

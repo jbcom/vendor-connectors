@@ -8,8 +8,6 @@ from __future__ import annotations
 
 from typing import Any
 
-from pydantic import BaseModel, Field
-
 # Import to register tools
 import mesh_toolkit.agent_tools.tools  # noqa: F401
 from mesh_toolkit.agent_tools.base import (
@@ -17,6 +15,7 @@ from mesh_toolkit.agent_tools.base import (
     ToolDefinition,
     get_tool_definitions,
 )
+from pydantic import BaseModel, Field
 
 
 def _create_pydantic_model(definition: ToolDefinition) -> type[BaseModel]:

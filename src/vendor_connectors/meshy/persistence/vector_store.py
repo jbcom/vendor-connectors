@@ -466,14 +466,11 @@ class VectorStore:
 
         if project:
             cursor = conn.execute(
-                "SELECT * FROM generations "
-                "WHERE status IN ('pending', 'in_progress') AND project = ?",
+                "SELECT * FROM generations WHERE status IN ('pending', 'in_progress') AND project = ?",
                 (project,),
             )
         else:
-            cursor = conn.execute(
-                "SELECT * FROM generations WHERE status IN ('pending', 'in_progress')"
-            )
+            cursor = conn.execute("SELECT * FROM generations WHERE status IN ('pending', 'in_progress')")
 
         return [self._row_to_record(row) for row in cursor]
 

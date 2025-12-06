@@ -563,8 +563,7 @@ def _register_all_tools():
         ToolDefinition(
             name="get_animation",
             description=(
-                "Get details of a specific animation by ID, including name, "
-                "category, subcategory, and preview URL."
+                "Get details of a specific animation by ID, including name, category, subcategory, and preview URL."
             ),
             category=ToolCategory.UTILITY,
             parameters={

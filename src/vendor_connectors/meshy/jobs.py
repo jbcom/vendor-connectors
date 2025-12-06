@@ -57,9 +57,7 @@ class AssetGenerator:
         desc_hash = hashlib.sha256(spec.description.encode()).hexdigest()[:8]
         return f"{spec.intent.value}_{desc_hash}"
 
-    def generate_model(
-        self, spec: AssetSpec, wait: bool = True, poll_interval: float = 5.0
-    ) -> AssetManifest:
+    def generate_model(self, spec: AssetSpec, wait: bool = True, poll_interval: float = 5.0) -> AssetManifest:
         """Generate 3D model from spec."""
         asset_id = self._generate_asset_id(spec)
 
@@ -124,9 +122,7 @@ class AssetGenerator:
 
         return manifest
 
-    def batch_generate(
-        self, specs: list[AssetSpec], max_concurrent: int = 3
-    ) -> list[AssetManifest]:
+    def batch_generate(self, specs: list[AssetSpec], max_concurrent: int = 3) -> list[AssetManifest]:
         """Generate multiple assets (respecting rate limits)."""
         manifests = []
 

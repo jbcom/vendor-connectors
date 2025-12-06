@@ -4847,24 +4847,18 @@ def _populate_animation_sets() -> None:
     ][:10]  # Limit to first 10
 
     # Combat: Fighting category
-    GameAnimationSet.COMBAT = [aid for aid in all_ids if ANIMATIONS[aid].category == "Fighting"][
-        :10
-    ]
+    GameAnimationSet.COMBAT = [aid for aid in all_ids if ANIMATIONS[aid].category == "Fighting"][:10]
 
     # Social: Interacting subcategory
-    GameAnimationSet.SOCIAL = [
-        aid for aid in all_ids if ANIMATIONS[aid].subcategory == "Interacting"
-    ][:10]
+    GameAnimationSet.SOCIAL = [aid for aid in all_ids if ANIMATIONS[aid].subcategory == "Interacting"][:10]
 
     # Celebration: Dancing category
-    GameAnimationSet.CELEBRATION = [
-        aid for aid in all_ids if ANIMATIONS[aid].category == "Dancing"
-    ][:10]
+    GameAnimationSet.CELEBRATION = [aid for aid in all_ids if ANIMATIONS[aid].category == "Dancing"][:10]
 
     # Exploration: LookingAround + Idle
-    GameAnimationSet.EXPLORATION = [
-        aid for aid in all_ids if ANIMATIONS[aid].subcategory in ("LookingAround", "Idle")
-    ][:10]
+    GameAnimationSet.EXPLORATION = [aid for aid in all_ids if ANIMATIONS[aid].subcategory in ("LookingAround", "Idle")][
+        :10
+    ]
 
 
 # Initialize sets on module load
