@@ -25,7 +25,7 @@ classifiers = [
 ]
 dependencies = [
     # jbcom ecosystem
-    "extended-data-types>=202511.0.0",
+    "extended-data-types>=2025.11.164",
     "lifecyclelogging>=202511.0.0",
     "directed-inputs-class>=202511.0.0",
     # Cloud providers
