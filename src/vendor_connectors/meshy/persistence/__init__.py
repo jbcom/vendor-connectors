@@ -21,7 +21,12 @@ from __future__ import annotations
 from vendor_connectors.meshy.persistence.repository import TaskRepository
 from vendor_connectors.meshy.persistence.schemas import ArtifactRecord, AssetManifest, ProjectManifest, TaskGraphEntry
 from vendor_connectors.meshy.persistence.utils import canonicalize_spec, compute_spec_hash
-from vendor_connectors.meshy.persistence.vector_store import GenerationRecord, SimilarityResult, VectorStore, get_embedding
+from vendor_connectors.meshy.persistence.vector_store import (
+    GenerationRecord,
+    SimilarityResult,
+    VectorStore,
+    get_embedding,
+)
 
 __all__ = [
     # JSON manifests
