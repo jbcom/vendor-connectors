@@ -7,7 +7,7 @@ from datetime import datetime, timezone
 from typing import Any
 
 from meshy import base
-from meshy.webhooks.schemas import MeshyWebhookPayload
+from vendor_connectors.meshy.webhooks.schemas import MeshyWebhookPayload
 
 from ..persistence.repository import TaskRepository
 from ..persistence.schemas import ArtifactRecord

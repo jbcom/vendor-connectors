@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from meshy.persistence.schemas import (
+from vendor_connectors.meshy.persistence.schemas import (
     ArtifactRecord,
     AssetManifest,
     ProjectManifest,
@@ -17,7 +17,7 @@ from meshy.persistence.schemas import (
     TaskGraphEntry,
     TaskSubmission,
 )
-from meshy.persistence.utils import compute_spec_hash as util_compute_spec_hash
+from vendor_connectors.meshy.persistence.utils import compute_spec_hash as util_compute_spec_hash
 
 
 def _utc_now() -> datetime:

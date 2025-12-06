@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from meshy.webhooks.handler import WebhookHandler
-from meshy.webhooks.schemas import MeshyWebhookPayload
+from vendor_connectors.meshy.webhooks.handler import WebhookHandler
+from vendor_connectors.meshy.webhooks.schemas import MeshyWebhookPayload
 
 __all__ = ["MeshyWebhookPayload", "WebhookHandler"]
