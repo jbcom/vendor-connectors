@@ -54,7 +54,7 @@ jobs:
       - uses: hynek/setup-cached-uv@v2
 
       - name: Install dependencies
-        run: uv sync --extra tests
+        run: uv sync --all-extras
 
       - name: Run tests
         run: uv run pytest tests -v
