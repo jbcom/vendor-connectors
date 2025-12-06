@@ -1,7 +1,7 @@
 """Retexture API - apply new textures to models.
 
 Usage:
-    from mesh_toolkit import retexture
+    from vendor_connectors.meshy import retexture
 
     result = retexture.apply(model_task_id, "golden with gems")
 """

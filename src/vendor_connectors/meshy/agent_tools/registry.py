@@ -4,7 +4,7 @@ This module provides a registry pattern for managing multiple tool providers
 (CrewAI, MCP, Langchain, etc.), enabling runtime discovery and selection.
 
 Usage:
-    from mesh_toolkit.agent_tools import get_provider, list_providers
+    from vendor_connectors.meshy.agent_tools import get_provider, list_providers
 
     # List available providers
     providers = list_providers()  # ['crewai', 'mcp']
@@ -23,7 +23,7 @@ import threading
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from mesh_toolkit.agent_tools.base import BaseToolProvider
+    from vendor_connectors.meshy.agent_tools.base import BaseToolProvider
 
 
 # Thread-safe registry
@@ -50,7 +50,7 @@ class ToolProvider(metaclass=_ToolProviderMeta):
     """Namespace for accessing registered tool providers.
 
     Usage:
-        from mesh_toolkit.agent_tools import ToolProvider
+        from vendor_connectors.meshy.agent_tools import ToolProvider
 
         # Access CrewAI provider
         tools = ToolProvider.crewai.get_tools()
@@ -165,11 +165,11 @@ def _lazy_load_provider(name: str) -> BaseToolProvider | None:
     """
     try:
         if name == "crewai":
-            from mesh_toolkit.agent_tools.crewai import CrewAIToolProvider
+            from vendor_connectors.meshy.agent_tools.crewai import CrewAIToolProvider
 
             return CrewAIToolProvider()
         elif name == "mcp":
-            from mesh_toolkit.agent_tools.mcp import MCPToolProvider
+            from vendor_connectors.meshy.agent_tools.mcp import MCPToolProvider
 
             return MCPToolProvider()
     except ImportError:

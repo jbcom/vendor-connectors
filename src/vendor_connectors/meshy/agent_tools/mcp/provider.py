@@ -10,8 +10,8 @@ import json
 from typing import Any
 
 # Import to register tools
-import mesh_toolkit.agent_tools.tools  # noqa: F401
-from mesh_toolkit.agent_tools.base import (
+import vendor_connectors.meshy.agent_tools.tools  # noqa: F401
+from vendor_connectors.meshy.agent_tools.base import (
     BaseToolProvider,
     get_tool_definition,
     get_tool_definitions,
@@ -206,7 +206,7 @@ def create_server():
     """Create an MCP server with mesh-toolkit tools.
 
     Usage:
-        from mesh_toolkit.agent_tools.mcp import create_server
+        from vendor_connectors.meshy.agent_tools.mcp import create_server
 
         server = create_server()
 

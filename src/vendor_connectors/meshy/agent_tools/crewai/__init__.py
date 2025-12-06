@@ -3,7 +3,7 @@
 This module provides CrewAI-compatible tools for 3D asset generation.
 
 Usage:
-    from mesh_toolkit.agent_tools.crewai import get_tools
+    from vendor_connectors.meshy.agent_tools.crewai import get_tools
 
     # Get all tools
     tools = get_tools()
@@ -17,7 +17,7 @@ Usage:
     )
 
     # Or get specific tools
-    from mesh_toolkit.agent_tools.crewai import (
+    from vendor_connectors.meshy.agent_tools.crewai import (
         Text3DGenerateTool,
         ApplyAnimationTool,
         ListAnimationsTool,
@@ -29,7 +29,7 @@ Requirements:
 
 from __future__ import annotations
 
-from mesh_toolkit.agent_tools.crewai.provider import (
+from vendor_connectors.meshy.agent_tools.crewai.provider import (
     CrewAIToolProvider,
     get_tool,
     get_tools,
@@ -53,8 +53,8 @@ def __getattr__(name: str):
 
     if name in tool_names:
         if name not in _tool_classes:
-            from mesh_toolkit.agent_tools.base import get_tool_definition
-            from mesh_toolkit.agent_tools.crewai.provider import _create_tool_class
+            from vendor_connectors.meshy.agent_tools.base import get_tool_definition
+            from vendor_connectors.meshy.agent_tools.crewai.provider import _create_tool_class
 
             definition = get_tool_definition(tool_names[name])
             if definition:

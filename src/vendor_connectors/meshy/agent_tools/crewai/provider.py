@@ -8,14 +8,15 @@ from __future__ import annotations
 
 from typing import Any
 
+from pydantic import BaseModel, Field
+
 # Import to register tools
-import mesh_toolkit.agent_tools.tools  # noqa: F401
-from mesh_toolkit.agent_tools.base import (
+import vendor_connectors.meshy.agent_tools.tools  # noqa: F401
+from vendor_connectors.meshy.agent_tools.base import (
     BaseToolProvider,
     ToolDefinition,
     get_tool_definitions,
 )
-from pydantic import BaseModel, Field
 
 
 def _create_pydantic_model(definition: ToolDefinition) -> type[BaseModel]:
@@ -178,7 +179,7 @@ def get_tools() -> list[Any]:
     """Get all mesh-toolkit tools as CrewAI BaseTool instances.
 
     Usage:
-        from mesh_toolkit.agent_tools.crewai import get_tools
+        from vendor_connectors.meshy.agent_tools.crewai import get_tools
 
         tools = get_tools()
         agent = Agent(role="Artist", tools=tools, ...)

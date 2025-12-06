@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import pytest
-from mesh_toolkit.models import (
+from pydantic import ValidationError
+
+from vendor_connectors.meshy.models import (
     AnimationRequest,
     AnimationResult,
     ArtStyle,
@@ -23,7 +25,6 @@ from mesh_toolkit.models import (
     TextTextureRequest,
     TextureUrls,
 )
-from pydantic import ValidationError
 
 
 class TestTaskStatus:

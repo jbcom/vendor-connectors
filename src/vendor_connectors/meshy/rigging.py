@@ -1,7 +1,7 @@
 """Rigging API - add skeletons to models.
 
 Usage:
-    from mesh_toolkit import rigging
+    from vendor_connectors.meshy import rigging
 
     result = rigging.rig(model_task_id)
 """

@@ -1,8 +1,8 @@
 """Animation API - apply animations to rigged models.
 
 Usage:
-    from mesh_toolkit import animate
-    from mesh_toolkit.animations import ANIMATIONS
+    from vendor_connectors.meshy import animate
+    from vendor_connectors.meshy.animations import ANIMATIONS
 
     result = animate.apply(rigged_task_id, animation_id=0)
 

@@ -1,7 +1,7 @@
 """Text-to-3D API.
 
 Usage:
-    from mesh_toolkit import text3d
+    from vendor_connectors.meshy import text3d
 
     result = text3d.generate("a medieval sword")
     print(result.model_urls.glb)

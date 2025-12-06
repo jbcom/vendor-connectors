@@ -6,11 +6,11 @@ Two storage backends are available:
 
 Usage:
     # Simple JSON manifests
-    from mesh_toolkit.persistence import TaskRepository
+    from vendor_connectors.meshy.persistence import TaskRepository
     repo = TaskRepository("models/")
 
     # Vector-enabled SQLite for RAG
-    from mesh_toolkit.persistence import VectorStore
+    from vendor_connectors.meshy.persistence import VectorStore
     store = VectorStore("assets.db")
     store.record_generation(spec_hash, prompt, embedding=get_embedding(prompt))
     similar = store.search_similar(query_embedding)

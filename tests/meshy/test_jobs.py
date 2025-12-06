@@ -5,14 +5,14 @@ from __future__ import annotations
 import json
 from unittest.mock import patch
 
-from mesh_toolkit.jobs import (
+from vendor_connectors.meshy.jobs import (
     AssetGenerator,
     AssetManifest,
     example_character_spec,
     example_environment_spec,
     example_prop_spec,
 )
-from mesh_toolkit.models import (
+from vendor_connectors.meshy.models import (
     ArtStyle,
     AssetIntent,
     AssetSpec,
@@ -110,7 +110,7 @@ class TestAssetGenerator:
 
     def test_generate_model_no_wait(self, temp_dir):
         """Test generating model without waiting."""
-        with patch("mesh_toolkit.jobs.text3d") as mock_text3d:
+        with patch("vendor_connectors.meshy.jobs.text3d") as mock_text3d:
             mock_text3d.create.return_value = "task-12345"
 
             generator = AssetGenerator(output_root=str(temp_dir))
@@ -132,8 +132,8 @@ class TestAssetGenerator:
     def test_generate_model_with_wait(self, temp_dir):
         """Test generating model with polling."""
         with (
-            patch("mesh_toolkit.jobs.text3d") as mock_text3d,
-            patch("mesh_toolkit.jobs.base") as mock_base,
+            patch("vendor_connectors.meshy.jobs.text3d") as mock_text3d,
+            patch("vendor_connectors.meshy.jobs.base") as mock_base,
         ):
             mock_text3d.create.return_value = "task-12345"
             mock_text3d.poll.return_value = Text3DResult(
@@ -166,8 +166,8 @@ class TestAssetGenerator:
     def test_generate_model_saves_manifest_json(self, temp_dir):
         """Test that manifest JSON is saved."""
         with (
-            patch("mesh_toolkit.jobs.text3d") as mock_text3d,
-            patch("mesh_toolkit.jobs.base") as mock_base,
+            patch("vendor_connectors.meshy.jobs.text3d") as mock_text3d,
+            patch("vendor_connectors.meshy.jobs.base") as mock_base,
         ):
             mock_text3d.create.return_value = "task-12345"
             mock_text3d.poll.return_value = Text3DResult(
@@ -200,8 +200,8 @@ class TestAssetGenerator:
     def test_batch_generate(self, temp_dir):
         """Test batch generation of multiple assets."""
         with (
-            patch("mesh_toolkit.jobs.text3d") as mock_text3d,
-            patch("mesh_toolkit.jobs.base") as mock_base,
+            patch("vendor_connectors.meshy.jobs.text3d") as mock_text3d,
+            patch("vendor_connectors.meshy.jobs.base") as mock_base,
         ):
             mock_text3d.create.return_value = "task-12345"
             mock_text3d.poll.return_value = Text3DResult(
@@ -239,8 +239,8 @@ class TestAssetGenerator:
     def test_batch_generate_continues_on_failure(self, temp_dir):
         """Test that batch generation continues if one fails."""
         with (
-            patch("mesh_toolkit.jobs.text3d") as mock_text3d,
-            patch("mesh_toolkit.jobs.base") as mock_base,
+            patch("vendor_connectors.meshy.jobs.text3d") as mock_text3d,
+            patch("vendor_connectors.meshy.jobs.base") as mock_base,
         ):
             call_count = [0]
 

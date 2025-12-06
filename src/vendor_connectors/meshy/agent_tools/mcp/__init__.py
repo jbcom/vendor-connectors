@@ -5,10 +5,10 @@ capabilities to any MCP-compatible client (Claude Desktop, etc.).
 
 Usage:
     # As a module
-    python -m mesh_toolkit.agent_tools.mcp
+    python -m vendor_connectors.meshy.agent_tools.mcp
 
     # Or programmatically
-    from mesh_toolkit.agent_tools.mcp import create_server, run_server
+    from vendor_connectors.meshy.agent_tools.mcp import create_server, run_server
 
     server = create_server()
     run_server(server)
@@ -29,7 +29,7 @@ Requirements:
 
 from __future__ import annotations
 
-from mesh_toolkit.agent_tools.mcp.provider import (
+from vendor_connectors.meshy.agent_tools.mcp.provider import (
     MCPToolProvider,
     create_server,
     run_server,

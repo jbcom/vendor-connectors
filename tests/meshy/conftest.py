@@ -9,7 +9,8 @@ from unittest.mock import MagicMock, patch
 
 import httpx
 import pytest
-from mesh_toolkit.persistence.repository import TaskRepository
+
+from vendor_connectors.meshy.persistence.repository import TaskRepository
 
 
 @pytest.fixture

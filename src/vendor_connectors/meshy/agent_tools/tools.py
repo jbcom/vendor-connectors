@@ -9,7 +9,7 @@ The tools here use MeshyClient to interact with the Meshy API.
 
 from __future__ import annotations
 
-from mesh_toolkit.agent_tools.base import (
+from vendor_connectors.meshy.agent_tools.base import (
     ParameterDefinition,
     ToolCategory,
     ToolDefinition,
@@ -42,7 +42,7 @@ def handle_text3d_generate(
         JSON result with task_id and status
     """
     try:
-        from mesh_toolkit import text3d
+        from vendor_connectors.meshy import text3d
 
         result = text3d.generate(
             prompt,
@@ -82,7 +82,7 @@ def handle_rig_model(
         JSON result with rigging task_id and status
     """
     try:
-        from mesh_toolkit import rigging
+        from vendor_connectors.meshy import rigging
 
         result = rigging.rig(model_id, wait=wait)
 
@@ -125,7 +125,7 @@ def handle_apply_animation(
         JSON result with animation task_id
     """
     try:
-        from mesh_toolkit import animate
+        from vendor_connectors.meshy import animate
 
         result = animate.apply(model_id, int(animation_id), wait=wait)
 
@@ -171,7 +171,7 @@ def handle_retexture_model(
         JSON result with retexture task_id
     """
     try:
-        from mesh_toolkit import retexture
+        from vendor_connectors.meshy import retexture
 
         result = retexture.apply(
             model_id,
@@ -218,7 +218,7 @@ def handle_list_animations(
         JSON list of animations
     """
     try:
-        from mesh_toolkit.animations import ANIMATIONS
+        from vendor_connectors.meshy.animations import ANIMATIONS
 
         animations = list(ANIMATIONS.values())
 
@@ -263,7 +263,7 @@ def handle_check_task_status(
         JSON with task status and progress
     """
     try:
-        from mesh_toolkit import animate, retexture, rigging, text3d
+        from vendor_connectors.meshy import animate, retexture, rigging, text3d
 
         # Call the appropriate get function based on task type
         get_funcs = {
@@ -316,7 +316,7 @@ def handle_get_animation_by_id(
         JSON with animation details
     """
     try:
-        from mesh_toolkit.animations import ANIMATIONS
+        from vendor_connectors.meshy.animations import ANIMATIONS
 
         if animation_id not in ANIMATIONS:
             return ToolResult(

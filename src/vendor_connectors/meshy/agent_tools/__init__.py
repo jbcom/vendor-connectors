@@ -15,20 +15,20 @@ Architecture:
 
 Usage:
     # CrewAI integration
-    from mesh_toolkit.agent_tools.crewai import get_tools
+    from vendor_connectors.meshy.agent_tools.crewai import get_tools
     tools = get_tools()
 
     # MCP server
-    from mesh_toolkit.agent_tools.mcp import create_server
+    from vendor_connectors.meshy.agent_tools.mcp import create_server
     server = create_server()
 
     # Registry for all providers
-    from mesh_toolkit.agent_tools import get_provider, list_providers
+    from vendor_connectors.meshy.agent_tools import get_provider, list_providers
 """
 
 from __future__ import annotations
 
-from mesh_toolkit.agent_tools.registry import (
+from vendor_connectors.meshy.agent_tools.registry import (
     ToolProvider,
     get_provider,
     list_providers,

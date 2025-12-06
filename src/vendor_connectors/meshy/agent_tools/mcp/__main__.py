@@ -1,7 +1,7 @@
 """Run the mesh-toolkit MCP server.
 
 Usage:
-    python -m mesh_toolkit.agent_tools.mcp
+    python -m vendor_connectors.meshy.agent_tools.mcp
 
 Environment:
     MESHY_API_KEY - Required for API access
@@ -18,7 +18,7 @@ def main():
         msg = "MESHY_API_KEY environment variable is required for API access."
         raise RuntimeError(msg)
 
-    from mesh_toolkit.agent_tools.mcp import run_server
+    from vendor_connectors.meshy.agent_tools.mcp import run_server
 
     run_server()
 

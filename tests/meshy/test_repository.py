@@ -6,8 +6,9 @@ import json
 from datetime import datetime, timezone
 
 import pytest
-from mesh_toolkit.persistence.repository import TaskRepository
-from mesh_toolkit.persistence.schemas import (
+
+from vendor_connectors.meshy.persistence.repository import TaskRepository
+from vendor_connectors.meshy.persistence.schemas import (
     ArtifactRecord,
     AssetManifest,
     TaskStatus,
