@@ -20,7 +20,8 @@ class ToolRegistry:
     """Central registry for AI tools.
 
     Tools are registered by name and can be filtered by category.
-    The registry supports lazy loading of tools from connector classes.
+    The registry also stores connector instances to enable proper method binding
+    when tools are invoked from workflow nodes.
 
     Example:
         >>> registry = ToolRegistry()
@@ -34,6 +35,7 @@ class ToolRegistry:
         """Initialize empty registry."""
         self._tools: dict[str, ToolDefinition] = {}
         self._categories: dict[ToolCategory, set[str]] = {}
+        self._connector_instances: dict[ToolCategory, object] = {}
 
     @classmethod
     def get_instance(cls) -> ToolRegistry:
@@ -136,6 +138,26 @@ class ToolRegistry:
         """Clear all registered tools."""
         self._tools.clear()
         self._categories.clear()
+
+    def register_instance(self, category: ToolCategory, instance: object) -> None:
+        """Register a connector instance for method binding.
+
+        Args:
+            category: The tool category.
+            instance: The connector instance.
+        """
+        self._connector_instances[category] = instance
+
+    def get_connector_instance(self, category: ToolCategory) -> Optional[object]:
+        """Get a connector instance by category.
+
+        Args:
+            category: The tool category.
+
+        Returns:
+            Connector instance or None if not registered.
+        """
+        return self._connector_instances.get(category)
 
     def __len__(self) -> int:
         """Get number of registered tools."""

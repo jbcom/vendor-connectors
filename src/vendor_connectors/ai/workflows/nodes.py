@@ -49,11 +49,21 @@ class ToolNode:
 
         input_data = state.get(self.input_key, {})
 
+        # Get connector instance for method binding if needed
+        handler = tool.handler
+        if tool.connector_class is not None:
+            instance = registry.get_connector_instance(tool.category)
+            if instance is not None:
+                # Bind the method to the instance
+                import types
+
+                handler = types.MethodType(tool.handler, instance)
+
         # Handle both dict and direct value inputs
         if isinstance(input_data, dict):
-            result = tool.handler(**input_data)
+            result = handler(**input_data)
         else:
-            result = tool.handler(input_data)
+            result = handler(input_data)
 
         return {**state, self.output_key: result}
 
@@ -111,10 +121,19 @@ def create_tool_node(
 
         input_data = state.get(input_key, {})
 
+        # Get connector instance for method binding if needed
+        handler = tool.handler
+        if tool.connector_class is not None:
+            instance = registry.get_connector_instance(tool.category)
+            if instance is not None:
+                import types
+
+                handler = types.MethodType(tool.handler, instance)
+
         if isinstance(input_data, dict):
-            result = tool.handler(**input_data)
+            result = handler(**input_data)
         else:
-            result = tool.handler(input_data)
+            result = handler(input_data)
 
         return {**state, output_key: result}
 

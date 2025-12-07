@@ -194,8 +194,9 @@ class AIConnector:
         Returns:
             List of registered tool names.
         """
-        # Store instance for method binding
+        # Store instance for method binding (both locally and in registry for workflows)
         self._connector_instances[category] = connector_instance
+        self._registry.register_instance(category, connector_instance)
 
         # Generate tools from the class
         tools = self._factory.from_connector(
