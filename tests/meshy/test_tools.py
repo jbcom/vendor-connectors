@@ -1,6 +1,8 @@
 """Tests for vendor_connectors.meshy.tools module.
 
-Tests LangChain tool implementations with mocked Meshy API calls.
+Tests tool implementations with mocked Meshy API calls.
+Framework-specific tools (LangChain, CrewAI) are tested separately
+since those frameworks are optional dependencies.
 """
 
 from unittest.mock import MagicMock, patch
@@ -20,25 +22,38 @@ EXPECTED_MESHY_TOOLS = {
 }
 
 
-class TestMeshyTools:
-    """Tests for Meshy LangChain tools."""
+class TestToolDefinitions:
+    """Tests for TOOL_DEFINITIONS metadata."""
 
-    def test_get_tools_returns_list(self):
-        """Test that get_tools returns a list."""
-        from vendor_connectors.meshy.tools import get_tools
+    def test_tool_definitions_has_all_tools(self):
+        """Test that TOOL_DEFINITIONS contains all expected tools."""
+        from vendor_connectors.meshy.tools import TOOL_DEFINITIONS
 
-        tools = get_tools()
-        assert isinstance(tools, list)
-        assert len(tools) == len(EXPECTED_MESHY_TOOLS)  # Should match expected count
-
-    def test_expected_tools_exist(self):
-        """Test that all expected tools are present."""
-        from vendor_connectors.meshy.tools import get_tools
-
-        tools = get_tools()
-        tool_names = {t.name for t in tools}
-
+        tool_names = {defn["name"] for defn in TOOL_DEFINITIONS}
         assert tool_names == EXPECTED_MESHY_TOOLS
+
+    def test_tool_definitions_have_required_fields(self):
+        """Test that each tool definition has func, name, description."""
+        from vendor_connectors.meshy.tools import TOOL_DEFINITIONS
+
+        for defn in TOOL_DEFINITIONS:
+            assert "func" in defn, f"Missing 'func' in {defn.get('name')}"
+            assert "name" in defn, "Missing 'name' in tool definition"
+            assert "description" in defn, f"Missing 'description' in {defn.get('name')}"
+            assert callable(defn["func"]), f"'func' not callable in {defn['name']}"
+
+
+class TestStrandsTools:
+    """Tests for Strands/plain function tools (always available)."""
+
+    def test_get_strands_tools_returns_functions(self):
+        """Test that get_strands_tools returns plain functions."""
+        from vendor_connectors.meshy.tools import get_strands_tools
+
+        tools = get_strands_tools()
+        assert isinstance(tools, list)
+        assert len(tools) == len(EXPECTED_MESHY_TOOLS)
+        assert all(callable(t) for t in tools)
 
 
 class TestText3DGenerate:
@@ -352,12 +367,38 @@ class TestGetAnimation:
                 get_animation(animation_id=999)
 
 
+class TestLangChainTools:
+    """Tests for LangChain tools (optional dependency)."""
+
+    @pytest.mark.skipif(
+        not pytest.importorskip("langchain_core", reason="langchain-core not installed"),
+        reason="langchain-core not installed",
+    )
+    def test_get_langchain_tools_returns_structured_tools(self):
+        """Test that get_langchain_tools returns LangChain StructuredTools."""
+        from vendor_connectors.meshy.tools import get_langchain_tools
+
+        tools = get_langchain_tools()
+        assert isinstance(tools, list)
+        assert len(tools) == len(EXPECTED_MESHY_TOOLS)
+
+        # Verify they're StructuredTools
+        from langchain_core.tools import StructuredTool
+
+        for tool in tools:
+            assert isinstance(tool, StructuredTool)
+
+        # Verify names
+        tool_names = {t.name for t in tools}
+        assert tool_names == EXPECTED_MESHY_TOOLS
+
+
 class TestCrewAITools:
-    """Tests for CrewAI tools integration."""
+    """Tests for CrewAI tools integration (optional dependency)."""
 
     def test_get_crewai_tools_requires_crewai(self):
         """Test that get_crewai_tools raises ImportError without crewai."""
-        with patch.dict("sys.modules", {"crewai_tools": None}):
+        with patch.dict("sys.modules", {"crewai": None, "crewai.tools": None}):
             # Reload to clear imports
             import importlib
 
@@ -367,3 +408,23 @@ class TestCrewAITools:
 
             with pytest.raises(ImportError, match="crewai is required"):
                 meshy_tools.get_crewai_tools()
+
+
+class TestAutoDetection:
+    """Tests for framework auto-detection."""
+
+    def test_get_tools_with_explicit_framework(self):
+        """Test get_tools with explicit framework selection."""
+        from vendor_connectors.meshy.tools import get_tools
+
+        # Strands/functions always works (no deps)
+        tools = get_tools("functions")
+        assert isinstance(tools, list)
+        assert all(callable(t) for t in tools)
+
+    def test_get_tools_invalid_framework(self):
+        """Test get_tools raises ValueError for invalid framework."""
+        from vendor_connectors.meshy.tools import get_tools
+
+        with pytest.raises(ValueError, match="Unknown framework"):
+            get_tools("invalid_framework")

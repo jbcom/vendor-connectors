@@ -56,6 +56,11 @@ class BaseRunner(ABC):
         """Extract task_id and model_url from the raw result."""
         pass
 
+    @abstractmethod
+    def get_native_tools(self) -> list:
+        """Get tools in the native format for this framework."""
+        pass
+
     def generate_3d_model(
         self,
         prompt: str,
@@ -66,7 +71,7 @@ class BaseRunner(ABC):
         """Generate a 3D model end-to-end.
 
         This method:
-        1. Creates an agent with Meshy tools
+        1. Creates an agent with Meshy tools (native format)
         2. Invokes the agent to generate a 3D model
         3. Waits for completion
         4. Downloads and saves the GLB file
@@ -82,10 +87,9 @@ class BaseRunner(ABC):
             GenerationResult with paths and metadata
         """
         from vendor_connectors.meshy import base
-        from vendor_connectors.meshy.tools import get_tools
 
-        # Get tools and create agent
-        tools = get_tools()
+        # Get tools in native format and create agent
+        tools = self.get_native_tools()
         agent = self.create_agent(tools)
 
         # Build the prompt for the agent
@@ -160,6 +164,12 @@ class LangChainRunner(BaseRunner):
     def __init__(self, model: str = "claude-haiku-4-5-20251001"):
         self.model = model
 
+    def get_native_tools(self) -> list:
+        """Get tools as LangChain StructuredTools."""
+        from vendor_connectors.meshy.tools import get_langchain_tools
+
+        return get_langchain_tools()
+
     def create_agent(self, tools: list) -> Any:
         """Create a LangGraph ReAct agent."""
         from langchain_anthropic import ChatAnthropic
@@ -203,29 +213,21 @@ class CrewAIRunner(BaseRunner):
     def __init__(self, model: str = "anthropic/claude-haiku-4-5-20251001"):
         self.model = model
 
+    def get_native_tools(self) -> list:
+        """Get tools as native CrewAI tools."""
+        from vendor_connectors.meshy.tools import get_crewai_tools
+
+        return get_crewai_tools()
+
     def create_agent(self, tools: list) -> Any:
-        """Create a CrewAI agent with tools.
-
-        CrewAI requires tools that inherit from BaseTool. We use the @tool
-        decorator to wrap our functions.
-        """
+        """Create a CrewAI agent with tools (already in native format)."""
         from crewai import Agent
-        from crewai.tools import tool as crewai_tool
-
-        # Convert LangChain tools to CrewAI tools using the @tool decorator
-        crewai_tools = []
-        for t in tools:
-            # Create a CrewAI tool by applying the decorator to the function
-            wrapped = crewai_tool(t.name)(t.func)
-            # Update the description
-            wrapped.description = t.description
-            crewai_tools.append(wrapped)
 
         return Agent(
             role="3D Artist",
             goal="Generate 3D models using Meshy AI tools",
             backstory="An AI assistant that creates 3D game assets using Meshy AI.",
-            tools=crewai_tools,
+            tools=tools,  # Already native CrewAI tools
             llm=self.model,
             verbose=True,
         )
@@ -253,24 +255,22 @@ class StrandsRunner(BaseRunner):
 
     framework_name = "strands"
 
+    def get_native_tools(self) -> list:
+        """Get tools as plain Python functions for Strands."""
+        from vendor_connectors.meshy.tools import get_strands_tools
+
+        return get_strands_tools()
+
     def create_agent(self, tools: list) -> Any:
         """Create a Strands agent with tool functions."""
         from strands import Agent
-
-        # Strands uses the raw functions, not LangChain tools
-        # Extract the underlying functions
-        from vendor_connectors.meshy.tools import (
-            check_task_status,
-            list_animations,
-            text3d_generate,
-        )
 
         return Agent(
             system_prompt=(
                 "You are a 3D asset generator. Use the tools to create 3D models. "
                 "Always return the full result including task_id and model_url."
             ),
-            tools=[text3d_generate, list_animations, check_task_status],
+            tools=tools,  # Plain Python functions
         )
 
     def invoke_agent(self, agent: Any, prompt: str) -> Any:

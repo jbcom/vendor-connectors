@@ -79,23 +79,20 @@ class TestCrewAIE2E:
     def test_crewai_agent_lists_animations(self, has_api_keys):
         """Test CrewAI agent listing animations."""
         from crewai import Agent, Crew, Task
-        from crewai.tools import tool as crewai_tool
 
-        from vendor_connectors.meshy.tools import get_tools
+        from vendor_connectors.meshy.tools import get_crewai_tools
 
-        langchain_tools = get_tools()
-        list_anim_tool = next(t for t in langchain_tools if t.name == "list_animations")
+        # Get native CrewAI tools directly
+        crewai_tools = get_crewai_tools()
 
-        # Wrap with CrewAI's @tool decorator
-        wrapped = crewai_tool(list_anim_tool.name)(list_anim_tool.func)
-        wrapped.description = list_anim_tool.description
-        crewai_tools = [wrapped]
+        # Filter to just list_animations
+        list_anim_tool = next(t for t in crewai_tools if "list_animations" in str(t))
 
         agent = Agent(
             role="Animation Researcher",
             goal="Find available animations in the Meshy catalog",
             backstory="An AI that researches animation options.",
-            tools=crewai_tools,
+            tools=[list_anim_tool],
             llm="anthropic/claude-haiku-4-5-20251001",
             verbose=True,
         )

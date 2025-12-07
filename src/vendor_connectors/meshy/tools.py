@@ -1,42 +1,46 @@
-"""LangChain tools for Meshy AI 3D generation.
+"""AI framework tools for Meshy AI 3D generation.
 
-This module provides LangChain StructuredTools for Meshy AI operations.
-Each connector owns its own tools rather than having a central AI package.
+This module provides tools for Meshy AI operations that work with multiple
+AI agent frameworks. The core functions are framework-agnostic Python functions,
+with native wrappers for each supported framework.
+
+Supported Frameworks:
+- LangChain (via langchain-core) - get_langchain_tools()
+- CrewAI - get_crewai_tools()
+- AWS Strands - get_strands_tools() (plain functions)
+- Auto-detection - get_tools() picks the best available
 
 Tools provided:
-- Text3DGenerateTool: Generate 3D models from text descriptions
-- Image3DGenerateTool: Generate 3D models from images
-- RigModelTool: Add skeleton/rig to static models
-- ApplyAnimationTool: Apply animations to rigged models
-- RetextureModelTool: Change model textures
-- ListAnimationsTool: List available animation catalog
-- CheckTaskStatusTool: Check Meshy task status
-- GetAnimationTool: Get specific animation details
+- text3d_generate: Generate 3D models from text descriptions
+- image3d_generate: Generate 3D models from images
+- rig_model: Add skeleton/rig to static models
+- apply_animation: Apply animations to rigged models
+- retexture_model: Change model textures
+- list_animations: List available animation catalog
+- check_task_status: Check Meshy task status
+- get_animation: Get specific animation details
 
-Usage:
+Usage (auto-detect):
     from vendor_connectors.meshy.tools import get_tools
-    from langchain_anthropic import ChatAnthropic
-    from langgraph.prebuilt import create_react_agent
+    tools = get_tools()  # Returns best format for installed framework
 
-    llm = ChatAnthropic(model="claude-3-5-sonnet-20241022")
-    tools = get_tools()
+Usage (LangChain):
+    from vendor_connectors.meshy.tools import get_langchain_tools
+    tools = get_langchain_tools()
     agent = create_react_agent(llm, tools)
 
-    result = agent.invoke({"messages": [("user", "Generate a 3D sword")]})
-
-For CrewAI:
+Usage (CrewAI):
     from vendor_connectors.meshy.tools import get_crewai_tools
-    from crewai import Agent
-
     agent = Agent(role="3D Artist", tools=get_crewai_tools())
+
+Usage (Strands/plain functions):
+    from vendor_connectors.meshy.tools import get_strands_tools
+    # Returns plain Python functions with type hints
 """
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
-
-if TYPE_CHECKING:
-    from langchain_core.tools import StructuredTool
+from typing import Any
 
 # =============================================================================
 # Tool Implementation Functions
@@ -350,85 +354,110 @@ def get_animation(animation_id: int) -> dict[str, Any]:
 
 
 # =============================================================================
-# LangChain Tool Definitions
+# Tool Metadata (shared across frameworks)
+# =============================================================================
+
+# Tool definitions with metadata for all frameworks
+TOOL_DEFINITIONS = [
+    {
+        "func": text3d_generate,
+        "name": "text3d_generate",
+        "description": (
+            "Generate a 3D GLB model from a text description using Meshy AI. "
+            "Provide a detailed prompt describing the model. Returns the task_id, "
+            "status, model_url, and thumbnail_url on success."
+        ),
+    },
+    {
+        "func": image3d_generate,
+        "name": "image3d_generate",
+        "description": (
+            "Generate a 3D GLB model from an image using Meshy AI. "
+            "Provide a URL to the source image. Returns the task_id, "
+            "status, model_url, and thumbnail_url on success."
+        ),
+    },
+    {
+        "func": rig_model,
+        "name": "rig_model",
+        "description": (
+            "Add a skeleton/rig to a static 3D model. This is required before "
+            "you can apply animations. Takes the model's task ID and returns "
+            "a new task ID for the rigging operation."
+        ),
+    },
+    {
+        "func": apply_animation,
+        "name": "apply_animation",
+        "description": (
+            "Apply an animation to a rigged 3D model. Use list_animations to "
+            "see available animation IDs. The model must be rigged first."
+        ),
+    },
+    {
+        "func": retexture_model,
+        "name": "retexture_model",
+        "description": (
+            "Apply new textures to an existing 3D model. Great for creating "
+            "color variants or material changes without regenerating the mesh."
+        ),
+    },
+    {
+        "func": list_animations,
+        "name": "list_animations",
+        "description": (
+            "List available animations from the Meshy animation catalog. "
+            "Optionally filter by category. Returns animation IDs and names "
+            "that can be used with apply_animation."
+        ),
+    },
+    {
+        "func": check_task_status,
+        "name": "check_task_status",
+        "description": (
+            "Check the current status of a Meshy AI task. Returns status "
+            "(pending, processing, succeeded, failed), progress percentage, "
+            "and model URL if complete."
+        ),
+    },
+    {
+        "func": get_animation,
+        "name": "get_animation",
+        "description": (
+            "Get details of a specific animation by ID, including name, category, subcategory, and preview URL."
+        ),
+    },
+]
+
+
+# =============================================================================
+# Framework-Specific Tool Getters
 # =============================================================================
 
 
-def get_tools() -> list[StructuredTool]:
+def get_langchain_tools() -> list[Any]:
     """Get all Meshy tools as LangChain StructuredTools.
 
     Returns:
         List of LangChain StructuredTool objects for Meshy operations.
+
+    Raises:
+        ImportError: If langchain-core is not installed.
     """
-    from langchain_core.tools import StructuredTool
+    try:
+        from langchain_core.tools import StructuredTool
+    except ImportError as e:
+        raise ImportError(
+            "langchain-core is required for LangChain tools.\nInstall with: pip install vendor-connectors[langchain]"
+        ) from e
 
     return [
         StructuredTool.from_function(
-            func=text3d_generate,
-            name="text3d_generate",
-            description=(
-                "Generate a 3D GLB model from a text description using Meshy AI. "
-                "Provide a detailed prompt describing the model. Returns the task_id, "
-                "status, model_url, and thumbnail_url on success."
-            ),
-        ),
-        StructuredTool.from_function(
-            func=image3d_generate,
-            name="image3d_generate",
-            description=(
-                "Generate a 3D GLB model from an image using Meshy AI. "
-                "Provide a URL to the source image. Returns the task_id, "
-                "status, model_url, and thumbnail_url on success."
-            ),
-        ),
-        StructuredTool.from_function(
-            func=rig_model,
-            name="rig_model",
-            description=(
-                "Add a skeleton/rig to a static 3D model. This is required before "
-                "you can apply animations. Takes the model's task ID and returns "
-                "a new task ID for the rigging operation."
-            ),
-        ),
-        StructuredTool.from_function(
-            func=apply_animation,
-            name="apply_animation",
-            description=(
-                "Apply an animation to a rigged 3D model. Use list_animations to "
-                "see available animation IDs. The model must be rigged first."
-            ),
-        ),
-        StructuredTool.from_function(
-            func=retexture_model,
-            name="retexture_model",
-            description=(
-                "Apply new textures to an existing 3D model. Great for creating "
-                "color variants or material changes without regenerating the mesh."
-            ),
-        ),
-        StructuredTool.from_function(
-            func=list_animations,
-            name="list_animations",
-            description=(
-                "List available animations from the Meshy animation catalog. "
-                "Optionally filter by category. Returns animation IDs and names "
-                "that can be used with apply_animation."
-            ),
-        ),
-        StructuredTool.from_function(
-            func=check_task_status,
-            name="check_task_status",
-            description=(
-                "Check the current status of a Meshy AI task. Returns status "
-                "(pending, processing, succeeded, failed), progress percentage, "
-                "and model URL if complete."
-            ),
-        ),
-        StructuredTool.from_function(
-            func=get_animation,
-            name="get_animation",
-            description="Get details of a specific animation by ID, including name, category, subcategory, and preview URL.",
-        ),
+            func=defn["func"],
+            name=defn["name"],
+            description=defn["description"],
+        )
+        for defn in TOOL_DEFINITIONS
     ]
 
 
@@ -442,28 +471,96 @@ def get_crewai_tools() -> list[Any]:
         ImportError: If crewai is not installed.
     """
     try:
-        from crewai_tools import tool
+        from crewai.tools import tool as crewai_tool
     except ImportError as e:
         raise ImportError(
-            "crewai is required for CrewAI tools. Install with: pip install vendor-connectors[meshy-crewai]"
+            "crewai is required for CrewAI tools.\nInstall with: pip install vendor-connectors[crewai]"
         ) from e
 
-    # CrewAI uses the @tool decorator to wrap functions
-    return [
-        tool(text3d_generate),
-        tool(image3d_generate),
-        tool(rig_model),
-        tool(apply_animation),
-        tool(retexture_model),
-        tool(list_animations),
-        tool(check_task_status),
-        tool(get_animation),
-    ]
+    tools = []
+    for defn in TOOL_DEFINITIONS:
+        # Apply @tool decorator with the function name
+        wrapped = crewai_tool(defn["name"])(defn["func"])
+        wrapped.description = defn["description"]
+        tools.append(wrapped)
 
+    return tools
+
+
+def get_strands_tools() -> list[Any]:
+    """Get all Meshy tools as plain Python functions for AWS Strands.
+
+    Strands agents work with plain Python functions that have type hints.
+    The functions are returned as-is since they already have proper signatures.
+
+    Returns:
+        List of callable functions for Strands agents.
+    """
+    return [defn["func"] for defn in TOOL_DEFINITIONS]
+
+
+def get_tools(framework: str = "auto") -> list[Any]:
+    """Get Meshy tools for the specified or auto-detected framework.
+
+    This is the recommended entry point - it auto-detects which AI framework
+    is installed and returns tools in the appropriate format.
+
+    Args:
+        framework: Framework to use. Options:
+            - "auto" (default): Auto-detect based on installed packages
+            - "langchain": Force LangChain StructuredTools
+            - "crewai": Force CrewAI tools
+            - "strands": Force plain functions for Strands
+            - "functions": Force plain functions (alias for strands)
+
+    Returns:
+        List of tools in the appropriate format for the framework.
+
+    Raises:
+        ImportError: If the requested framework is not installed.
+        ValueError: If an unknown framework is specified.
+
+    Example:
+        # Auto-detect (recommended)
+        tools = get_tools()
+
+        # Force specific framework
+        tools = get_tools("langchain")
+        tools = get_tools("crewai")
+    """
+    from vendor_connectors._compat import is_available
+
+    if framework == "auto":
+        # Priority: CrewAI > LangChain > Strands/functions
+        # (CrewAI first since it's more opinionated about tool format)
+        if is_available("crewai"):
+            return get_crewai_tools()
+        if is_available("langchain_core"):
+            return get_langchain_tools()
+        # Fall back to plain functions (always works)
+        return get_strands_tools()
+
+    if framework == "langchain":
+        return get_langchain_tools()
+    if framework == "crewai":
+        return get_crewai_tools()
+    if framework in ("strands", "functions"):
+        return get_strands_tools()
+
+    raise ValueError(f"Unknown framework: {framework}. Options: auto, langchain, crewai, strands, functions")
+
+
+# =============================================================================
+# Exports
+# =============================================================================
 
 __all__ = [
+    # Framework-specific getters
     "get_tools",
+    "get_langchain_tools",
     "get_crewai_tools",
+    "get_strands_tools",
+    # Raw functions (for direct use or custom wrappers)
     "text3d_generate",
     "image3d_generate",
     "rig_model",
@@ -472,4 +569,6 @@ __all__ = [
     "list_animations",
     "check_task_status",
     "get_animation",
+    # Tool metadata (for custom integrations)
+    "TOOL_DEFINITIONS",
 ]
