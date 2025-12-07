@@ -23,10 +23,13 @@ def mock_crewai():
     mock_tools_module = MagicMock()
     mock_tools_module.BaseTool = MockBaseTool
 
-    with patch.dict(sys.modules, {
-        "crewai": mock_module,
-        "crewai.tools": mock_tools_module,
-    }):
+    with patch.dict(
+        sys.modules,
+        {
+            "crewai": mock_module,
+            "crewai.tools": mock_tools_module,
+        },
+    ):
         yield mock_module
 
 
@@ -61,6 +64,7 @@ class TestCrewAIProviderInit:
         """Test that tool classes are lazily loaded."""
         # Reset any cached state
         import vendor_connectors.ai.providers.crewai as crewai_module
+
         crewai_module._tool_classes = {}
 
         # Accessing a tool class should trigger lazy loading
@@ -68,7 +72,7 @@ class TestCrewAIProviderInit:
 
         # This should not raise - it uses lazy loading
         try:
-            tool_class = __getattr__("Text3DGenerateTool")
+            _ = __getattr__("Text3DGenerateTool")
             # May be None if registration hasn't happened
         except AttributeError:
             pass
@@ -88,14 +92,17 @@ class TestCrewAIToolProvider:
         """Reset state for each test."""
         # Reset meshy tools registration
         import vendor_connectors.ai.tools.meshy_tools as mt
+
         mt._tools_registered = False
 
         # Reset global registry
         from vendor_connectors.ai.base import _registry
+
         _registry._tools.clear()
 
         # Reset provider singleton
         import vendor_connectors.ai.providers.crewai.provider as provider_mod
+
         provider_mod._provider = None
 
     def test_provider_name(self, mock_crewai):
@@ -125,7 +132,7 @@ class TestCrewAIToolProvider:
         from vendor_connectors.ai.providers.crewai.provider import CrewAIToolProvider
 
         provider = CrewAIToolProvider()
-        tools = provider.get_tools()
+        provider.get_tools()
 
         # Should have created tools
         assert len(provider._tool_classes) > 0
@@ -139,9 +146,8 @@ class TestCrewAIToolProvider:
         # First get all tools to ensure they're created
         provider.get_tools()
 
-        # Now get specific tool
-        tool = provider.get_tool("text3d_generate")
-        # May be None or a tool instance depending on mock setup
+        # Now get specific tool - just verify it doesn't raise
+        provider.get_tool("text3d_generate")
 
     def test_get_nonexistent_tool(self, mock_crewai):
         """Test getting a nonexistent tool returns None."""
@@ -160,9 +166,8 @@ class TestCrewAIToolProvider:
         provider = CrewAIToolProvider()
         provider.get_tools()  # Initialize tools
 
-        # Should be able to get the class
-        tool_class = provider.get_tool_class("text3d_generate")
-        # May be None or a class depending on mock setup
+        # Should be able to get the class - just verify it doesn't raise
+        provider.get_tool_class("text3d_generate")
 
 
 class TestCrewAIModuleFunctions:
@@ -171,12 +176,15 @@ class TestCrewAIModuleFunctions:
     def setup_method(self):
         """Reset state for each test."""
         import vendor_connectors.ai.tools.meshy_tools as mt
+
         mt._tools_registered = False
 
         from vendor_connectors.ai.base import _registry
+
         _registry._tools.clear()
 
         import vendor_connectors.ai.providers.crewai.provider as provider_mod
+
         provider_mod._provider = None
 
     def test_get_tools_function(self, mock_crewai):
@@ -193,9 +201,8 @@ class TestCrewAIModuleFunctions:
         # Initialize
         get_tools()
 
-        # Get specific tool
-        tool = get_tool("list_animations")
-        # Result depends on mock setup
+        # Get specific tool - just verify it doesn't raise
+        get_tool("list_animations")
 
     def test_singleton_provider(self, mock_crewai):
         """Test that module functions use singleton provider."""

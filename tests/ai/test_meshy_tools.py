@@ -6,8 +6,6 @@ Tests tool registration and handlers with mocked Meshy API calls.
 import json
 from unittest.mock import MagicMock, patch
 
-import pytest
-
 from vendor_connectors.ai.base import ToolCategory, ToolDefinition
 
 

@@ -4,7 +4,6 @@ Tests core types and registry functionality without requiring optional dependenc
 """
 
 import json
-import threading
 from concurrent.futures import ThreadPoolExecutor
 
 import pytest

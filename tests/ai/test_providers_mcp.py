@@ -4,7 +4,7 @@ Tests MCP provider with mocked mcp dependencies.
 """
 
 import sys
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -38,12 +38,14 @@ class MockServer:
         def decorator(func):
             self._list_tools_handler = func
             return func
+
         return decorator
 
     def call_tool(self):
         def decorator(func):
             self._call_tool_handler = func
             return func
+
         return decorator
 
     def create_initialization_options(self):
@@ -65,12 +67,15 @@ def mock_mcp():
 
     mock_stdio = MagicMock()
 
-    with patch.dict(sys.modules, {
-        "mcp": MagicMock(),
-        "mcp.types": mock_types,
-        "mcp.server": mock_server,
-        "mcp.server.stdio": mock_stdio,
-    }):
+    with patch.dict(
+        sys.modules,
+        {
+            "mcp": MagicMock(),
+            "mcp.types": mock_types,
+            "mcp.server": mock_server,
+            "mcp.server.stdio": mock_stdio,
+        },
+    ):
         yield
 
 
@@ -106,14 +111,17 @@ class TestMCPToolProvider:
         """Reset state for each test."""
         # Reset meshy tools registration
         import vendor_connectors.ai.tools.meshy_tools as mt
+
         mt._tools_registered = False
 
         # Reset global registry
         from vendor_connectors.ai.base import _registry
+
         _registry._tools.clear()
 
         # Reset provider singleton
         import vendor_connectors.ai.providers.mcp.provider as provider_mod
+
         provider_mod._provider = None
 
     def test_provider_name(self, mock_mcp):
@@ -203,7 +211,7 @@ class TestMCPToolProvider:
         assert provider._tools == []
 
         # This should trigger initialization
-        tool = provider.get_tool("list_animations")
+        provider.get_tool("list_animations")
 
         assert provider._tools != []
 
@@ -214,12 +222,15 @@ class TestMCPServerCreation:
     def setup_method(self):
         """Reset state for each test."""
         import vendor_connectors.ai.tools.meshy_tools as mt
+
         mt._tools_registered = False
 
         from vendor_connectors.ai.base import _registry
+
         _registry._tools.clear()
 
         import vendor_connectors.ai.providers.mcp.provider as provider_mod
+
         provider_mod._provider = None
 
     def test_create_server_returns_server(self, mock_mcp):
@@ -258,12 +269,15 @@ class TestMCPModuleFunctions:
     def setup_method(self):
         """Reset state for each test."""
         import vendor_connectors.ai.tools.meshy_tools as mt
+
         mt._tools_registered = False
 
         from vendor_connectors.ai.base import _registry
+
         _registry._tools.clear()
 
         import vendor_connectors.ai.providers.mcp.provider as provider_mod
+
         provider_mod._provider = None
 
     def test_create_server_function(self, mock_mcp):
@@ -338,9 +352,11 @@ class TestMCPToolSchemaGeneration:
     def setup_method(self):
         """Reset state for each test."""
         import vendor_connectors.ai.tools.meshy_tools as mt
+
         mt._tools_registered = False
 
         from vendor_connectors.ai.base import _registry
+
         _registry._tools.clear()
 
     def test_tool_has_input_schema(self, mock_mcp):

@@ -1,6 +1,6 @@
 """Tests for vendor_connectors.ai package exports."""
 
-import pytest
+from vendor_connectors.ai import ToolCategory
 
 
 class TestAIPackageExports:
@@ -71,7 +71,3 @@ class TestToolsSubpackage:
         from vendor_connectors.ai import tools
 
         assert "meshy_tools" in tools.__all__
-
-
-# Import ToolCategory at module level for use in definitions
-from vendor_connectors.ai import ToolCategory
