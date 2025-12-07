@@ -197,8 +197,8 @@ class TestVendorConnectors:
 
             aws1 = vc.get_aws_connector()
             slack1 = vc.get_slack_client()
-            vc.get_aws_connector()
-            vc.get_slack_client()
+            _aws2 = vc.get_aws_connector()
+            _slack2 = vc.get_slack_client()
 
             # Each connector type should only be created once
             mock_aws.assert_called_once()
