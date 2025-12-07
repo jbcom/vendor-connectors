@@ -175,7 +175,7 @@ def handle_rig_model(
             return ToolResult(
                 success=True,
                 data={
-                    "status": result.status.value,
+                    "status": result.status.value if hasattr(result.status, "value") else str(result.status),
                     "message": "Rigging completed",
                 },
                 task_id=result.id,
@@ -218,7 +218,7 @@ def handle_apply_animation(
             return ToolResult(
                 success=True,
                 data={
-                    "status": result.status.value,
+                    "status": result.status.value if hasattr(result.status, "value") else str(result.status),
                     "message": "Animation completed",
                     "glb_url": result.animation_glb_url,
                 },
@@ -269,7 +269,7 @@ def handle_retexture_model(
             return ToolResult(
                 success=True,
                 data={
-                    "status": result.status.value,
+                    "status": result.status.value if hasattr(result.status, "value") else str(result.status),
                     "message": "Retexture completed",
                     "model_url": getattr(result, "model_url", None),
                 },
