@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 """Base types and interfaces for AI sub-package.
 
 This module defines the core types used across the AI sub-package:
@@ -6,33 +5,20 @@ This module defines the core types used across the AI sub-package:
 - ToolCategory enum - Categories for vendor connector tools
 - ToolParameter/ToolDefinition - Framework-agnostic tool definitions
 - AIMessage/AIResponse - Unified message formats
-=======
-"""Base types and interfaces for AI tools across vendor connectors.
-
-This module provides the foundation for the vendor_connectors.ai sub-package,
-defining types that are compatible with multiple AI frameworks (LangChain,
-CrewAI, MCP, etc.).
-
-Originated from meshy/agent_tools and generalized for all connectors.
-Compatible with PR #20's AI sub-package design.
-
-Key Types:
-- ToolParameter: Parameter definition for tools
-- ToolDefinition: Framework-agnostic tool definition
-- ToolCategory: Categories for organizing tools
-- ToolResult: Structured result from tool execution
->>>>>>> 0cfc317 (feat(meshy): Add Meshy connector and AI package foundation (#23))
+- ToolResult - Structured result from tool execution
+- ToolRegistry - Thread-safe tool registry
 """
 
 from __future__ import annotations
 
-<<<<<<< HEAD
+import threading
+from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import TYPE_CHECKING, Any, Callable
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    pass
+    from collections.abc import Callable
 
 __all__ = [
     "AIProvider",
@@ -42,6 +28,12 @@ __all__ = [
     "AIMessage",
     "AIResponse",
     "AIRole",
+    "ToolResult",
+    "BaseToolProvider",
+    "ToolRegistry",
+    "register_tool",
+    "get_tool_definitions",
+    "get_tool_definition",
 ]
 
 
@@ -67,26 +59,7 @@ class AIRole(str, Enum):
 class ToolCategory(str, Enum):
     """Categories for vendor connector tools."""
 
-=======
-import threading
-from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
-from enum import Enum
-from typing import TYPE_CHECKING, Any
-
-if TYPE_CHECKING:
-    from collections.abc import Callable
-
-
-class ToolCategory(str, Enum):
-    """Categories for vendor connector tools.
-
-    Used to organize tools by their source connector or function type.
-    Compatible with PR #20's ToolCategory enum.
-    """
-
     # Vendor connectors
->>>>>>> 0cfc317 (feat(meshy): Add Meshy connector and AI package foundation (#23))
     AWS = "aws"
     GITHUB = "github"
     SLACK = "slack"
@@ -97,8 +70,6 @@ class ToolCategory(str, Enum):
     CURSOR = "cursor"
     ANTHROPIC = "anthropic"
 
-<<<<<<< HEAD
-=======
     # Meshy-specific subcategories (for internal use)
     GENERATION = "generation"  # Create new 3D assets
     RIGGING = "rigging"  # Add skeletons/rigs
@@ -106,37 +77,26 @@ class ToolCategory(str, Enum):
     TEXTURING = "texturing"  # Texture/retexture models
     UTILITY = "utility"  # Status checks, listings, etc.
 
->>>>>>> 0cfc317 (feat(meshy): Add Meshy connector and AI package foundation (#23))
 
 @dataclass
 class ToolParameter:
     """Definition of a tool parameter.
 
     Attributes:
-<<<<<<< HEAD
         name: Parameter name.
         description: Human-readable description for AI agents.
         type: Python type (str, int, bool, etc.).
         required: Whether the parameter is required.
         default: Default value if not required.
         enum_values: Optional list of allowed values.
-=======
-        name: Parameter name
-        description: Description for agents
-        type: Python type (str, int, bool, etc.)
-        required: Whether parameter is required
-        default: Default value if not required
-        enum_values: Optional list of allowed values
->>>>>>> 0cfc317 (feat(meshy): Add Meshy connector and AI package foundation (#23))
     """
 
     name: str
     description: str
-<<<<<<< HEAD
     type: type = str
     required: bool = True
     default: Any = None
-    enum_values: list[str | None] = None
+    enum_values: list[str] | None = None
 
     def to_json_schema(self) -> dict[str, Any]:
         """Convert to JSON Schema format for LangChain tools."""
@@ -161,21 +121,14 @@ class ToolParameter:
             schema["enum"] = self.enum_values
 
         return schema
-=======
-    type: type
-    required: bool = True
-    default: Any = None
-    enum_values: list[str] | None = None
 
 
 # Backwards compatibility alias
 ParameterDefinition = ToolParameter
->>>>>>> 0cfc317 (feat(meshy): Add Meshy connector and AI package foundation (#23))
 
 
 @dataclass
 class ToolDefinition:
-<<<<<<< HEAD
     """Framework-agnostic tool definition.
 
     This is converted to LangChain StructuredTool or other framework-specific
@@ -187,34 +140,17 @@ class ToolDefinition:
         category: Tool category for organization.
         parameters: Dict of parameter name -> ToolParameter.
         handler: The actual function that implements the tool.
+        requires_api_key: Whether an API key is required (e.g., MESHY_API_KEY).
         connector_class: Optional reference to the connector class.
         method_name: Optional method name this tool wraps.
-=======
-    """Definition of a tool that can be exposed to agents.
-
-    This is framework-agnostic - each provider converts this to their
-    native tool format (CrewAI BaseTool, MCP Tool, etc.).
-
-    Compatible with vendor_connectors.ai.base.ToolDefinition from PR #20.
-
-    Attributes:
-        name: Unique tool identifier (snake_case)
-        description: Human-readable description for agents
-        category: Tool category for organization
-        parameters: Dict of parameter name -> ToolParameter
-        handler: The actual function that implements the tool
-        requires_api_key: Whether MESHY_API_KEY is required (Meshy-specific)
-        connector_class: Optional reference to connector class (for PR #20 compatibility)
-        method_name: Optional method name this tool wraps (for PR #20 compatibility)
->>>>>>> 0cfc317 (feat(meshy): Add Meshy connector and AI package foundation (#23))
     """
 
     name: str
     description: str
     category: ToolCategory
     parameters: dict[str, ToolParameter]
-<<<<<<< HEAD
     handler: Callable[..., Any]
+    requires_api_key: bool = True
     connector_class: type | None = None
     method_name: str | None = None
 
@@ -240,6 +176,37 @@ class ToolDefinition:
 
 
 @dataclass
+class ToolResult:
+    """Result from executing a tool.
+
+    Attributes:
+        success: Whether the tool executed successfully
+        data: The result data (JSON-serializable)
+        error: Error message if success is False
+        task_id: Meshy task ID if applicable
+    """
+
+    success: bool
+    data: dict[str, Any] = field(default_factory=dict)
+    error: str | None = None
+    task_id: str | None = None
+
+    def to_json(self) -> str:
+        """Serialize to JSON string."""
+        import json
+
+        return json.dumps(
+            {
+                "success": self.success,
+                "data": self.data,
+                "error": self.error,
+                "task_id": self.task_id,
+            },
+            indent=2,
+        )
+
+
+@dataclass
 class AIMessage:
     """Unified message format for AI conversations.
 
@@ -255,7 +222,7 @@ class AIMessage:
     content: str
     name: str | None = None
     tool_call_id: str | None = None
-    tool_calls: list[dict[str, Any | None]] = None
+    tool_calls: list[dict[str, Any]] | None = None
 
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary format."""
@@ -277,7 +244,7 @@ class AIMessage:
         return cls(role=AIRole.USER, content=content)
 
     @classmethod
-    def assistant(cls, content: str, tool_calls: list[dict | None] = None) -> AIMessage:
+    def assistant(cls, content: str, tool_calls: list[dict] | None = None) -> AIMessage:
         """Create an assistant message."""
         return cls(role=AIRole.ASSISTANT, content=content, tool_calls=tool_calls)
 
@@ -310,7 +277,7 @@ class AIResponse:
     model: str
     provider: AIProvider
     usage: dict[str, int] = field(default_factory=dict)
-    tool_calls: list[dict[str, Any | None]] = None
+    tool_calls: list[dict[str, Any]] | None = None
     stop_reason: str | None = None
     raw_response: Any | None = None
 
@@ -333,42 +300,6 @@ class AIResponse:
     def total_tokens(self) -> int:
         """Get total token count."""
         return self.input_tokens + self.output_tokens
-=======
-    handler: Callable[..., str]
-    requires_api_key: bool = True
-    connector_class: type | None = None
-    method_name: str | None = None
-
-
-@dataclass
-class ToolResult:
-    """Result from executing a tool.
-
-    Attributes:
-        success: Whether the tool executed successfully
-        data: The result data (JSON-serializable)
-        error: Error message if success is False
-        task_id: Meshy task ID if applicable
-    """
-
-    success: bool
-    data: dict[str, Any] = field(default_factory=dict)
-    error: str | None = None
-    task_id: str | None = None
-
-    def to_json(self) -> str:
-        """Serialize to JSON string."""
-        import json
-
-        return json.dumps(
-            {
-                "success": self.success,
-                "data": self.data,
-                "error": self.error,
-                "task_id": self.task_id,
-            },
-            indent=2,
-        )
 
 
 class BaseToolProvider(ABC):
@@ -420,9 +351,6 @@ class BaseToolProvider(ABC):
         return [t.name if hasattr(t, "name") else str(t) for t in self.get_tools()]
 
 
-# Thread-safe tool registry
-
-
 class ToolRegistry:
     """Thread-safe registry for tool definitions.
 
@@ -466,4 +394,3 @@ def get_tool_definitions() -> list[ToolDefinition]:
 def get_tool_definition(name: str) -> ToolDefinition | None:
     """Get a specific tool definition by name."""
     return _registry.get(name)
->>>>>>> 0cfc317 (feat(meshy): Add Meshy connector and AI package foundation (#23))
