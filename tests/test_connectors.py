@@ -23,6 +23,7 @@ class TestVendorConnectors:
         mock_logger = MagicMock()
         vc = VendorConnectors(logger=mock_logger)
         assert vc.logging == mock_logger
+        assert vc.logger is not None  # Logger is extracted from logging
 
     def test_get_cache_key(self):
         """Test cache key generation."""

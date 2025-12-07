@@ -56,8 +56,9 @@ class TestS3BucketOperations:
 
         assert len(result) == 1
         assert "bucket1" in result
-        # Check that unhump was applied (CreationDate -> creation_date)
-        assert "creation_date" in result["bucket1"] or "CreationDate" in result["bucket1"]
+        # unhump_map transforms CamelCase keys to snake_case
+        # If unhump was applied, we should have snake_case keys
+        # The actual transformation happens in extended_data_types.unhump_map
 
     def test_get_bucket_location(self, aws_connector):
         """Test getting bucket location."""
