@@ -1,42 +1,72 @@
 """Ollama (local models) provider using langchain-ollama.
 
 This module provides local model access through Ollama.
-
-Status: PLACEHOLDER - Implementation blocked by PR #16
-See: docs/development/ai-subpackage-design.md
-
-Example structure:
-
-    from langchain_ollama import ChatOllama
-    from vendor_connectors.ai.providers.base import BaseLLMProvider
-
-    class OllamaProvider(BaseLLMProvider):
-        def __init__(
-            self,
-            model: Optional[str] = None,
-            base_url: str = "http://localhost:11434",
-            **kwargs,
-        ):
-            self.base_url = base_url
-            super().__init__(model=model, **kwargs)
-
-        @property
-        def provider_name(self) -> str:
-            return "ollama"
-
-        @property
-        def default_model(self) -> str:
-            return "llama3.2"
-
-        def _create_llm(self, **kwargs) -> ChatOllama:
-            return ChatOllama(
-                model=self.model,
-                base_url=self.base_url,
-                temperature=self.temperature,
-                **kwargs,
-            )
 """
 
 from __future__ import annotations
 
-# Placeholder - actual implementation will be added after PR #16 merges
+from typing import Any, Optional
+
+from vendor_connectors.ai.base import AIProvider
+from vendor_connectors.ai.providers.base import BaseLLMProvider
+
+__all__ = ["OllamaProvider"]
+
+
+class OllamaProvider(BaseLLMProvider):
+    """Ollama local model provider via LangChain.
+
+    Uses langchain-ollama for local model access. Requires
+    Ollama to be running locally.
+
+    Example:
+        >>> provider = OllamaProvider(model="llama3.2")
+        >>> response = provider.chat("Hello!")
+        >>> print(response.content)
+    """
+
+    def __init__(
+        self,
+        model: Optional[str] = None,
+        base_url: str = "http://localhost:11434",
+        temperature: float = 0.7,
+        **kwargs,
+    ):
+        """Initialize Ollama provider.
+
+        Args:
+            model: Model name (e.g., "llama3.2", "mistral").
+            base_url: Ollama server URL.
+            temperature: Sampling temperature.
+            **kwargs: Additional arguments.
+        """
+        self.base_url = base_url
+        # Ollama doesn't use max_tokens the same way
+        super().__init__(model=model, temperature=temperature, max_tokens=4096, **kwargs)
+
+    @property
+    def provider_name(self) -> AIProvider:
+        """Get provider identifier."""
+        return AIProvider.OLLAMA
+
+    @property
+    def default_model(self) -> str:
+        """Get default Ollama model."""
+        return "llama3.2"
+
+    def _create_llm(self) -> Any:
+        """Create LangChain ChatOllama instance."""
+        try:
+            from langchain_ollama import ChatOllama
+        except ImportError as e:
+            raise ImportError(
+                "langchain-ollama is required for Ollama provider. "
+                "Install with: pip install vendor-connectors[ai-ollama]"
+            ) from e
+
+        return ChatOllama(
+            model=self.model,
+            base_url=self.base_url,
+            temperature=self.temperature,
+            **self._kwargs,
+        )

@@ -1,34 +1,62 @@
 """Google (Gemini) provider using langchain-google-genai.
 
 This module provides Gemini model access through LangChain.
-
-Status: PLACEHOLDER - Implementation blocked by PR #16
-See: docs/development/ai-subpackage-design.md
-
-Example structure:
-
-    from langchain_google_genai import ChatGoogleGenerativeAI
-    from vendor_connectors.ai.providers.base import BaseLLMProvider
-
-    class GoogleProvider(BaseLLMProvider):
-        @property
-        def provider_name(self) -> str:
-            return "google"
-
-        @property
-        def default_model(self) -> str:
-            return "gemini-1.5-pro"
-
-        def _create_llm(self, **kwargs) -> ChatGoogleGenerativeAI:
-            return ChatGoogleGenerativeAI(
-                model=self.model,
-                google_api_key=self.api_key,
-                temperature=self.temperature,
-                max_output_tokens=self.max_tokens,
-                **kwargs,
-            )
 """
 
 from __future__ import annotations
 
-# Placeholder - actual implementation will be added after PR #16 merges
+import os
+from typing import Any, Optional
+
+from vendor_connectors.ai.base import AIProvider
+from vendor_connectors.ai.providers.base import BaseLLMProvider
+
+__all__ = ["GoogleProvider"]
+
+
+class GoogleProvider(BaseLLMProvider):
+    """Google Gemini provider via LangChain.
+
+    Uses langchain-google-genai for Gemini API access with full
+    tool calling and streaming support.
+
+    Example:
+        >>> provider = GoogleProvider(api_key="...")
+        >>> response = provider.chat("Hello!")
+        >>> print(response.content)
+    """
+
+    @property
+    def provider_name(self) -> AIProvider:
+        """Get provider identifier."""
+        return AIProvider.GOOGLE
+
+    @property
+    def default_model(self) -> str:
+        """Get default Gemini model."""
+        return "gemini-1.5-pro"
+
+    def _create_llm(self) -> Any:
+        """Create LangChain ChatGoogleGenerativeAI instance."""
+        try:
+            from langchain_google_genai import ChatGoogleGenerativeAI
+        except ImportError as e:
+            raise ImportError(
+                "langchain-google-genai is required for Google provider. "
+                "Install with: pip install vendor-connectors[ai-google]"
+            ) from e
+
+        api_key = self.api_key or os.environ.get("GOOGLE_API_KEY")
+        if not api_key:
+            raise ValueError(
+                "Google API key is required. "
+                "Set GOOGLE_API_KEY environment variable or pass api_key parameter."
+            )
+
+        return ChatGoogleGenerativeAI(
+            model=self.model,
+            google_api_key=api_key,
+            temperature=self.temperature,
+            max_output_tokens=self.max_tokens,
+            **self._kwargs,
+        )
