@@ -2,7 +2,7 @@
 
 ## ✅ Refactoring Complete
 
-The Meshy `agent_tools/` subpackage has been **refactored and moved** to a top-level `ai/` package that matches PR #20's structure.
+Meshy tools now live directly under the unified top-level `ai/` package. The deprecated `agent_tools/` shim has been removed in favor of the consolidated AI tool stack.
 
 ## Current Structure
 
@@ -22,7 +22,7 @@ vendor_connectors/
 │   ├── __init__.py
 │   ├── connector.py            # MeshyConnector class
 │   ├── text3d.py, rigging.py, etc.
-│   └── agent_tools/            # DEPRECATED - backwards compat shim
+│   └── (deprecated shim removed)
 └── ... (aws, github, slack, etc.)
 ```
 
@@ -167,17 +167,6 @@ response = connector.invoke(
     use_tools=True,
     categories=[ToolCategory.MESHY]
 )
-```
-
-## Backwards Compatibility
-
-Old Meshy imports still work (with deprecation warning):
-```python
-# Old (will show deprecation warning)
-from vendor_connectors.meshy.agent_tools import ToolDefinition
-
-# New
-from vendor_connectors.ai import ToolDefinition
 ```
 
 ## Benefits

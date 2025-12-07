@@ -181,8 +181,6 @@ addopts = [
 omit = [
     # AI sub-package requires optional dependencies (langchain, langgraph)
     "src/vendor_connectors/ai/*",
-    # Meshy agent_tools requires optional dependencies (crewai, mcp)
-    "src/vendor_connectors/meshy/agent_tools/*",
 ]
 
 [tool.coverage.report]

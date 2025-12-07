@@ -182,7 +182,7 @@ def get_tools() -> list[Any]:
     """Get all mesh-toolkit tools as CrewAI BaseTool instances.
 
     Usage:
-        from vendor_connectors.meshy.agent_tools.crewai import get_tools
+        from vendor_connectors.ai.providers.crewai import get_tools
 
         tools = get_tools()
         agent = Agent(role="Artist", tools=tools, ...)

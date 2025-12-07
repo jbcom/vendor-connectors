@@ -53,4 +53,4 @@ Use conventional commits:
 
 - Python 3.10+ required (crewai dependency)
 - Meshy was merged from mesh-toolkit
-- All agent tool integrations in meshy.agent_tools
+- AI tools now live under `vendor_connectors.ai`

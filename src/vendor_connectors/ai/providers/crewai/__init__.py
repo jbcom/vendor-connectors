@@ -3,7 +3,7 @@
 This module provides CrewAI-compatible tools for 3D asset generation.
 
 Usage:
-    from vendor_connectors.meshy.agent_tools.crewai import get_tools
+    from vendor_connectors.ai.providers.crewai import get_tools
 
     # Get all tools
     tools = get_tools()
@@ -14,13 +14,6 @@ Usage:
         role="3D Artist",
         tools=tools,
         ...
-    )
-
-    # Or get specific tools
-    from vendor_connectors.meshy.agent_tools.crewai import (
-        Text3DGenerateTool,
-        ApplyAnimationTool,
-        ListAnimationsTool,
     )
 
 Requirements:

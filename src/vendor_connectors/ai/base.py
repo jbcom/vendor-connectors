@@ -4,7 +4,7 @@ This module provides the foundation for the vendor_connectors.ai sub-package,
 defining types that are compatible with multiple AI frameworks (LangChain,
 CrewAI, MCP, etc.).
 
-Originated from meshy/agent_tools and generalized for all connectors.
+Built for the consolidated AI tools package across all connectors.
 Compatible with PR #20's AI sub-package design.
 
 Key Types:

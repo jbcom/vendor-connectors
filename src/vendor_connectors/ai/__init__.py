@@ -4,8 +4,8 @@ This package provides AI framework integrations for vendor connectors,
 enabling them to be used as tools in LangChain, CrewAI, MCP, and other
 AI agent frameworks.
 
-Originated from meshy/agent_tools, now generalized for all connectors.
-Compatible with PR #20's AI sub-package design.
+It serves as the unified home for tool definitions and providers across
+the project and is compatible with PR #20's AI sub-package design.
 
 Example:
     from vendor_connectors.ai.base import ToolParameter, ToolDefinition, ToolCategory

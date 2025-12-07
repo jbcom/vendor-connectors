@@ -211,7 +211,7 @@ def create_server():
     """Create an MCP server with mesh-toolkit tools.
 
     Usage:
-        from vendor_connectors.meshy.agent_tools.mcp import create_server
+        from vendor_connectors.ai.providers.mcp import create_server
 
         server = create_server()
 

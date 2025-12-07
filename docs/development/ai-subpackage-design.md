@@ -55,7 +55,7 @@ vendor_connectors/
 
 ### Key Design Patterns
 
-Following the existing `meshy.agent_tools` pattern:
+Following the unified AI tools pattern:
 
 1. **Tool Definition** (framework-agnostic)
 2. **Provider Interface** (adapts to specific frameworks)
@@ -512,9 +512,9 @@ def get_all_tools(
         tools.extend(_tool_registry.get(cat, []))
     
     if include_meshy:
-        from vendor_connectors.meshy.agent_tools import get_tool_definitions
-        # Convert meshy tools to LangChain format
-        tools.extend(_convert_meshy_tools(get_tool_definitions()))
+        from vendor_connectors.ai.tools.meshy_tools import get_meshy_tools
+        # Convert Meshy tools to LangChain format
+        tools.extend(_convert_meshy_tools(get_meshy_tools()))
     
     return tools
 ```

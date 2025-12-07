@@ -66,7 +66,7 @@ github = vc.get_github_client(github_owner="org")
 ### Meshy AI Module
 The `meshy/` module has its own substructure:
 - `text3d.py`, `rigging.py`, `animate.py`, `retexture.py` - Core 3D operations
-- `agent_tools/` - CrewAI and MCP integrations
+- AI tool integrations live in `vendor_connectors/ai/`
 - `webhooks/` - Webhook server for async job notifications
 - `persistence/` - Local caching and vector store
 
