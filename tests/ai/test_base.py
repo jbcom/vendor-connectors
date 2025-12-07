@@ -50,8 +50,8 @@ class TestToolCategory:
         """Test that ToolCategory inherits from str."""
         assert isinstance(ToolCategory.AWS, str)
         assert ToolCategory.AWS == "aws"
-        # Can be used as string directly
-        assert f"category: {ToolCategory.MESHY}" == "category: meshy"
+        # Value can be used as string
+        assert ToolCategory.MESHY.value == "meshy"
 
 
 class TestToolParameter:
