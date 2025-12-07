@@ -19,7 +19,7 @@ def google_connector():
         "private_key_id": "key123",
         "project_id": "test-project",
     }
-    with patch("vendor_connectors.google.build"):
+    with patch("googleapiclient.discovery.build"):
         connector = GoogleConnectorFull(service_account_info=service_account)
         connector.logger = MagicMock()
         return connector
