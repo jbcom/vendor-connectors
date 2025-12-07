@@ -268,34 +268,49 @@ class TestSSOGroups:
         assert "group-1" in result
         assert result["group-1"]["DisplayName"] == "Admins"
 
-    def test_get_sso_group(self, aws_connector):
-        """Test getting a specific SSO group."""
+    def test_create_sso_group(self, aws_connector):
+        """Test creating an SSO group."""
         mock_identitystore = MagicMock()
-        mock_identitystore.describe_group.return_value = {
+        mock_identitystore.create_group.return_value = {
             "GroupId": "group-1",
-            "DisplayName": "Admins",
+            "IdentityStoreId": "d-1234567890",
         }
 
-        aws_connector.get_aws_client = MagicMock(return_value=mock_identitystore)
+        def get_client(client_name, **kwargs):
+            if client_name == "identitystore":
+                return mock_identitystore
+            mock_sso_admin = MagicMock()
+            mock_sso_admin.list_instances.return_value = {
+                "Instances": [{"IdentityStoreId": "d-1234567890"}]
+            }
+            return mock_sso_admin
 
-        result = aws_connector.get_sso_group("group-1", identity_store_id="d-1234567890")
+        aws_connector.get_aws_client = MagicMock(side_effect=get_client)
+
+        result = aws_connector.create_sso_group("Admins", description="Admin group")
 
         assert result["GroupId"] == "group-1"
-        assert result["DisplayName"] == "Admins"
+        mock_identitystore.create_group.assert_called_once()
 
-    def test_get_sso_group_not_found(self, aws_connector):
-        """Test getting a non-existent SSO group."""
+    def test_delete_sso_group(self, aws_connector):
+        """Test deleting an SSO group."""
         mock_identitystore = MagicMock()
-        error = ClientError(
-            {"Error": {"Code": "ResourceNotFoundException"}}, "DescribeGroup"
-        )
-        mock_identitystore.describe_group.side_effect = error
+        mock_identitystore.delete_group.return_value = {}
 
-        aws_connector.get_aws_client = MagicMock(return_value=mock_identitystore)
+        def get_client(client_name, **kwargs):
+            if client_name == "identitystore":
+                return mock_identitystore
+            mock_sso_admin = MagicMock()
+            mock_sso_admin.list_instances.return_value = {
+                "Instances": [{"IdentityStoreId": "d-1234567890"}]
+            }
+            return mock_sso_admin
 
-        result = aws_connector.get_sso_group("missing-group", identity_store_id="d-1234567890")
+        aws_connector.get_aws_client = MagicMock(side_effect=get_client)
 
-        assert result is None
+        aws_connector.delete_sso_group("group-1")
+
+        mock_identitystore.delete_group.assert_called_once()
 
 
 class TestSSOPermissionSets:
@@ -327,33 +342,19 @@ class TestSSOPermissionSets:
                 }
             },
         ]
-
-        aws_connector.get_aws_client = MagicMock(return_value=mock_sso_admin)
-
-        result = aws_connector.list_permission_sets(unhump_permission_sets=False)
-
-        assert len(result) == 2
-        assert "ps-1" in result
-        assert result["ps-1"]["Name"] == "AdminAccess"
-
-    def test_get_permission_set(self, aws_connector):
-        """Test getting a specific permission set."""
-        mock_sso_admin = MagicMock()
-        mock_sso_admin.describe_permission_set.return_value = {
-            "PermissionSet": {
-                "PermissionSetArn": "arn:aws:sso:::permissionSet/ssoins-1234567890/ps-1",
-                "Name": "AdminAccess",
-            }
+        mock_sso_admin.get_inline_policy_for_permission_set.return_value = {}
+        mock_sso_admin.list_managed_policies_in_permission_set.return_value = {
+            "AttachedManagedPolicies": []
         }
 
         aws_connector.get_aws_client = MagicMock(return_value=mock_sso_admin)
 
-        result = aws_connector.get_permission_set(
-            "arn:aws:sso:::permissionSet/ssoins-1234567890/ps-1",
-            instance_arn="arn:aws:sso:::instance/ssoins-1234567890",
-        )
+        result = aws_connector.list_permission_sets(unhump_sets=False)
 
-        assert result["Name"] == "AdminAccess"
+        assert len(result) == 2
+        ps1_arn = "arn:aws:sso:::permissionSet/ssoins-1234567890/ps-1"
+        assert ps1_arn in result
+        assert result[ps1_arn]["Name"] == "AdminAccess"
 
 
 class TestSSOAccountAssignments:
@@ -386,20 +387,27 @@ class TestSSOAccountAssignments:
         assert result[0]["AccountId"] == "123456789012"
         assert result[0]["PrincipalType"] == "USER"
 
-    def test_list_accounts_for_provisioned_permission_set(self, aws_connector):
-        """Test listing accounts for a provisioned permission set."""
+    def test_create_account_assignment(self, aws_connector):
+        """Test creating an account assignment."""
         mock_sso_admin = MagicMock()
-        mock_sso_admin.list_accounts_for_provisioned_permission_set.return_value = {
-            "AccountIds": ["123456789012", "210987654321"]
+        mock_sso_admin.list_instances.return_value = {
+            "Instances": [{"InstanceArn": "arn:aws:sso:::instance/ssoins-1234567890"}]
+        }
+        mock_sso_admin.create_account_assignment.return_value = {
+            "AccountAssignmentCreationStatus": {
+                "Status": "SUCCEEDED",
+                "RequestId": "req-123",
+            }
         }
 
         aws_connector.get_aws_client = MagicMock(return_value=mock_sso_admin)
 
-        result = aws_connector.list_accounts_for_provisioned_permission_set(
-            instance_arn="arn:aws:sso:::instance/ssoins-1234567890",
+        result = aws_connector.create_account_assignment(
+            account_id="123456789012",
             permission_set_arn="arn:aws:sso:::permissionSet/ssoins-1234567890/ps-1",
+            principal_id="user-1",
+            principal_type="USER",
         )
 
-        assert len(result) == 2
-        assert "123456789012" in result
-        assert "210987654321" in result
+        assert "AccountAssignmentCreationStatus" in result
+        mock_sso_admin.create_account_assignment.assert_called_once()

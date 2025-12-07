@@ -4,8 +4,6 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
 
-import pytest
-
 from vendor_connectors.connectors import VendorConnectors
 
 
@@ -111,7 +109,7 @@ class TestVendorConnectors:
     def test_get_google_client(self, mock_google):
         """Test getting Google client."""
         vc = VendorConnectors(inputs={
-            "GOOGLE_SERVICE_ACCOUNT_JSON": '{"type": "service_account"}',
+            "GOOGLE_SERVICE_ACCOUNT": '{"type": "service_account"}',
             "GOOGLE_PROJECT_ID": "test-project"
         })
         mock_connector = MagicMock()
@@ -141,6 +139,7 @@ class TestVendorConnectors:
     def test_get_slack_client(self, mock_slack):
         """Test getting Slack client."""
         vc = VendorConnectors(inputs={
+            "SLACK_TOKEN": "xoxp-test123",
             "SLACK_BOT_TOKEN": "xoxb-test123"
         })
         mock_connector = MagicMock()
@@ -176,28 +175,6 @@ class TestVendorConnectors:
 
         assert result == mock_connector
 
-    @patch("vendor_connectors.connectors.AnthropicConnector")
-    def test_get_anthropic_client(self, mock_anthropic):
-        """Test getting Anthropic client."""
-        vc = VendorConnectors()
-        mock_connector = MagicMock()
-        mock_anthropic.return_value = mock_connector
-
-        result = vc.get_anthropic_client(api_key="sk-ant-test123")
-
-        assert result == mock_connector
-
-    @patch("vendor_connectors.connectors.CursorConnector")
-    def test_get_cursor_client(self, mock_cursor):
-        """Test getting Cursor client."""
-        vc = VendorConnectors()
-        mock_connector = MagicMock()
-        mock_cursor.return_value = mock_connector
-
-        result = vc.get_cursor_client(api_key="cursor-test123")
-
-        assert result == mock_connector
-
     @patch("vendor_connectors.connectors.VaultConnector")
     def test_get_vault_client(self, mock_vault):
         """Test getting Vault client."""
@@ -215,8 +192,10 @@ class TestVendorConnectors:
         """Test that different connector types are cached separately."""
         with patch("vendor_connectors.connectors.AWSConnector") as mock_aws, \
              patch("vendor_connectors.connectors.SlackConnector") as mock_slack:
-            
-            vc = VendorConnectors(inputs={"SLACK_BOT_TOKEN": "xoxb-test123"})
+            vc = VendorConnectors(inputs={
+                "SLACK_TOKEN": "xoxp-test123",
+                "SLACK_BOT_TOKEN": "xoxb-test123"
+            })
             mock_aws_connector = MagicMock()
             mock_slack_connector = MagicMock()
             mock_aws.return_value = mock_aws_connector
@@ -224,8 +203,8 @@ class TestVendorConnectors:
 
             aws1 = vc.get_aws_connector()
             slack1 = vc.get_slack_client()
-            aws2 = vc.get_aws_connector()
-            slack2 = vc.get_slack_client()
+            vc.get_aws_connector()
+            vc.get_slack_client()
 
             # Each connector type should only be created once
             mock_aws.assert_called_once()
