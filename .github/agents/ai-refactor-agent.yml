@@ -26,23 +26,24 @@ context:
       reason: Active PR implementing the changes
 
 current_state: |
-  The ai/ package is currently ACTIVE and supported. The refactor discussed in
-  Issue #33 and PR #34 proposes moving towards a decentralized model where tools
-  live alongside each connector. This is a PLANNED direction, not yet complete.
+  PR #34 removes the central vendor_connectors/ai/ package (~5,700 lines deleted).
+  Once merged, tools will live alongside each connector. Check PR #34 status before
+  making changes - if merged, the ai/ package no longer exists.
   
-  CURRENT (active, supported):
-    vendor_connectors/ai/tools/           # LangChain tools for connectors
-    vendor_connectors/ai/providers/       # Multi-provider LLM support
-    vendor_connectors/ai/connector.py     # AIConnector unified interface
-    vendor_connectors/ai/workflows/       # LangGraph workflow builders
+  BEING REMOVED (when PR #34 merges):
+    vendor_connectors/ai/tools/meshy_tools.py
+    vendor_connectors/ai/providers/
+    vendor_connectors/ai/connector.py
+    vendor_connectors/ai/workflows/
     
-  TARGET PATTERN (for new connectors):
-    vendor_connectors/meshy/agent_tools/  # Tools live with connector
-    vendor_connectors/<service>/tools.py  # Future pattern for other connectors
-    vendor_connectors/<service>/mcp.py    # MCP server with connector
+  NEW PATTERN (after PR #34):
+    vendor_connectors/meshy/tools.py      # LangChain StructuredTools
+    vendor_connectors/meshy/mcp.py        # MCP server
+    vendor_connectors/<service>/tools.py  # Pattern for other connectors
+    vendor_connectors/<service>/mcp.py    # MCP server per connector
   
-  NOTE: Do NOT delete the ai/ package - it is actively used. Instead, new tools
-  should follow the decentralized pattern while ai/ remains for backwards compatibility.
+  CHECK FIRST: Run `GH_TOKEN="$GITHUB_JBCOM_TOKEN" gh pr view 34 --repo jbcom/vendor-connectors --json state`
+  to verify if PR #34 is merged before assuming ai/ exists or doesn't exist.
 
 guidelines:
   - "NEW tools should live WITH their connector (e.g., meshy/agent_tools/)"
