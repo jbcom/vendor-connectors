@@ -1,0 +1,271 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.12, pytest-9.0.2, pluggy-1.6.0 -- /opt/hostedtoolcache/Python/3.12.12/x64/bin/python
+cachedir: .pytest_cache
+rootdir: /home/runner/work/jbcom-control-center/jbcom-control-center
+configfile: pyproject.toml
+plugins: anyio-4.12.0, cov-7.0.0, asyncio-1.3.0, mock-3.15.1
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 205 items
+
+tests/meshy/test_jobs.py::TestAssetManifest::test_create_manifest PASSED [  0%]
+tests/meshy/test_jobs.py::TestAssetManifest::test_manifest_to_dict PASSED [  0%]
+tests/meshy/test_jobs.py::TestAssetManifest::test_manifest_default_metadata PASSED [  1%]
+tests/meshy/test_jobs.py::TestAssetGenerator::test_generate_asset_id_from_spec PASSED [  1%]
+tests/meshy/test_jobs.py::TestAssetGenerator::test_generate_asset_id_from_slug PASSED [  2%]
+tests/meshy/test_jobs.py::TestAssetGenerator::test_generate_asset_id_from_hash PASSED [  2%]
+tests/meshy/test_jobs.py::TestAssetGenerator::test_generate_model_no_wait PASSED [  3%]
+tests/meshy/test_jobs.py::TestAssetGenerator::test_generate_model_with_wait PASSED [  3%]
+tests/meshy/test_jobs.py::TestAssetGenerator::test_generate_model_saves_manifest_json PASSED [  4%]
+tests/meshy/test_jobs.py::TestAssetGenerator::test_batch_generate PASSED [  4%]
+tests/meshy/test_jobs.py::TestAssetGenerator::test_batch_generate_continues_on_failure PASSED [  5%]
+tests/meshy/test_jobs.py::TestExampleSpecs::test_example_character_spec PASSED [  5%]
+tests/meshy/test_jobs.py::TestExampleSpecs::test_example_prop_spec PASSED [  6%]
+tests/meshy/test_jobs.py::TestExampleSpecs::test_example_environment_spec PASSED [  6%]
+tests/meshy/test_models.py::TestTaskStatus::test_all_statuses_exist PASSED [  7%]
+tests/meshy/test_models.py::TestTaskStatus::test_string_comparison PASSED [  7%]
+tests/meshy/test_models.py::TestArtStyle::test_all_styles_exist PASSED   [  8%]
+tests/meshy/test_models.py::TestText3DRequest::test_minimal_request PASSED [  8%]
+tests/meshy/test_models.py::TestText3DRequest::test_full_request PASSED  [  9%]
+tests/meshy/test_models.py::TestText3DRequest::test_model_dump_excludes_none PASSED [  9%]
+tests/meshy/test_models.py::TestText3DRequest::test_missing_prompt_raises_error PASSED [ 10%]
+tests/meshy/test_models.py::TestText3DResult::test_result_parsing PASSED [ 10%]
+tests/meshy/test_models.py::TestText3DResult::test_result_with_textures PASSED [ 11%]
+tests/meshy/test_models.py::TestImage3DRequest::test_minimal_request PASSED [ 11%]
+tests/meshy/test_models.py::TestImage3DRequest::test_full_request PASSED [ 12%]
+tests/meshy/test_models.py::TestTextTextureRequest::test_minimal_request PASSED [ 12%]
+tests/meshy/test_models.py::TestTextTextureRequest::test_default_values PASSED [ 13%]
+tests/meshy/test_models.py::TestRiggingModels::test_rigging_request_with_task_id PASSED [ 13%]
+tests/meshy/test_models.py::TestRiggingModels::test_rigging_request_with_url PASSED [ 14%]
+tests/meshy/test_models.py::TestRiggingModels::test_rigging_result PASSED [ 14%]
+tests/meshy/test_models.py::TestAnimationModels::test_animation_request PASSED [ 15%]
+tests/meshy/test_models.py::TestAnimationModels::test_animation_result PASSED [ 15%]
+tests/meshy/test_models.py::TestRetextureModels::test_retexture_request PASSED [ 16%]
+tests/meshy/test_models.py::TestRetextureModels::test_retexture_result PASSED [ 16%]
+tests/meshy/test_models.py::TestAssetSpec::test_full_spec PASSED         [ 17%]
+tests/meshy/test_models.py::TestAssetSpec::test_asset_intents PASSED     [ 17%]
+tests/meshy/test_models.py::TestAssetSpec::test_asset_id_optional PASSED [ 18%]
+tests/meshy/test_repository.py::TestTaskRepositoryInit::test_creates_base_directory PASSED [ 18%]
+tests/meshy/test_repository.py::TestTaskRepositoryInit::test_uses_existing_directory PASSED [ 19%]
+tests/meshy/test_repository.py::TestProjectManifest::test_load_creates_new_manifest PASSED [ 19%]
+tests/meshy/test_repository.py::TestProjectManifest::test_load_existing_manifest PASSED [ 20%]
+tests/meshy/test_repository.py::TestProjectManifest::test_save_and_load_manifest PASSED [ 20%]
+tests/meshy/test_repository.py::TestAssetRecordOperations::test_get_asset_record_not_found PASSED [ 20%]
+tests/meshy/test_repository.py::TestAssetRecordOperations::test_upsert_and_get_asset_record PASSED [ 21%]
+tests/meshy/test_repository.py::TestAssetRecordOperations::test_upsert_updates_existing PASSED [ 21%]
+tests/meshy/test_repository.py::TestTaskSubmission::test_record_task_submission PASSED [ 22%]
+tests/meshy/test_repository.py::TestTaskSubmission::test_record_duplicate_submission_idempotent PASSED [ 22%]
+tests/meshy/test_repository.py::TestTaskSubmission::test_record_submission_validates_fields PASSED [ 23%]
+tests/meshy/test_repository.py::TestTaskUpdate::test_record_task_update PASSED [ 23%]
+tests/meshy/test_repository.py::TestTaskUpdate::test_record_task_update_with_error PASSED [ 24%]
+tests/meshy/test_repository.py::TestTaskUpdate::test_record_task_update_adds_history PASSED [ 24%]
+tests/meshy/test_repository.py::TestTaskUpdate::test_record_task_update_not_found_raises PASSED [ 25%]
+tests/meshy/test_repository.py::TestTaskUpdate::test_record_task_update_with_artifacts PASSED [ 25%]
+tests/meshy/test_repository.py::TestTaskLookup::test_find_task_by_id_with_project PASSED [ 26%]
+tests/meshy/test_repository.py::TestTaskLookup::test_find_task_by_id_without_project PASSED [ 26%]
+tests/meshy/test_repository.py::TestTaskLookup::test_find_task_not_found PASSED [ 27%]
+tests/meshy/test_repository.py::TestPendingAssets::test_list_pending_assets PASSED [ 27%]
+tests/meshy/test_repository.py::TestPendingAssets::test_list_pending_excludes_completed PASSED [ 28%]
+tests/meshy/test_repository.py::TestSpecHash::test_compute_spec_hash_deterministic PASSED [ 28%]
+tests/meshy/test_repository.py::TestSpecHash::test_compute_spec_hash_different_for_different_specs PASSED [ 29%]
+tests/meshy/test_repository.py::TestSpecHash::test_compute_spec_hash_order_independent PASSED [ 29%]
+tests/meshy/test_webhooks.py::TestMeshyWebhookPayload::test_parse_succeeded_payload PASSED [ 30%]
+tests/meshy/test_webhooks.py::TestMeshyWebhookPayload::test_parse_failed_payload PASSED [ 30%]
+tests/meshy/test_webhooks.py::TestMeshyWebhookPayload::test_get_error_message PASSED [ 31%]
+tests/meshy/test_webhooks.py::TestMeshyWebhookPayload::test_get_error_message_none PASSED [ 31%]
+tests/meshy/test_webhooks.py::TestMeshyWebhookPayload::test_get_glb_url_from_model_urls PASSED [ 32%]
+tests/meshy/test_webhooks.py::TestMeshyWebhookPayload::test_get_glb_url_from_rigging_result PASSED [ 32%]
+tests/meshy/test_webhooks.py::TestMeshyWebhookPayload::test_get_glb_url_from_animation PASSED [ 33%]
+tests/meshy/test_webhooks.py::TestMeshyWebhookPayload::test_get_all_urls PASSED [ 33%]
+tests/meshy/test_webhooks.py::TestWebhookHandler::test_handle_webhook_success PASSED [ 34%]
+tests/meshy/test_webhooks.py::TestWebhookHandler::test_handle_webhook_task_not_found PASSED [ 34%]
+tests/meshy/test_webhooks.py::TestWebhookHandler::test_handle_webhook_failed_task PASSED [ 35%]
+tests/meshy/test_webhooks.py::TestWebhookHandler::test_handle_webhook_downloads_artifact PASSED [ 35%]
+tests/meshy/test_webhooks.py::TestWebhookHandler::test_handle_webhook_no_download_when_disabled PASSED [ 36%]
+tests/meshy/test_webhooks.py::TestWebhookHandler::test_verify_signature_stub PASSED [ 36%]
+tests/meshy/test_webhooks.py::TestWebhookHandlerArtifactDownload::test_download_glb_artifact PASSED [ 37%]
+tests/meshy/test_webhooks.py::TestWebhookHandlerArtifactDownload::test_download_artifact_handles_error PASSED [ 37%]
+tests/test_anthropic.py::TestModels::test_content_block PASSED           [ 38%]
+tests/test_anthropic.py::TestModels::test_usage PASSED                   [ 38%]
+tests/test_anthropic.py::TestModels::test_message PASSED                 [ 39%]
+tests/test_anthropic.py::TestModels::test_message_text_property PASSED   [ 39%]
+tests/test_anthropic.py::TestModels::test_model PASSED                   [ 40%]
+tests/test_anthropic.py::TestAnthropicConnector::test_init_without_api_key PASSED [ 40%]
+tests/test_anthropic.py::TestAnthropicConnector::test_init_with_api_key PASSED [ 40%]
+tests/test_anthropic.py::TestAnthropicConnector::test_is_available_true PASSED [ 41%]
+tests/test_anthropic.py::TestAnthropicConnector::test_is_available_false PASSED [ 41%]
+tests/test_anthropic.py::TestAnthropicConnector::test_get_available_models PASSED [ 42%]
+tests/test_anthropic.py::TestAnthropicConnector::test_validate_model PASSED [ 42%]
+tests/test_anthropic.py::TestAnthropicConnector::test_get_recommended_model PASSED [ 43%]
+tests/test_anthropic.py::TestAnthropicConnector::test_create_message PASSED [ 43%]
+tests/test_anthropic.py::TestAnthropicConnector::test_create_message_with_system PASSED [ 44%]
+tests/test_anthropic.py::TestAnthropicConnector::test_list_models PASSED [ 44%]
+tests/test_anthropic.py::TestClaudeModels::test_claude_models_dict PASSED [ 45%]
+tests/test_anthropic.py::TestClaudeModels::test_claude_models_has_descriptions PASSED [ 45%]
+tests/test_aws_codedeploy.py::TestGetAwsCodeDeployDeployments::test_returns_details_and_normalizes_statuses PASSED [ 46%]
+tests/test_aws_codedeploy.py::TestGetAwsCodeDeployDeployments::test_raises_runtime_error_on_client_failure PASSED [ 46%]
+tests/test_aws_codedeploy.py::TestCreateCodeDeployDeployment::test_waits_for_success_and_returns_details PASSED [ 47%]
+tests/test_aws_codedeploy.py::TestCreateCodeDeployDeployment::test_waiter_failure_raises_runtime_error PASSED [ 47%]
+tests/test_aws_codedeploy.py::TestCreateCodeDeployDeployment::test_validates_file_exists_behavior PASSED [ 48%]
+tests/test_aws_connector.py::TestAWSConnector::test_init_without_role PASSED [ 48%]
+tests/test_aws_connector.py::TestAWSConnector::test_init_with_role PASSED [ 49%]
+tests/test_aws_connector.py::TestAWSConnector::test_assume_role_success PASSED [ 49%]
+tests/test_aws_connector.py::TestAWSConnector::test_assume_role_failure PASSED [ 50%]
+tests/test_aws_connector.py::TestAWSConnector::test_get_aws_session_default PASSED [ 50%]
+tests/test_aws_connector.py::TestAWSConnector::test_create_standard_retry_config PASSED [ 51%]
+tests/test_aws_connector.py::TestAWSConnector::test_get_aws_client PASSED [ 51%]
+tests/test_aws_connector.py::TestAWSConnector::test_get_aws_resource PASSED [ 52%]
+tests/test_aws_connector.py::TestAWSConnector::test_list_secrets_returns_arns_with_filters PASSED [ 52%]
+tests/test_aws_connector.py::TestAWSConnector::test_list_secrets_fetches_values_and_skips_empty PASSED [ 53%]
+tests/test_aws_connector.py::TestAWSConnector::test_list_secrets_rejects_path_traversal PASSED [ 53%]
+tests/test_aws_connector.py::TestAWSConnector::test_create_secret_with_tags_and_description PASSED [ 54%]
+tests/test_aws_connector.py::TestAWSConnector::test_create_secret_requires_name PASSED [ 54%]
+tests/test_aws_connector.py::TestAWSConnector::test_update_secret_calls_aws PASSED [ 55%]
+tests/test_aws_connector.py::TestAWSConnector::test_delete_secret_with_recovery_window PASSED [ 55%]
+tests/test_aws_connector.py::TestAWSConnector::test_delete_secret_force_delete PASSED [ 56%]
+tests/test_aws_connector.py::TestAWSConnector::test_delete_secret_invalid_recovery_window PASSED [ 56%]
+tests/test_aws_connector.py::TestAWSConnector::test_delete_secrets_matching_dry_run PASSED [ 57%]
+tests/test_aws_connector.py::TestAWSConnector::test_delete_secrets_matching_executes_delete PASSED [ 57%]
+tests/test_aws_organizations.py::test_classify_accounts_applies_rules PASSED [ 58%]
+tests/test_aws_organizations.py::test_classify_accounts_fetches_when_missing PASSED [ 58%]
+tests/test_aws_organizations.py::test_label_account_tags_resource PASSED [ 59%]
+tests/test_aws_organizations.py::test_preprocess_organization_compiles_sections PASSED [ 59%]
+tests/test_aws_organizations.py::test_get_accounts_merges_controltower_data PASSED [ 60%]
+tests/test_aws_organizations.py::test_label_aws_accounts_builds_metadata PASSED [ 60%]
+tests/test_aws_organizations.py::test_classify_aws_accounts_generates_suffix PASSED [ 60%]
+tests/test_aws_organizations.py::test_preprocess_aws_organization_uses_helpers PASSED [ 61%]
+tests/test_cloud_params.py::TestGetCloudCallParams::test_default_max_results PASSED [ 61%]
+tests/test_cloud_params.py::TestGetCloudCallParams::test_custom_max_results PASSED [ 62%]
+tests/test_cloud_params.py::TestGetCloudCallParams::test_no_max_results PASSED [ 62%]
+tests/test_cloud_params.py::TestGetCloudCallParams::test_max_results_zero PASSED [ 63%]
+tests/test_cloud_params.py::TestGetCloudCallParams::test_kwargs_included PASSED [ 63%]
+tests/test_cloud_params.py::TestGetCloudCallParams::test_reject_null_values PASSED [ 64%]
+tests/test_cloud_params.py::TestGetCloudCallParams::test_include_null_values PASSED [ 64%]
+tests/test_cloud_params.py::TestGetCloudCallParams::test_first_letter_to_lower PASSED [ 65%]
+tests/test_cloud_params.py::TestGetCloudCallParams::test_first_letter_to_upper PASSED [ 65%]
+tests/test_cloud_params.py::TestGetAwsCallParams::test_default_max_results PASSED [ 66%]
+tests/test_cloud_params.py::TestGetAwsCallParams::test_first_letter_upper PASSED [ 66%]
+tests/test_cloud_params.py::TestGetAwsCallParams::test_snake_case_preserved PASSED [ 67%]
+tests/test_cloud_params.py::TestGetGoogleCallParams::test_default_max_results PASSED [ 67%]
+tests/test_cloud_params.py::TestGetGoogleCallParams::test_first_letter_lower PASSED [ 68%]
+tests/test_cloud_params.py::TestGetGoogleCallParams::test_no_max_results PASSED [ 68%]
+tests/test_cloud_params.py::TestGetGoogleCallParams::test_snake_case_preserved PASSED [ 69%]
+tests/test_cursor.py::TestValidators::test_validate_agent_id_valid PASSED [ 69%]
+tests/test_cursor.py::TestValidators::test_validate_agent_id_empty PASSED [ 70%]
+tests/test_cursor.py::TestValidators::test_validate_agent_id_too_long PASSED [ 70%]
+tests/test_cursor.py::TestValidators::test_validate_agent_id_invalid_chars PASSED [ 71%]
+tests/test_cursor.py::TestValidators::test_validate_prompt_text_valid PASSED [ 71%]
+tests/test_cursor.py::TestValidators::test_validate_prompt_text_empty PASSED [ 72%]
+tests/test_cursor.py::TestValidators::test_validate_prompt_text_too_long PASSED [ 72%]
+tests/test_cursor.py::TestValidators::test_validate_repository_valid PASSED [ 73%]
+tests/test_cursor.py::TestValidators::test_validate_repository_invalid PASSED [ 73%]
+tests/test_cursor.py::TestValidators::test_validate_webhook_url_valid PASSED [ 74%]
+tests/test_cursor.py::TestValidators::test_validate_webhook_url_http PASSED [ 74%]
+tests/test_cursor.py::TestValidators::test_validate_webhook_url_internal PASSED [ 75%]
+tests/test_cursor.py::TestValidators::test_validate_webhook_url_ipv6_internal PASSED [ 75%]
+tests/test_cursor.py::TestModels::test_agent_model PASSED                [ 76%]
+tests/test_cursor.py::TestModels::test_agent_model_extra_fields PASSED   [ 76%]
+tests/test_cursor.py::TestModels::test_repository_model PASSED           [ 77%]
+tests/test_cursor.py::TestModels::test_conversation_model PASSED         [ 77%]
+tests/test_cursor.py::TestCursorConnector::test_init_without_api_key PASSED [ 78%]
+tests/test_cursor.py::TestCursorConnector::test_init_with_api_key PASSED [ 78%]
+tests/test_cursor.py::TestCursorConnector::test_is_available_true PASSED [ 79%]
+tests/test_cursor.py::TestCursorConnector::test_is_available_false PASSED [ 79%]
+tests/test_cursor.py::TestCursorConnector::test_list_agents PASSED       [ 80%]
+tests/test_cursor.py::TestCursorConnector::test_launch_agent PASSED      [ 80%]
+tests/test_cursor.py::TestCursorConnector::test_launch_agent_validation PASSED [ 80%]
+tests/test_github_connector.py::TestGithubConnector::test_init_with_repo PASSED [ 81%]
+tests/test_github_connector.py::TestGithubConnector::test_init_without_repo PASSED [ 81%]
+tests/test_github_connector.py::TestGithubConnector::test_get_repository_branch PASSED [ 82%]
+tests/test_github_connector.py::TestGithubConnector::test_get_repository_file PASSED [ 82%]
+tests/test_github_workflow_builder.py::test_build_github_actions_workflow_generates_yaml PASSED [ 83%]
+tests/test_google_billing.py::test_list_billing_accounts_paginates_and_unhumps PASSED [ 83%]
+tests/test_google_billing.py::test_update_project_billing_info_prefixes_account_name PASSED [ 84%]
+tests/test_google_billing.py::test_disable_project_billing_sets_empty_account PASSED [ 84%]
+tests/test_google_billing.py::test_list_billing_account_projects_handles_prefixing PASSED [ 85%]
+tests/test_google_connector.py::TestGoogleConnector::test_init_with_dict_service_account PASSED [ 85%]
+tests/test_google_connector.py::TestGoogleConnector::test_credentials_property PASSED [ 86%]
+tests/test_google_connector.py::TestGoogleConnector::test_get_service PASSED [ 86%]
+tests/test_google_connector.py::TestGoogleConnector::test_get_service_caching PASSED [ 87%]
+tests/test_google_connector.py::TestGoogleConnector::test_list_users_filters_and_transforms PASSED [ 87%]
+tests/test_google_connector.py::TestGoogleConnector::test_list_groups_key_by_email_and_filters PASSED [ 88%]
+tests/test_slack_connector.py::TestSlackConnector::test_init PASSED      [ 88%]
+tests/test_slack_connector.py::TestSlackConnector::test_get_bot_channels PASSED [ 89%]
+tests/test_slack_connector.py::TestSlackConnector::test_send_message PASSED [ 89%]
+tests/test_slack_connector.py::TestSlackConnector::test_list_users_filters_deleted PASSED [ 90%]
+tests/test_slack_connector.py::TestSlackConnector::test_list_usergroups_filters_ids PASSED [ 90%]
+tests/test_slack_connector.py::TestSlackConnector::test_list_conversations_channels_only PASSED [ 91%]
+tests/test_vault_connector.py::TestVaultConnector::test_init PASSED      [ 91%]
+tests/test_vault_connector.py::TestVaultConnector::test_vault_client_with_token PASSED [ 92%]
+tests/test_vault_connector.py::TestVaultConnector::test_is_token_valid PASSED [ 92%]
+tests/test_vault_connector.py::TestVaultConnector::test_get_vault_client_classmethod PASSED [ 93%]
+tests/test_vault_connector.py::TestVaultConnector::test_list_secrets_recurses_directories PASSED [ 93%]
+tests/test_vault_connector.py::TestVaultConnector::test_list_secrets_handles_invalid_root PASSED [ 94%]
+tests/test_vault_connector.py::TestVaultConnector::test_list_secrets_rejects_path_traversal PASSED [ 94%]
+tests/test_vault_connector.py::TestVaultConnector::test_list_aws_iam_roles_filters_prefix PASSED [ 95%]
+tests/test_vault_connector.py::TestVaultConnector::test_list_aws_iam_roles_handles_errors PASSED [ 95%]
+tests/test_vault_connector.py::TestVaultConnector::test_get_aws_iam_role_returns_data PASSED [ 96%]
+tests/test_vault_connector.py::TestVaultConnector::test_get_aws_iam_role_handles_errors PASSED [ 96%]
+tests/test_vault_connector.py::TestVaultConnector::test_generate_aws_credentials_success PASSED [ 97%]
+tests/test_vault_connector.py::TestVaultConnector::test_generate_aws_credentials_error PASSED [ 97%]
+tests/test_zoom_connector.py::TestZoomConnector::test_init PASSED        [ 98%]
+tests/test_zoom_connector.py::TestZoomConnector::test_get_access_token_success PASSED [ 98%]
+tests/test_zoom_connector.py::TestZoomConnector::test_get_access_token_failure PASSED [ 99%]
+tests/test_zoom_connector.py::TestZoomConnector::test_get_zoom_users PASSED [ 99%]
+tests/test_zoom_connector.py::TestZoomConnector::test_create_zoom_user PASSED [100%]
+
+================================ tests coverage ================================
+_______________ coverage: platform linux, python 3.12.12-final-0 _______________
+
+Name                                                         Stmts   Miss  Cover   Missing
+------------------------------------------------------------------------------------------
+src/vendor_connectors/__init__.py                               14      0   100%
+src/vendor_connectors/anthropic/__init__.py                    172     55    68%   254, 257, 261, 290-304, 356, 358, 360, 362, 364, 366, 368, 373, 398-416, 436, 454-461, 497-529
+src/vendor_connectors/aws/__init__.py                          224     77    66%   107-118, 190-192, 204-206, 230-253, 343, 362-364, 374, 376, 390-392, 403, 426-428, 439, 453-456, 459-460, 499-519, 534-562
+src/vendor_connectors/aws/codedeploy.py                        182     52    71%   43-53, 63-65, 82, 84, 100-114, 124-126, 173, 180-184, 186, 205-209, 217-218, 272, 280, 300, 302, 304, 306, 308, 313-315, 319, 337-338
+src/vendor_connectors/aws/organizations.py                     286    143    50%   56-128, 148-195, 261-290, 302-335, 356-358, 363-368, 395, 433, 555, 587-589, 610-617, 633-635, 648
+src/vendor_connectors/aws/s3.py                                230    208    10%   42-61, 77-87, 107-126, 144-154, 178-209, 233-234, 259-269, 293-324, 346-360, 380-429, 447-473, 497-536, 554-578, 594-608, 623-636, 652-723
+src/vendor_connectors/aws/sso.py                               266    243     9%   43-59, 76-92, 118-161, 179-199, 225-254, 269-284, 312-369, 391-419, 439-456, 471-486, 506-523, 538-553, 581-644, 653-671, 697-731, 755-775, 799-819
+src/vendor_connectors/cloud_params.py                           19      0   100%
+src/vendor_connectors/connectors.py                            145    114    21%   46-51, 55-56, 60-61, 65-66, 77-89, 100-127, 138-165, 173-195, 209-240, 253-279, 291-305, 318-346, 355-382, 395-422, 442-467, 489-517
+src/vendor_connectors/cursor/__init__.py                       231     67    71%   238, 240, 257, 261-262, 277, 289-296, 358, 361, 365, 403-410, 415, 419, 423-426, 444, 462-468, 483-491, 531-532, 535, 549, 552, 558, 567-570, 574, 588-593, 612-618, 633-638
+src/vendor_connectors/github/__init__.py                       367    250    32%   29-30, 68-69, 81-82, 86-88, 92-112, 126-127, 130-132, 137, 139, 142, 153, 156-160, 163, 170-177, 192-230, 240-257, 282-318, 329-344, 364-402, 413-431, 451-495, 506-521, 534-543, 555-564, 580-581, 607-651, 681-699, 729-754, 784-806, 830-893, 918, 920, 945
+src/vendor_connectors/google/__init__.py                       213     36    83%   77, 81, 106, 119, 141, 179, 183, 187, 191, 195, 199, 203, 207, 211, 215, 219, 232, 246-253, 264-265, 270, 281, 285, 310, 314, 320, 339, 357, 461, 532
+src/vendor_connectors/google/billing.py                        134     69    49%   72-86, 97-108, 221-228, 244-260, 276-314, 336-376
+src/vendor_connectors/google/cloud.py                          170    151    11%   32-44, 55-64, 82-109, 120-131, 151-166, 177-182, 198-210, 226-249, 265-282, 298-309, 325-355, 373-407, 427-446, 462-485, 505-525
+src/vendor_connectors/google/constants.py                       11      0   100%
+src/vendor_connectors/google/services.py                       296    274     7%   48-88, 110-122, 140-152, 172-195, 215-238, 258-281, 297-320, 340-366, 382-389, 407-418, 434-448, 470-494, 512-529, 553-576, 604-647, 661-675, 693-716, 738-776
+src/vendor_connectors/google/workspace.py                      210    189    10%   41-64, 80-91, 119-140, 158-161, 174-176, 196-219, 235-246, 266-276, 289-291, 311-334, 354-363, 378-380, 398-412, 445-483, 510-538, 556-621, 637-652
+src/vendor_connectors/meshy/__init__.py                          4      0   100%
+src/vendor_connectors/meshy/agent_tools/__init__.py              3      3     0%   29-38
+src/vendor_connectors/meshy/agent_tools/base.py                 56     56     0%   7-169
+src/vendor_connectors/meshy/agent_tools/crewai/__init__.py      16     16     0%   30-69
+src/vendor_connectors/meshy/agent_tools/crewai/provider.py      69     69     0%   7-202
+src/vendor_connectors/meshy/agent_tools/mcp/__init__.py          3      3     0%   30-38
+src/vendor_connectors/meshy/agent_tools/mcp/__main__.py         10     10     0%   10-27
+src/vendor_connectors/meshy/agent_tools/mcp/provider.py         94     94     0%   7-225
+src/vendor_connectors/meshy/agent_tools/registry.py             63     63     0%   20-182
+src/vendor_connectors/meshy/agent_tools/tools.py                83     83     0%   10-584
+src/vendor_connectors/meshy/animate.py                          34     26    24%   24-30, 35-36, 41-57, 80-92
+src/vendor_connectors/meshy/animations.py                       69     69     0%   3-4885
+src/vendor_connectors/meshy/base.py                             73     51    30%   25-26, 41-46, 52-54, 60-62, 67-79, 84, 117-145, 158-170
+src/vendor_connectors/meshy/jobs.py                             81      0   100%
+src/vendor_connectors/meshy/logging.py                           9      9     0%   3-33
+src/vendor_connectors/meshy/models.py                          218      0   100%
+src/vendor_connectors/meshy/persistence/__init__.py              6      0   100%
+src/vendor_connectors/meshy/persistence/repository.py          120     12    90%   170-185, 273-274, 276-277, 279-280, 301-305
+src/vendor_connectors/meshy/persistence/schemas.py              61      0   100%
+src/vendor_connectors/meshy/persistence/utils.py                10      0   100%
+src/vendor_connectors/meshy/persistence/vector_store.py        165    110    33%   56, 62, 113-116, 120-133, 138-145, 149-202, 235-268, 300-321, 332-335, 346-349, 367-409, 429-454, 465-475, 487-488, 492-497, 513-515, 519-521, 524, 527, 541-548
+src/vendor_connectors/meshy/retexture.py                        40     31    22%   19-25, 30-31, 36-52, 75-87, 110-122
+src/vendor_connectors/meshy/rigging.py                          40     31    22%   19-25, 30-31, 36-52, 71-81, 102-113
+src/vendor_connectors/meshy/text3d.py                           39     30    23%   20-26, 31-32, 37-43, 48-64, 89-106
+src/vendor_connectors/meshy/webhooks/__init__.py                 4      0   100%
+src/vendor_connectors/meshy/webhooks/handler.py                 52      1    98%   73
+src/vendor_connectors/meshy/webhooks/schemas.py                 84     11    87%   108, 121, 123, 125, 129-132, 136, 138, 140
+src/vendor_connectors/slack/__init__.py                        196    104    47%   14-20, 37-38, 48, 61, 78-97, 111-117, 138-153, 195, 200, 238, 241, 245, 249, 253, 255, 259-262, 275-276, 303, 305, 307, 309, 311, 313, 321, 362, 364, 366, 368, 386, 415, 417, 419, 423, 427, 445, 472-506
+src/vendor_connectors/vault/__init__.py                        233     92    61%   60, 72-105, 110, 122-123, 135, 210-211, 224-225, 244-252, 277-348, 366-376, 429, 441-442, 469, 488
+src/vendor_connectors/zoom/__init__.py                          79     19    76%   57, 71, 83-84, 90-99, 114-118
+------------------------------------------------------------------------------------------
+TOTAL                                                         5184   2921    44%
+Required test coverage of 35.0% reached. Total coverage: 43.65%
+============================= 205 passed in 4.84s ==============================
