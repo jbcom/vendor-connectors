@@ -10,9 +10,9 @@ The tools here use MeshyClient to interact with the Meshy API.
 from __future__ import annotations
 
 from vendor_connectors.meshy.agent_tools.base import (
-    ParameterDefinition,
     ToolCategory,
     ToolDefinition,
+    ToolParameter,
     ToolResult,
     register_tool,
 )
@@ -359,13 +359,13 @@ def _register_all_tools():
             ),
             category=ToolCategory.GENERATION,
             parameters={
-                "prompt": ParameterDefinition(
+                "prompt": ToolParameter(
                     name="prompt",
                     description="Detailed text description of the 3D model to generate",
                     type=str,
                     required=True,
                 ),
-                "art_style": ParameterDefinition(
+                "art_style": ToolParameter(
                     name="art_style",
                     description="Art style for the model",
                     type=str,
@@ -373,21 +373,21 @@ def _register_all_tools():
                     default="sculpture",
                     enum_values=["realistic", "sculpture", "cartoon", "low-poly"],
                 ),
-                "negative_prompt": ParameterDefinition(
+                "negative_prompt": ToolParameter(
                     name="negative_prompt",
                     description="Things to avoid in the generation",
                     type=str,
                     required=False,
                     default="",
                 ),
-                "target_polycount": ParameterDefinition(
+                "target_polycount": ToolParameter(
                     name="target_polycount",
                     description="Target polygon count for the model",
                     type=int,
                     required=False,
                     default=15000,
                 ),
-                "enable_pbr": ParameterDefinition(
+                "enable_pbr": ToolParameter(
                     name="enable_pbr",
                     description="Enable PBR (physically-based rendering) materials",
                     type=bool,
@@ -409,13 +409,13 @@ def _register_all_tools():
             ),
             category=ToolCategory.RIGGING,
             parameters={
-                "model_id": ParameterDefinition(
+                "model_id": ToolParameter(
                     name="model_id",
                     description="Task ID of the static model to rig",
                     type=str,
                     required=True,
                 ),
-                "wait": ParameterDefinition(
+                "wait": ToolParameter(
                     name="wait",
                     description="Wait for rigging to complete (default True)",
                     type=bool,
@@ -436,19 +436,19 @@ def _register_all_tools():
             ),
             category=ToolCategory.ANIMATION,
             parameters={
-                "model_id": ParameterDefinition(
+                "model_id": ToolParameter(
                     name="model_id",
                     description="Task ID of the rigged model to animate",
                     type=str,
                     required=True,
                 ),
-                "animation_id": ParameterDefinition(
+                "animation_id": ToolParameter(
                     name="animation_id",
                     description="Animation ID from the Meshy catalog (use list_animations)",
                     type=int,
                     required=True,
                 ),
-                "wait": ParameterDefinition(
+                "wait": ToolParameter(
                     name="wait",
                     description="Wait for animation to complete (default True)",
                     type=bool,
@@ -469,26 +469,26 @@ def _register_all_tools():
             ),
             category=ToolCategory.TEXTURING,
             parameters={
-                "model_id": ParameterDefinition(
+                "model_id": ToolParameter(
                     name="model_id",
                     description="Task ID of the model to retexture",
                     type=str,
                     required=True,
                 ),
-                "texture_prompt": ParameterDefinition(
+                "texture_prompt": ToolParameter(
                     name="texture_prompt",
                     description="Description of the new texture/appearance",
                     type=str,
                     required=True,
                 ),
-                "enable_pbr": ParameterDefinition(
+                "enable_pbr": ToolParameter(
                     name="enable_pbr",
                     description="Enable PBR (physically-based rendering) materials",
                     type=bool,
                     required=False,
                     default=True,
                 ),
-                "wait": ParameterDefinition(
+                "wait": ToolParameter(
                     name="wait",
                     description="Wait for retexturing to complete (default True)",
                     type=bool,
@@ -510,14 +510,14 @@ def _register_all_tools():
             ),
             category=ToolCategory.UTILITY,
             parameters={
-                "category": ParameterDefinition(
+                "category": ToolParameter(
                     name="category",
                     description="Optional category filter (Fighting, WalkAndRun, Dancing, etc.)",
                     type=str,
                     required=False,
                     default="",
                 ),
-                "limit": ParameterDefinition(
+                "limit": ToolParameter(
                     name="limit",
                     description="Maximum number of animations to return",
                     type=int,
@@ -540,13 +540,13 @@ def _register_all_tools():
             ),
             category=ToolCategory.UTILITY,
             parameters={
-                "task_id": ParameterDefinition(
+                "task_id": ToolParameter(
                     name="task_id",
                     description="The Meshy task ID to check",
                     type=str,
                     required=True,
                 ),
-                "task_type": ParameterDefinition(
+                "task_type": ToolParameter(
                     name="task_type",
                     description="Task type",
                     type=str,
@@ -567,7 +567,7 @@ def _register_all_tools():
             ),
             category=ToolCategory.UTILITY,
             parameters={
-                "animation_id": ParameterDefinition(
+                "animation_id": ToolParameter(
                     name="animation_id",
                     description="The animation ID number",
                     type=int,

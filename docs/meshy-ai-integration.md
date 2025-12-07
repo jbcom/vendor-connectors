@@ -2,17 +2,26 @@
 
 ## Status
 
-**Current**: Meshy connector is implemented in `src/vendor_connectors/meshy/`  
-**Blocked by**: PR #20 (AI sub-package)  
-**Next Step**: Create `vendor_connectors/ai/tools/meshy_tools.py` after PR #20 merges
+**Current**: Meshy connector is implemented with **aligned** agent_tools structure  
+**Alignment**: Meshy agent_tools now uses PR #20-compatible naming (`ToolParameter`, `ToolDefinition`)  
+**Compatibility**: Either PR can merge first - they'll slot together like puzzle pieces  
 
-## Overview
+## Structure Alignment
 
-This document describes how the existing Meshy connector will integrate with the `vendor_connectors.ai` sub-package once PR #20 is merged.
+### Before Alignment
+- Meshy used `ParameterDefinition`
+- PR #20 uses `ToolParameter`
+- Incompatible field names
 
-## Current Meshy Structure
+### After Alignment ✓
+Both use the same interface:
+- `ToolParameter` (with backwards-compat `ParameterDefinition` alias)
+- `ToolDefinition` with compatible fields:
+  - `connector_class: type | None` 
+  - `method_name: str | None`
+- Same import names and structure
 
-The Meshy connector already has a complete agent tools system:
+## Current Meshy Structure (Aligned)
 
 ```
 src/vendor_connectors/meshy/
@@ -22,13 +31,15 @@ src/vendor_connectors/meshy/
 ├── rigging.py           # Model rigging
 ├── animate.py           # Animation application
 ├── retexture.py         # Texture modification
-└── agent_tools/         # Existing AI framework integrations
-    ├── base.py          # Tool definitions
-    ├── tools.py         # Tool handlers
+└── agent_tools/         # AI framework integrations (ALIGNED with PR #20)
+    ├── base.py          # ToolParameter, ToolDefinition (PR #20-compatible)
+    ├── tools.py         # Tool handlers  
     ├── registry.py      # Provider registry
     ├── crewai/          # CrewAI integration
     └── mcp/             # MCP server
 ```
+
+**Key Alignment**: Meshy's `agent_tools/base.py` now uses the same `ToolParameter` and `ToolDefinition` interface as PR #20's `ai/base.py`.
 
 ## Integration with PR #20 AI Sub-Package
 
