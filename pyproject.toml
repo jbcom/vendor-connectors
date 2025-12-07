@@ -24,31 +24,18 @@ classifiers = [
     "Typing :: Typed",
 ]
 dependencies = [
+    # === Core dependencies (minimal - HTTP client foundation) ===
     # jbcom ecosystem
     "extended-data-types>=2025.11.164",
     "lifecyclelogging>=202511.3.0",
     "directed-inputs-class>=202511.3.0",
-    # Cloud providers
-    "boto3>=1.34.0",
-    "google-api-python-client>=2.0.0",
-    "google-cloud-billing>=1.0.0",
-    "google-cloud-resource-manager>=1.0.0",
-    "hvac>=2.0.0",
-    "PyGithub>=2.0.0",
-    "python-graphql-client>=0.4.0",
-    "slack-sdk>=3.0.0",
-    "requests>=2.32.0",
-    # Meshy AI SDK dependencies
+    # HTTP client with retries
     "httpx>=0.28.1",
     "tenacity>=9.1.2",
     "pydantic>=2.0.0",
-    "rich>=14.0.0",
-    "eval-type-backport>=0.2.0; python_version < '3.10'",
-    # Additional utils
-    "numpy>=1.26.0",
-    "validators>=0.22.0",
+    "requests>=2.32.0",
+    # Utilities
     "deepmerge>=1.1.0",
-    "filelock>=3.13.0",
     "more-itertools>=10.0.0",
 ]
 
