@@ -113,7 +113,11 @@ class MeshyConnector(DirectedInputsClass):
         # Set API key (env var or explicit)
         self._api_key = api_key or self.get_input("MESHY_API_KEY", required=False) or os.getenv("MESHY_API_KEY")
         if self._api_key:
-            # Update the global API key in base module
+            # WARNING: This sets a global API key in the base module.
+            # Multiple MeshyConnector instances with different API keys are NOT
+            # supported - the last instance's key will be used for all requests.
+            # This is a limitation of the underlying API design.
+            # TODO: Refactor base module to accept api_key per-request for thread safety.
             base._api_key = self._api_key
 
         self.logger.info("Initialized MeshyConnector")
@@ -172,18 +176,7 @@ class MeshyConnector(DirectedInputsClass):
         if isinstance(art_style, str):
             art_style = ArtStyle(art_style)
 
-        if wait:
-            result = text3d.generate(
-                prompt,
-                art_style=art_style,
-                negative_prompt=negative_prompt,
-                target_polycount=target_polycount,
-                enable_pbr=enable_pbr,
-                wait=True,
-            )
-            return self._text3d_result_to_task_result(result)
-
-        # Non-blocking: just create the task
+        # Create the task with all parameters including topology
         from vendor_connectors.meshy.models import Text3DRequest
 
         request = Text3DRequest(
@@ -198,11 +191,16 @@ class MeshyConnector(DirectedInputsClass):
         task_id = text3d.create(request)
         self.logger.info(f"Created text-to-3d task: {task_id}")
 
-        return TaskResult(
-            task_id=task_id,
-            task_type="text-to-3d",
-            status=TaskStatus.PENDING,
-        )
+        if not wait:
+            return TaskResult(
+                task_id=task_id,
+                task_type="text-to-3d",
+                status=TaskStatus.PENDING,
+            )
+
+        # Poll until complete using user-specified interval and timeout
+        result = text3d.poll(task_id, interval=poll_interval, timeout=timeout)
+        return self._text3d_result_to_task_result(result)
 
     def _text3d_result_to_task_result(self, result: Text3DResult) -> TaskResult:
         """Convert Text3DResult to TaskResult."""
@@ -273,6 +271,8 @@ class MeshyConnector(DirectedInputsClass):
             json=request.model_dump(exclude_none=True),
         )
         task_id = response.json().get("result")
+        if not task_id:
+            raise RuntimeError("Failed to create image-to-3d task: no task ID returned")
         self.logger.info(f"Created image-to-3d task: {task_id}")
 
         if not wait:
@@ -358,16 +358,25 @@ class MeshyConnector(DirectedInputsClass):
         self._validate_api_key()
         self.logger.info(f"Starting rigging for model: {model_task_id}")
 
-        if wait:
-            result = rigging.rig(model_task_id, height_meters=height_meters, wait=True)
-            return self._rigging_result_to_task_result(result)
+        from vendor_connectors.meshy.models import RiggingRequest
 
-        task_id = rigging.rig(model_task_id, height_meters=height_meters, wait=False)
-        return TaskResult(
-            task_id=task_id,
-            task_type="rigging",
-            status=TaskStatus.PENDING,
+        request = RiggingRequest(
+            input_task_id=model_task_id,
+            height_meters=height_meters,
         )
+        task_id = rigging.create(request)
+        self.logger.info(f"Created rigging task: {task_id}")
+
+        if not wait:
+            return TaskResult(
+                task_id=task_id,
+                task_type="rigging",
+                status=TaskStatus.PENDING,
+            )
+
+        # Poll with user-specified interval and timeout
+        result = rigging.poll(task_id, interval=poll_interval, timeout=timeout)
+        return self._rigging_result_to_task_result(result)
 
     def _rigging_result_to_task_result(self, result: RiggingResult) -> TaskResult:
         """Convert RiggingResult to TaskResult."""
@@ -421,28 +430,27 @@ class MeshyConnector(DirectedInputsClass):
         self._validate_api_key()
         self.logger.info(f"Applying animation {animation_id} to model: {rigged_task_id}")
 
-        if wait:
-            result = animate.apply(
-                rigged_task_id,
-                animation_id,
-                loop=loop,
-                frame_rate=frame_rate,
-                wait=True,
-            )
-            return self._animation_result_to_task_result(result)
+        from vendor_connectors.meshy.models import AnimationRequest
 
-        task_id = animate.apply(
-            rigged_task_id,
-            animation_id,
+        request = AnimationRequest(
+            rig_task_id=rigged_task_id,
+            action_id=animation_id,
             loop=loop,
             frame_rate=frame_rate,
-            wait=False,
         )
-        return TaskResult(
-            task_id=task_id,
-            task_type="animation",
-            status=TaskStatus.PENDING,
-        )
+        task_id = animate.create(request)
+        self.logger.info(f"Created animation task: {task_id}")
+
+        if not wait:
+            return TaskResult(
+                task_id=task_id,
+                task_type="animation",
+                status=TaskStatus.PENDING,
+            )
+
+        # Poll with user-specified interval and timeout
+        result = animate.poll(task_id, interval=poll_interval, timeout=timeout)
+        return self._animation_result_to_task_result(result)
 
     def _animation_result_to_task_result(self, result: AnimationResult) -> TaskResult:
         """Convert AnimationResult to TaskResult."""
@@ -492,28 +500,27 @@ class MeshyConnector(DirectedInputsClass):
         self._validate_api_key()
         self.logger.info(f"Starting retexture for model {model_task_id}: {prompt[:50]}...")
 
-        if wait:
-            result = retexture.apply(
-                model_task_id,
-                prompt,
-                enable_original_uv=enable_original_uv,
-                enable_pbr=enable_pbr,
-                wait=True,
-            )
-            return self._retexture_result_to_task_result(result)
+        from vendor_connectors.meshy.models import RetextureRequest
 
-        task_id = retexture.apply(
-            model_task_id,
-            prompt,
+        request = RetextureRequest(
+            input_task_id=model_task_id,
+            text_style_prompt=prompt,
             enable_original_uv=enable_original_uv,
             enable_pbr=enable_pbr,
-            wait=False,
         )
-        return TaskResult(
-            task_id=task_id,
-            task_type="retexture",
-            status=TaskStatus.PENDING,
-        )
+        task_id = retexture.create(request)
+        self.logger.info(f"Created retexture task: {task_id}")
+
+        if not wait:
+            return TaskResult(
+                task_id=task_id,
+                task_type="retexture",
+                status=TaskStatus.PENDING,
+            )
+
+        # Poll with user-specified interval and timeout
+        result = retexture.poll(task_id, interval=poll_interval, timeout=timeout)
+        return self._retexture_result_to_task_result(result)
 
     def _retexture_result_to_task_result(self, result: RetextureResult) -> TaskResult:
         """Convert RetextureResult to TaskResult."""
@@ -616,9 +623,12 @@ class MeshyConnector(DirectedInputsClass):
         # Download the file
         import httpx
 
-        response = httpx.get(model_url)
-        response.raise_for_status()
-        return response.content
+        try:
+            response = httpx.get(model_url)
+            response.raise_for_status()
+            return response.content
+        except httpx.HTTPError as e:
+            raise RuntimeError(f"Failed to download model: {e}") from e
 
     def _get_model_url_for_format(self, task_result: TaskResult, format: str) -> str | None:
         """Get model URL for the specified format."""

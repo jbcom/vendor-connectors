@@ -87,9 +87,11 @@ class TestTaskResult:
 class TestMeshyConnectorTextTo3D:
     """Tests for text_to_3d method."""
 
-    @patch("vendor_connectors.meshy.text3d.generate")
-    def test_text_to_3d_blocking(self, mock_generate):
+    @patch("vendor_connectors.meshy.text3d.poll")
+    @patch("vendor_connectors.meshy.text3d.create")
+    def test_text_to_3d_blocking(self, mock_create, mock_poll):
         """Test text_to_3d with wait=True."""
+        mock_create.return_value = "task-123"
         mock_result = Text3DResult(
             id="task-123",
             status=TaskStatus.SUCCEEDED,
@@ -98,7 +100,7 @@ class TestMeshyConnectorTextTo3D:
             model_urls=ModelUrls(glb="https://example.com/model.glb"),
             thumbnail_url="https://example.com/thumb.png",
         )
-        mock_generate.return_value = mock_result
+        mock_poll.return_value = mock_result
 
         connector = MeshyConnector(api_key="test-key")
         result = connector.text_to_3d("A medieval sword", wait=True)
@@ -106,7 +108,8 @@ class TestMeshyConnectorTextTo3D:
         assert result.task_id == "task-123"
         assert result.status == TaskStatus.SUCCEEDED
         assert result.model_url == "https://example.com/model.glb"
-        mock_generate.assert_called_once()
+        mock_create.assert_called_once()
+        mock_poll.assert_called_once()
 
     @patch("vendor_connectors.meshy.text3d.create")
     def test_text_to_3d_non_blocking(self, mock_create):
@@ -124,9 +127,11 @@ class TestMeshyConnectorTextTo3D:
 class TestMeshyConnectorRigging:
     """Tests for rig_model method."""
 
-    @patch("vendor_connectors.meshy.rigging.rig")
-    def test_rig_model_blocking(self, mock_rig):
+    @patch("vendor_connectors.meshy.rigging.poll")
+    @patch("vendor_connectors.meshy.rigging.create")
+    def test_rig_model_blocking(self, mock_create, mock_poll):
         """Test rig_model with wait=True."""
+        mock_create.return_value = "rig-123"
         mock_result = RiggingResult(
             id="rig-123",
             status=TaskStatus.SUCCEEDED,
@@ -134,7 +139,7 @@ class TestMeshyConnectorRigging:
             created_at=1700000000,
             result=RiggingResultData(rigged_character_glb_url="https://example.com/rigged.glb"),
         )
-        mock_rig.return_value = mock_result
+        mock_poll.return_value = mock_result
 
         connector = MeshyConnector(api_key="test-key")
         result = connector.rig_model("model-task-123", wait=True)
@@ -142,25 +147,30 @@ class TestMeshyConnectorRigging:
         assert result.task_id == "rig-123"
         assert result.status == TaskStatus.SUCCEEDED
         assert result.model_url == "https://example.com/rigged.glb"
+        mock_create.assert_called_once()
+        mock_poll.assert_called_once()
 
-    @patch("vendor_connectors.meshy.rigging.rig")
-    def test_rig_model_non_blocking(self, mock_rig):
+    @patch("vendor_connectors.meshy.rigging.create")
+    def test_rig_model_non_blocking(self, mock_create):
         """Test rig_model with wait=False."""
-        mock_rig.return_value = "rig-456"
+        mock_create.return_value = "rig-456"
 
         connector = MeshyConnector(api_key="test-key")
         result = connector.rig_model("model-task-123", wait=False)
 
         assert result.task_id == "rig-456"
         assert result.status == TaskStatus.PENDING
+        mock_create.assert_called_once()
 
 
 class TestMeshyConnectorAnimation:
     """Tests for apply_animation method."""
 
-    @patch("vendor_connectors.meshy.animate.apply")
-    def test_apply_animation_blocking(self, mock_apply):
+    @patch("vendor_connectors.meshy.animate.poll")
+    @patch("vendor_connectors.meshy.animate.create")
+    def test_apply_animation_blocking(self, mock_create, mock_poll):
         """Test apply_animation with wait=True."""
+        mock_create.return_value = "anim-123"
         mock_result = AnimationResult(
             id="anim-123",
             status=TaskStatus.SUCCEEDED,
@@ -168,7 +178,7 @@ class TestMeshyConnectorAnimation:
             created_at=1700000000,
             animation_glb_url="https://example.com/anim.glb",
         )
-        mock_apply.return_value = mock_result
+        mock_poll.return_value = mock_result
 
         connector = MeshyConnector(api_key="test-key")
         result = connector.apply_animation("rig-123", animation_id=5, wait=True)
@@ -176,14 +186,18 @@ class TestMeshyConnectorAnimation:
         assert result.task_id == "anim-123"
         assert result.status == TaskStatus.SUCCEEDED
         assert result.model_url == "https://example.com/anim.glb"
+        mock_create.assert_called_once()
+        mock_poll.assert_called_once()
 
 
 class TestMeshyConnectorRetexture:
     """Tests for retexture_model method."""
 
-    @patch("vendor_connectors.meshy.retexture.apply")
-    def test_retexture_model_blocking(self, mock_apply):
+    @patch("vendor_connectors.meshy.retexture.poll")
+    @patch("vendor_connectors.meshy.retexture.create")
+    def test_retexture_model_blocking(self, mock_create, mock_poll):
         """Test retexture_model with wait=True."""
+        mock_create.return_value = "retex-123"
         mock_result = RetextureResult(
             id="retex-123",
             status=TaskStatus.SUCCEEDED,
@@ -191,13 +205,15 @@ class TestMeshyConnectorRetexture:
             created_at=1700000000,
             model_urls=ModelUrls(glb="https://example.com/retextured.glb"),
         )
-        mock_apply.return_value = mock_result
+        mock_poll.return_value = mock_result
 
         connector = MeshyConnector(api_key="test-key")
         result = connector.retexture_model("model-123", "golden with gems", wait=True)
 
         assert result.task_id == "retex-123"
         assert result.status == TaskStatus.SUCCEEDED
+        mock_create.assert_called_once()
+        mock_poll.assert_called_once()
 
 
 class TestMeshyConnectorGetTask:
@@ -226,7 +242,7 @@ class TestMeshyConnectorGetTask:
         connector = MeshyConnector(api_key="test-key")
 
         with pytest.raises(ValueError, match="Unknown task type"):
-            connector.get_task("task-123", task_type="unknown")
+            connector.get_task("task-123", task_type="unknown")  # type: ignore[arg-type]
 
 
 class TestMeshyConnectorDownload:
