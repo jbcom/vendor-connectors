@@ -82,7 +82,7 @@ def mock_provider():
 def mock_registry():
     """Fixture providing a fresh mock registry."""
     with patch("vendor_connectors.ai.connector.ToolRegistry") as mock_registry_class:
-        registry_instance = Mock()
+        registry_instance = MagicMock()
         registry_instance.__len__.return_value = 0
         registry_instance.get_tools.return_value = []
         registry_instance.list_names.return_value = []
