@@ -1,0 +1,121 @@
+name: Sync Mesh Animations
+
+on:
+  # Manual trigger
+  workflow_dispatch:
+    inputs:
+      force_update:
+        description: 'Force update even if no changes detected'
+        required: false
+        default: 'false'
+        type: boolean
+
+  # Trigger on PRs that change the meshy package
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/vendor_connectors/meshy/**'
+      - 'scripts/sync_animations.py'
+
+  # Scheduled sync (weekly on Sundays)
+  schedule:
+    - cron: '0 0 * * 0'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync-animations:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          # For PRs, checkout the PR branch
+          ref: ${{ github.event.pull_request.head.ref || github.ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          pip install httpx beautifulsoup4 rich
+
+      - name: Run animation sync script
+        id: sync
+        run: |
+          python scripts/sync_animations.py || true
+          
+          # Check if animations.py was updated
+          if [ -f src/vendor_connectors/meshy/animations.py ]; then
+            echo "animations_updated=true" >> $GITHUB_OUTPUT
+          else
+            echo "animations_updated=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check for changes
+        id: check_changes
+        run: |
+          git diff --quiet src/vendor_connectors/meshy/ || echo "has_changes=true" >> $GITHUB_OUTPUT
+
+      # For PR branches: commit directly to the PR
+      - name: Commit changes to PR branch
+        if: github.event_name == 'pull_request' && steps.check_changes.outputs.has_changes == 'true'
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add src/vendor_connectors/meshy/
+          git commit -m "chore(meshy): sync animation library catalog" || exit 0
+          git push
+
+      - name: Comment on PR
+        if: github.event_name == 'pull_request' && steps.check_changes.outputs.has_changes == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '🎬 **Animation Library Synced**\n\nThe Meshy animation library catalog has been updated with the latest animations from the API documentation.'
+            })
+
+      # For manual dispatch on main: create a PR
+      - name: Create PR for main branch updates
+        if: (github.event_name == 'workflow_dispatch' || github.event_name == 'schedule') && steps.check_changes.outputs.has_changes == 'true'
+        run: |
+          BRANCH_NAME="chore/sync-mesh-animations-$(date +%Y%m%d)"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git checkout -b "$BRANCH_NAME"
+          git add src/vendor_connectors/meshy/
+          git commit -m "chore(meshy): sync animation library catalog"
+          git push origin "$BRANCH_NAME"
+          
+          gh pr create \
+            --title "chore(meshy): Sync Meshy animation library" \
+            --body "## Summary
+
+          This PR updates the Meshy animation library catalog with the latest animations from the API documentation.
+
+          ## Changes
+
+          - Updated \`src/vendor_connectors/meshy/animations.py\`
+
+          ## Auto-generated
+
+          This PR was automatically created by the animation sync workflow." \
+            --base main \
+            --head "$BRANCH_NAME"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: No changes detected
+        if: steps.check_changes.outputs.has_changes != 'true'
+        run: echo "No animation library changes detected."
