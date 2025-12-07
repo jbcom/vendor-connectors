@@ -18,6 +18,8 @@ Part of vendor_connectors.ai package.
 
 from __future__ import annotations
 
+import threading
+
 from vendor_connectors.ai.base import (
     ToolCategory,
     ToolDefinition,
@@ -680,16 +682,25 @@ def _register_all_tools():
     )
 
 
-# Track if tools have been registered
+# Track if tools have been registered (protected by _tools_registration_lock)
 _tools_registered = False
+_tools_registration_lock = threading.Lock()
 
 
 def _ensure_tools_registered() -> None:
-    """Register tools on-demand to avoid import-time side effects."""
+    """Register tools on-demand to avoid import-time side effects.
+
+    Thread-safe: uses a lock to prevent multiple concurrent registrations.
+    """
     global _tools_registered
-    if not _tools_registered:
-        _register_all_tools()
-        _tools_registered = True
+    # Fast path: avoid lock if already registered
+    if _tools_registered:
+        return
+    with _tools_registration_lock:
+        # Double-check after acquiring lock
+        if not _tools_registered:
+            _register_all_tools()
+            _tools_registered = True
 
 
 def get_meshy_tools() -> list[ToolDefinition]:
