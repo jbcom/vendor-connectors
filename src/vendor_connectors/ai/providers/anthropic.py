@@ -6,7 +6,7 @@ This module provides Claude model access through LangChain.
 from __future__ import annotations
 
 import os
-from typing import Any, Optional
+from typing import Any
 
 from vendor_connectors.ai.base import AIProvider
 from vendor_connectors.ai.providers.base import BaseLLMProvider
@@ -49,8 +49,7 @@ class AnthropicProvider(BaseLLMProvider):
         api_key = self.api_key or os.environ.get("ANTHROPIC_API_KEY")
         if not api_key:
             raise ValueError(
-                "Anthropic API key is required. "
-                "Set ANTHROPIC_API_KEY environment variable or pass api_key parameter."
+                "Anthropic API key is required. Set ANTHROPIC_API_KEY environment variable or pass api_key parameter."
             )
 
         return ChatAnthropic(

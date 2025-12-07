@@ -1,39 +1,46 @@
-"""LangChain-based AI providers.
+"""LLM Provider implementations.
 
-This package contains provider implementations for:
-- Anthropic (Claude) - langchain-anthropic
-- OpenAI (GPT) - langchain-openai
-- Google (Gemini) - langchain-google-genai
-- xAI (Grok) - langchain-xai
-- Ollama (local models) - langchain-ollama
-
-Each provider implements the BaseLLMProvider interface and handles
-the conversion between our unified API and the specific LangChain integration.
-
-Status: PLACEHOLDER - Implementation blocked by PR #16
-See: docs/development/ai-subpackage-design.md
-
-Usage (after implementation):
-    from vendor_connectors.ai.providers import get_provider
-
-    # Get a specific provider
-    anthropic = get_provider("anthropic", model="claude-3-5-sonnet-latest")
-    response = anthropic.chat("Hello!")
-
-    # Or use via AIConnector (preferred)
-    from vendor_connectors.ai import AIConnector
-    ai = AIConnector(provider="openai", model="gpt-4o")
+Available providers:
+- AnthropicProvider: Claude models via langchain-anthropic
+- OpenAIProvider: GPT models via langchain-openai
+- GoogleProvider: Gemini models via langchain-google-genai
+- XAIProvider: Grok models via langchain-xai
+- OllamaProvider: Local models via langchain-ollama
 """
 
-from __future__ import annotations
+from vendor_connectors.ai.providers.base import BaseLLMProvider
 
-__all__ = [
-    # Will export:
-    # "get_provider",
-    # "list_providers",
-    # "BaseLLMProvider",
-]
+__all__ = ["BaseLLMProvider", "get_provider"]
 
-# Placeholder - actual imports will be added after PR #16 merges
-# from vendor_connectors.ai.providers.base import BaseLLMProvider
-# from vendor_connectors.ai.providers.registry import get_provider, list_providers
+# Lazy imports to avoid requiring all provider dependencies
+_PROVIDER_MAP = {
+    "anthropic": ("vendor_connectors.ai.providers.anthropic", "AnthropicProvider"),
+    "openai": ("vendor_connectors.ai.providers.openai", "OpenAIProvider"),
+    "google": ("vendor_connectors.ai.providers.google", "GoogleProvider"),
+    "xai": ("vendor_connectors.ai.providers.xai", "XAIProvider"),
+    "ollama": ("vendor_connectors.ai.providers.ollama", "OllamaProvider"),
+}
+
+
+def get_provider(name: str) -> type[BaseLLMProvider]:
+    """Get a provider class by name.
+
+    Args:
+        name: Provider name (anthropic, openai, google, xai, ollama).
+
+    Returns:
+        Provider class.
+
+    Raises:
+        ValueError: If provider name is unknown.
+        ImportError: If provider dependencies are not installed.
+    """
+    if name not in _PROVIDER_MAP:
+        raise ValueError(f"Unknown provider: {name}. Available: {', '.join(_PROVIDER_MAP.keys())}")
+
+    module_path, class_name = _PROVIDER_MAP[name]
+
+    import importlib
+
+    module = importlib.import_module(module_path)
+    return getattr(module, class_name)
