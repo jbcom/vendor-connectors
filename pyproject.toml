@@ -229,3 +229,9 @@ version_variables = ["src/vendor_connectors/__init__.py:__version__"]
 [tool.semantic_release.branches.main]
 match = "main"
 prerelease = false
+
+[dependency-groups]
+dev = [
+    "beautifulsoup4>=4.14.3",
+    "rich>=14.2.0",
+]
