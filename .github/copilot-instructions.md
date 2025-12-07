@@ -391,10 +391,14 @@ python-semantic-release will auto-bump version on merge to main.
 ## Current Direction and Open Work
 
 ### Active PRs (Review These for Context)
+**Note:** PR numbers below reflect status as of December 2025. Check current PR list for latest.
+
 - **PR #34**: Refactoring AI tooling - moving tools from central `ai/` package to individual connectors (meshy/tools.py, meshy/mcp.py). Breaking change that eliminates ~4,343 lines of abstraction.
 - **PR #19**: Preparing Meshy connector interface improvements (class-based, DirectedInputsClass pattern)
 
 ### Key Open Issues
+**Note:** Issue numbers reflect status as of December 2025. Check issue tracker for latest.
+
 - **Issue #33**: AI package restructure - each connector owns its tools (HIGH PRIORITY)
 - **Issue #18**: Add Meshy connector for 3D asset generation (in progress via PR #19)
 - **Issue #21**: Increase test coverage to 75% (currently ~47%, threshold 45%)

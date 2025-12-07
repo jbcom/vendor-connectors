@@ -18,6 +18,7 @@ context:
     - path: memory-bank/activeContext.md
       reason: Active refactor status
   
+  # Note: Issue/PR numbers verified as of Dec 2025 - check current status
   issues:
     - number: 33
       reason: Main refactor issue defining the pattern
@@ -75,20 +76,24 @@ migration_pattern:
   
   step2_create_mcp_server: |
     # In vendor_connectors/<service>/mcp.py
-    from mcp.server import Server
-    from .tools import get_tools
+    # Note: Actual MCP imports may vary - check mcp package documentation
+    # This is a conceptual example showing the pattern
     
-    def create_server() -> Server:
-        server = Server("meshy-mcp")
-        tools = get_tools()
-        # Register tools with MCP
-        for tool in tools:
-            server.add_tool(tool)
+    def create_server():
+        # Import and configure MCP server
+        # Implementation depends on mcp package version
+        from .tools import get_tools
+        
+        # Example: Create server instance
+        # server = configure_mcp_server("service-mcp")
+        # for tool in get_tools():
+        #     server.register_tool(tool)
         return server
     
     def main():
         server = create_server()
-        server.run()
+        # Start MCP server
+        # server.run()
     
     if __name__ == "__main__":
         main()

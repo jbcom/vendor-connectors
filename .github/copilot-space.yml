@@ -11,6 +11,9 @@ description: |
 # Context files to always include
 context:
   files:
+    # Note: This file and copilot-instructions.md reference each other.
+    # copilot-instructions.md is the primary reference; this file provides
+    # persistent workspace context and task automation.
     - path: memory-bank/activeContext.md
       priority: high
       description: Current development context and active work
