@@ -158,7 +158,7 @@ dev = [
 ]
 
 [project.scripts]
-meshy-mcp = "vendor_connectors.ai.providers.mcp.__main__:main"
+meshy-mcp = "vendor_connectors.meshy.mcp:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/vendor_connectors"]
