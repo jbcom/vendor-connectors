@@ -349,7 +349,7 @@ class TestSSOPermissionSets:
 
         aws_connector.get_aws_client = MagicMock(return_value=mock_sso_admin)
 
-        result = aws_connector.list_permission_sets(unhump_permission_sets=False)
+        result = aws_connector.list_permission_sets(unhump_sets=False)
 
         assert len(result) == 2
         ps1_arn = "arn:aws:sso:::permissionSet/ssoins-1234567890/ps-1"
