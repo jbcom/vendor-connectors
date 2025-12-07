@@ -26,24 +26,20 @@ context:
       reason: Active PR implementing the changes
 
 current_state: |
-  PR #34 removes the central vendor_connectors/ai/ package (~5,700 lines deleted).
-  Once merged, tools will live alongside each connector. Check PR #34 status before
-  making changes - if merged, the ai/ package no longer exists.
+  The central vendor_connectors/ai/ package is being REMOVED (PR #34). Tools now
+  live alongside each connector, eliminating unnecessary abstraction.
   
-  BEING REMOVED (when PR #34 merges):
+  REMOVED (no longer exists):
     vendor_connectors/ai/tools/meshy_tools.py
     vendor_connectors/ai/providers/
     vendor_connectors/ai/connector.py
     vendor_connectors/ai/workflows/
     
-  NEW PATTERN (after PR #34):
+  CURRENT PATTERN:
     vendor_connectors/meshy/tools.py      # LangChain StructuredTools
     vendor_connectors/meshy/mcp.py        # MCP server
     vendor_connectors/<service>/tools.py  # Pattern for other connectors
     vendor_connectors/<service>/mcp.py    # MCP server per connector
-  
-  CHECK FIRST: Run `GH_TOKEN="$GITHUB_JBCOM_TOKEN" gh pr view 34 --repo jbcom/vendor-connectors --json state`
-  to verify if PR #34 is merged before assuming ai/ exists or doesn't exist.
 
 guidelines:
   - "NEW tools should live WITH their connector (e.g., meshy/agent_tools/)"
