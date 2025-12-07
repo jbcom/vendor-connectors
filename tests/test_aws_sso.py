@@ -234,8 +234,11 @@ class TestSSOGroups:
                 {"GroupId": "group-2", "DisplayName": "Users"},
             ]
         }
-        # Mock list_group_memberships to prevent infinite loops
-        mock_identitystore.list_group_memberships.return_value = {"GroupMemberships": []}
+        # Mock list_group_memberships to simulate paginated responses and test loop termination
+        mock_identitystore.list_group_memberships.side_effect = [
+            {"GroupMemberships": [{"GroupId": "group-1", "MemberId": {"UserId": "user-1"}}], "NextToken": "token-1"},
+            {"GroupMemberships": []}
+        ]
 
         def get_client(client_name, **kwargs):
             if client_name == "identitystore":
