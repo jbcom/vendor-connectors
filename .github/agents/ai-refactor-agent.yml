@@ -45,12 +45,12 @@ current_state: |
   should follow the decentralized pattern while ai/ remains for backwards compatibility.
 
 guidelines:
-  - "Tools live WITH their connector, not in a central ai/ package"
+  - "NEW tools should live WITH their connector (e.g., meshy/agent_tools/)"
+  - "EXISTING ai/ package remains supported for backwards compatibility"
   - "Each connector provides 3 interfaces: Python API, LangChain tools, MCP server"
-  - "No wrapper classes (AIConnector, BaseLLMProvider) - users use LangChain directly"
   - "LangChain StructuredTool is the standard - works with LangChain, CrewAI, LangGraph"
-  - "Entry points in pyproject.toml: <service>-mcp = vendor_connectors.<service>.mcp:main"
-  - "Remove ai/ package entirely once all connectors migrated"
+  - "Entry points in pyproject.toml: <service>-mcp = vendor_connectors.<service>.agent_tools.mcp.__main__:main"
+  - "AIConnector and providers in ai/ are valid for users who want unified multi-provider access"
 
 migration_pattern:
   step1_create_tools_file: |
