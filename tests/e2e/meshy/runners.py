@@ -41,10 +41,6 @@ class BaseRunner(ABC):
 
     framework_name: str = "base"
 
-    def __init__(self):
-        """Initialize the runner."""
-        pass
-
     @abstractmethod
     def create_agent(self, tools: list) -> Any:
         """Create an agent with the given tools."""
@@ -93,10 +89,7 @@ class BaseRunner(ABC):
         agent = self.create_agent(tools)
 
         # Build the prompt for the agent
-        agent_prompt = (
-            f"Generate a 3D model using text3d_generate. "
-            f"Use prompt='{prompt}' and art_style='{art_style}'."
-        )
+        agent_prompt = f"Generate a 3D model using text3d_generate. Use prompt='{prompt}' and art_style='{art_style}'."
 
         # Invoke agent - this waits for completion
         raw_result = self.invoke_agent(agent, agent_prompt)
@@ -135,8 +128,9 @@ class BaseRunner(ABC):
         """Extract model_url and task_id from a string."""
         result = {}
 
-        # Try to find GLB URL
-        url_match = re.search(r'https://[^\s"\'<>]+\.glb', text)
+        # Try to find GLB URL (including query params for signed URLs)
+        # Match URLs that end with .glb or have .glb followed by query params
+        url_match = re.search(r'https://[^\s"\'<>]+\.glb(?:\?[^\s"\'<>]+)?', text)
         if url_match:
             result["model_url"] = url_match.group(0)
 
@@ -164,7 +158,6 @@ class LangChainRunner(BaseRunner):
     framework_name = "langchain"
 
     def __init__(self, model: str = "claude-haiku-4-5-20251001"):
-        super().__init__()
         self.model = model
 
     def create_agent(self, tools: list) -> Any:
@@ -208,7 +201,6 @@ class CrewAIRunner(BaseRunner):
     framework_name = "crewai"
 
     def __init__(self, model: str = "anthropic/claude-haiku-4-5-20251001"):
-        super().__init__()
         self.model = model
 
     def create_agent(self, tools: list) -> Any:
@@ -250,9 +242,6 @@ class StrandsRunner(BaseRunner):
     """Runner for AWS Strands agents."""
 
     framework_name = "strands"
-
-    def __init__(self):
-        super().__init__()
 
     def create_agent(self, tools: list) -> Any:
         """Create a Strands agent with tool functions."""
