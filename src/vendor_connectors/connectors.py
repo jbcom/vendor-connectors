@@ -12,6 +12,7 @@ from lifecyclelogging import Logging
 from vendor_connectors.aws import AWSConnector
 from vendor_connectors.github import GithubConnector
 from vendor_connectors.google import GoogleConnector
+from vendor_connectors.meshy import MeshyConnector
 from vendor_connectors.slack import SlackConnector
 from vendor_connectors.vault import VaultConnector
 from vendor_connectors.zoom import ZoomConnector
@@ -417,4 +418,34 @@ class VendorConnectors(DirectedInputsClass):
             client_secret=client_secret,
             account_id=account_id,
         )
+        return connector
+
+    # -------------------------------------------------------------------------
+    # Meshy AI
+    # -------------------------------------------------------------------------
+
+    def get_meshy_client(
+        self,
+        api_key: Optional[str] = None,
+    ) -> MeshyConnector:
+        """Get a cached MeshyConnector instance.
+
+        Args:
+            api_key: Meshy API key. Defaults to MESHY_API_KEY env var.
+
+        Returns:
+            MeshyConnector instance for 3D asset generation.
+        """
+        api_key = api_key or self.get_input("MESHY_API_KEY", required=False)
+
+        cached = self._get_cached_client("meshy", api_key=api_key)
+        if cached:
+            return cached
+
+        connector = MeshyConnector(
+            api_key=api_key,
+            logger=self.logging,
+            inputs=self.inputs,
+        )
+        self._set_cached_client("meshy", connector, api_key=api_key)
         return connector
