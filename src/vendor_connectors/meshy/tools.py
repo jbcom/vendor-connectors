@@ -78,7 +78,7 @@ def _extract_result_fields(result: object) -> dict[str, object]:
 
 def text3d_generate(
     prompt: str,
-    art_style: str = "sculpture",
+    art_style: str = "realistic",
     negative_prompt: str = "",
     target_polycount: int = 15000,
     enable_pbr: bool = True,
@@ -87,7 +87,7 @@ def text3d_generate(
 
     Args:
         prompt: Detailed text description of the 3D model
-        art_style: One of: realistic, sculpture, cartoon, low-poly
+        art_style: One of: realistic, cartoon, low-poly, sculpt, pbr
         negative_prompt: Things to avoid in the generation
         target_polycount: Target polygon count
         enable_pbr: Enable PBR materials

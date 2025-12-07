@@ -82,8 +82,8 @@ def _create_mcp_tools() -> list[Any]:
                 "art_style": {
                     "type": "string",
                     "description": "Art style for the model",
-                    "enum": ["realistic", "sculpture", "cartoon", "low-poly"],
-                    "default": "sculpture",
+                    "enum": ["realistic", "cartoon", "low-poly", "sculpt", "pbr"],
+                    "default": "realistic",
                 },
                 "negative_prompt": {"type": "string", "description": "Things to avoid in the generation", "default": ""},
                 "target_polycount": {
