@@ -85,7 +85,7 @@ def _create_mcp_tools() -> list[Any]:
                 },
                 "art_style": {
                     "type": "string",
-                    "description": "Art style: realistic or sculpture (sculpture disables PBR)",
+                    "description": "Art style: realistic or sculpture (for sculpture, PBR is not recommended)",
                     "enum": ["realistic", "sculpture"],
                     "default": "realistic",
                 },

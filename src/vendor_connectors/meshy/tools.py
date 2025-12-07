@@ -87,7 +87,7 @@ def text3d_generate(
 
     Args:
         prompt: Detailed text description of the 3D model (max 600 chars)
-        art_style: One of: realistic, sculpture (sculpture disables PBR)
+        art_style: One of: realistic, sculpture. For 'sculpture', it is recommended to disable PBR (set enable_pbr=False), but this is not enforced.
         negative_prompt: Things to avoid in the generation
         target_polycount: Target polygon count
         enable_pbr: Enable PBR materials

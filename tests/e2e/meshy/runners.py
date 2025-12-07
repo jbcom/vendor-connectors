@@ -204,12 +204,22 @@ class CrewAIRunner(BaseRunner):
         self.model = model
 
     def create_agent(self, tools: list) -> Any:
-        """Create a CrewAI agent with tools."""
-        from crewai import Agent
-        from crewai.tools.structured_tool import CrewStructuredTool
+        """Create a CrewAI agent with tools.
 
-        # Convert LangChain tools to CrewAI tools
-        crewai_tools = [CrewStructuredTool.from_langchain(t) for t in tools]
+        CrewAI requires tools that inherit from BaseTool. We use the @tool
+        decorator to wrap our functions.
+        """
+        from crewai import Agent
+        from crewai.tools import tool as crewai_tool
+
+        # Convert LangChain tools to CrewAI tools using the @tool decorator
+        crewai_tools = []
+        for t in tools:
+            # Create a CrewAI tool by applying the decorator to the function
+            wrapped = crewai_tool(t.name)(t.func)
+            # Update the description
+            wrapped.description = t.description
+            crewai_tools.append(wrapped)
 
         return Agent(
             role="3D Artist",

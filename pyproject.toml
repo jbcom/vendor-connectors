@@ -50,7 +50,7 @@ dependencies = [
     "deepmerge>=1.1.0",
     "filelock>=3.13.0",
     "more-itertools>=10.0.0",
-    # AI tools - LangChain core for tool definitions (REQUIRED)
+    # AI tools - LangChain core for tool definitions (REQUIRED - We provide tools, users choose LLM providers)
     "langchain-core>=0.3.0",
 ]
 

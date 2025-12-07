@@ -21,7 +21,7 @@ class ArtStyle(str, Enum):
 
     Per Meshy API docs:
     - realistic: Realistic style
-    - sculpture: Sculpture style (enable_pbr should be false)
+    - sculpture: Sculpture style (PBR not recommended but not enforced)
     """
 
     REALISTIC = "realistic"
