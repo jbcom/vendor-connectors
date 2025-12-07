@@ -34,9 +34,6 @@ pip install vendor-connectors
 # For Meshy webhooks
 pip install vendor-connectors[webhooks]
 
-# For Meshy AI tools (LangChain)
-pip install vendor-connectors[meshy-langchain]
-
 # For Meshy AI tools (CrewAI)
 pip install vendor-connectors[meshy-crewai]
 
@@ -52,6 +49,8 @@ pip install vendor-connectors[vector]
 # Everything
 pip install vendor-connectors[all]
 ```
+
+> **Note**: `langchain-core` is now a required dependency for all installations. This package provides LangChain tools - you bring your own LLM provider (Anthropic, OpenAI, etc.).
 
 ## Usage
 

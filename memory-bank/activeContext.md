@@ -20,12 +20,13 @@ Universal vendor connectors for cloud providers and third-party services.
 
 ### Optional Extras
 - `webhooks`: Meshy webhooks support
-- `meshy-langchain`: LangChain tools for Meshy
 - `meshy-crewai`: CrewAI tools for Meshy
 - `meshy-mcp`: MCP server for Meshy
 - `meshy-ai`: All Meshy AI integrations
 - `vector`: Vector store for RAG
 - `all`: Everything
+
+**Note**: `langchain-core` is a required dependency. We provide TOOLS, you choose your LLM provider.
 
 ### Development
 ```bash
@@ -87,8 +88,8 @@ run_server(server)
 
 ### Installation
 ```bash
-# LangChain tools
-pip install vendor-connectors[meshy-langchain]
+# Base installation includes langchain-core (required for tools)
+pip install vendor-connectors
 
 # CrewAI tools
 pip install vendor-connectors[meshy-crewai]
@@ -98,6 +99,15 @@ pip install vendor-connectors[meshy-mcp]
 
 # All AI integrations
 pip install vendor-connectors[meshy-ai]
+```
+
+**Important**: This package provides TOOLS only. You choose and install your LLM provider separately:
+```bash
+# Choose your LLM provider (not included)
+pip install langchain-anthropic  # For Claude
+pip install langchain-openai     # For GPT
+pip install langchain-google-genai  # For Gemini
+# etc.
 ```
 
 ---

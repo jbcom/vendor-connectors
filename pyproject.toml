@@ -50,6 +50,8 @@ dependencies = [
     "deepmerge>=1.1.0",
     "filelock>=3.13.0",
     "more-itertools>=10.0.0",
+    # AI tools - LangChain core for tool definitions (REQUIRED)
+    "langchain-core>=0.3.0",
 ]
 
 [project.urls]
@@ -76,10 +78,6 @@ vector = [
     "sqlite-vec>=0.1.0",
     "sentence-transformers>=3.0.0",
 ]
-# Meshy AI tools - LangChain integration
-meshy-langchain = [
-    "langchain-core>=0.3.0",
-]
 # Meshy AI tools - CrewAI integration
 meshy-crewai = [
     "crewai[tools]>=1.5.0",
@@ -90,7 +88,6 @@ meshy-mcp = [
 ]
 # All Meshy AI integrations
 meshy-ai = [
-    "langchain-core>=0.3.0",
     "crewai[tools]>=1.5.0",
     "mcp>=1.0.0",
 ]
@@ -103,7 +100,6 @@ all = [
     "pyngrok>=7.2.2",
     "sqlite-vec>=0.1.0",
     "sentence-transformers>=3.0.0",
-    "langchain-core>=0.3.0",
 ]
 dev = [
     "pytest>=8.0.0",

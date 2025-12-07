@@ -359,17 +359,8 @@ def get_tools() -> list[StructuredTool]:
 
     Returns:
         List of LangChain StructuredTool objects for Meshy operations.
-
-    Raises:
-        ImportError: If langchain-core is not installed.
     """
-    try:
-        from langchain_core.tools import StructuredTool
-    except ImportError as e:
-        raise ImportError(
-            "langchain-core is required for LangChain tools. "
-            "Install with: pip install vendor-connectors[ai]"
-        ) from e
+    from langchain_core.tools import StructuredTool
 
     return [
         StructuredTool.from_function(
@@ -454,7 +445,7 @@ def get_crewai_tools() -> list[Any]:
         from crewai_tools import tool
     except ImportError as e:
         raise ImportError(
-            "crewai is required for CrewAI tools. " "Install with: pip install vendor-connectors[crewai]"
+            "crewai is required for CrewAI tools. " "Install with: pip install vendor-connectors[meshy-crewai]"
         ) from e
 
     # CrewAI uses the @tool decorator to wrap functions

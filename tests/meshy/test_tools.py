@@ -8,51 +8,38 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 
+# Expected tools list - canonical reference for all Meshy tools
+EXPECTED_MESHY_TOOLS = {
+    "text3d_generate",
+    "image3d_generate",
+    "rig_model",
+    "apply_animation",
+    "retexture_model",
+    "list_animations",
+    "check_task_status",
+    "get_animation",
+}
+
+
 class TestMeshyTools:
     """Tests for Meshy LangChain tools."""
 
     def test_get_tools_returns_list(self):
         """Test that get_tools returns a list."""
-        pytest.importorskip("langchain_core")
         from vendor_connectors.meshy.tools import get_tools
 
         tools = get_tools()
         assert isinstance(tools, list)
-        assert len(tools) == 8  # Should have 8 tools
-
-    def test_get_tools_requires_langchain(self):
-        """Test that get_tools raises ImportError without langchain-core."""
-        with patch.dict("sys.modules", {"langchain_core": None, "langchain_core.tools": None}):
-            from vendor_connectors.meshy import tools as meshy_tools
-
-            # Reload to clear imports
-            import importlib
-
-            importlib.reload(meshy_tools)
-
-            with pytest.raises(ImportError, match="langchain-core is required"):
-                meshy_tools.get_tools()
+        assert len(tools) == len(EXPECTED_MESHY_TOOLS)  # Should match expected count
 
     def test_expected_tools_exist(self):
         """Test that all expected tools are present."""
-        pytest.importorskip("langchain_core")
         from vendor_connectors.meshy.tools import get_tools
 
         tools = get_tools()
         tool_names = {t.name for t in tools}
 
-        expected_tools = {
-            "text3d_generate",
-            "image3d_generate",
-            "rig_model",
-            "apply_animation",
-            "retexture_model",
-            "list_animations",
-            "check_task_status",
-            "get_animation",
-        }
-
-        assert tool_names == expected_tools
+        assert tool_names == EXPECTED_MESHY_TOOLS
 
 
 class TestText3DGenerate:
