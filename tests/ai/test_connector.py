@@ -1,4 +1,3 @@
-```python
 """Tests for AIConnector - Unified AI interface."""
 
 from __future__ import annotations
@@ -452,4 +451,3 @@ class TestAIConnectorInvoke:
         mock_registry.get_tools.return_value = [tool_def]
 
         mock_lc_tool = Mock()
-        mock
