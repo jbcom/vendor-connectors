@@ -80,14 +80,14 @@ def text3d_generate(
     prompt: str,
     art_style: str = "realistic",
     negative_prompt: str = "",
-    target_polycount: int = 15000,
+    target_polycount: int = 30000,
     enable_pbr: bool = True,
 ) -> dict[str, Any]:
     """Generate a 3D model from text description.
 
     Args:
-        prompt: Detailed text description of the 3D model
-        art_style: One of: realistic, cartoon, low-poly, sculpt, pbr
+        prompt: Detailed text description of the 3D model (max 600 chars)
+        art_style: One of: realistic, sculpture (sculpture disables PBR)
         negative_prompt: Things to avoid in the generation
         target_polycount: Target polygon count
         enable_pbr: Enable PBR materials

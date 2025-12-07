@@ -81,8 +81,8 @@ def _create_mcp_tools() -> list[Any]:
                 "prompt": {"type": "string", "description": "Detailed text description of the 3D model", "required": True},
                 "art_style": {
                     "type": "string",
-                    "description": "Art style for the model",
-                    "enum": ["realistic", "cartoon", "low-poly", "sculpt", "pbr"],
+                    "description": "Art style: realistic or sculpture (sculpture disables PBR)",
+                    "enum": ["realistic", "sculpture"],
                     "default": "realistic",
                 },
                 "negative_prompt": {"type": "string", "description": "Things to avoid in the generation", "default": ""},

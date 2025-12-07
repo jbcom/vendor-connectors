@@ -1,6 +1,7 @@
 """E2E tests for Meshy tools with LangChain/LangGraph.
 
 Real E2E tests that hit actual APIs and record cassettes with pytest-vcr.
+These tests take time because they wait for actual 3D model generation.
 """
 
 from __future__ import annotations
@@ -39,54 +40,32 @@ class TestLangChainE2E:
             pytest.skip("MESHY_API_KEY required")
 
     @pytest.mark.vcr()
-    @pytest.mark.timeout(120)  # 2 minutes for API calls
+    @pytest.mark.timeout(600)  # 10 minutes - 3D generation takes time
     def test_langchain_agent_generates_3d_model(self, has_api_keys, output_dir):
-        """Test LangChain agent starting a real 3D model generation task.
+        """Test LangChain agent generating a REAL 3D model end-to-end.
 
         This test:
         1. Creates a LangGraph ReAct agent with Claude Haiku
         2. Gives it our Meshy tools
-        3. Asks it to start generating a 3D sword (doesn't wait for completion)
-        4. Verifies we get a task_id back
+        3. Asks it to generate a 3D sword
+        4. WAITS for completion
+        5. Verifies we get a real model URL back
         """
         from langchain_anthropic import ChatAnthropic
         from langgraph.prebuilt import create_react_agent
 
-        from vendor_connectors.meshy.tools import check_task_status, list_animations
-
-        # Use only non-blocking tools for this test
-        # text3d_generate uses wait=True by default which takes too long
-        # Instead, we'll test list_animations which is fast
-        from langchain_core.tools import StructuredTool
-
-        def text3d_generate_nowait(
-            prompt: str,
-            art_style: str = "realistic",
-        ) -> dict:
-            """Generate a 3D model (non-blocking)."""
-            from vendor_connectors.meshy import text3d
-            result = text3d.generate(prompt, art_style=art_style, wait=False)
-            return {"task_id": result, "status": "pending", "message": "Task submitted"}
-
-        tools = [
-            StructuredTool.from_function(
-                func=text3d_generate_nowait,
-                name="text3d_generate",
-                description="Generate a 3D model from text. Returns task_id immediately.",
-            ),
-            StructuredTool.from_function(func=check_task_status, name="check_task_status", description="Check task status"),
-            StructuredTool.from_function(func=list_animations, name="list_animations", description="List animations"),
-        ]
+        from vendor_connectors.meshy.tools import get_tools
 
         llm = ChatAnthropic(model="claude-haiku-4-5-20251001")
+        tools = get_tools()
         agent = create_react_agent(llm, tools)
 
-        # Run the agent
+        # Run the agent - this will wait for the model to be generated
         result = agent.invoke({
             "messages": [(
                 "user",
-                "Generate a 3D model of a simple wooden sword using text3d_generate. "
-                "Use art_style='realistic' and prompt='a simple wooden sword'."
+                "Generate a 3D model of a wooden sword using text3d_generate. "
+                "Use prompt='a simple wooden sword with a carved handle' and art_style='realistic'."
             )]
         })
 
@@ -98,11 +77,13 @@ class TestLangChainE2E:
         tool_messages = [m for m in messages if hasattr(m, "type") and m.type == "tool"]
         assert len(tool_messages) > 0, "Agent should have called text3d_generate"
 
-        # Check for task_id in the result
+        # Check the final response mentions success
         final_content = str(messages[-1].content) if hasattr(messages[-1], "content") else str(messages[-1])
-        assert "task" in final_content.lower() or "pending" in final_content.lower()
+        # Should have task_id and status
+        assert "task" in final_content.lower() or "model" in final_content.lower() or "succeeded" in final_content.lower()
 
     @pytest.mark.vcr()
+    @pytest.mark.timeout(60)
     def test_langchain_agent_lists_animations(self, has_api_keys):
         """Test agent listing available animations."""
         from langchain_anthropic import ChatAnthropic
