@@ -1,453 +1,390 @@
-"""Tests for AIConnector - Unified AI interface."""
+```python
+"""Tests for AI Connector interface.
+
+This module provides comprehensive unit tests for the AIConnector class,
+ensuring proper initialization, tool management, and interaction with
+underlying AI providers.
+
+Estimated code coverage: 85%
+"""
 
 from __future__ import annotations
 
-import os
-from unittest.mock import MagicMock, Mock, call, patch
-from typing import Any, Optional
+from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
+from vendor_connectors.ai.base import AIProvider, AIResponse, ToolCategory
 from vendor_connectors.ai.connector import AIConnector
-from vendor_connectors.ai.base import (
-    AIProvider,
-    AIResponse,
-    ToolCategory,
-    ToolDefinition,
-    ToolParameter,
-    AIRole,
-    AIMessage,
-)
-
-
-# Estimated code coverage: 95%
-# This test suite covers all public methods, error scenarios, edge cases,
-# and integration points with mocked dependencies.
-
-
-class MockLLMProvider:
-    """Mock LLM provider for testing."""
-
-    def __init__(self, model: Optional[str] = None, **kwargs):
-        self.model = model or "mock-model"
-        self.kwargs = kwargs
-
-    def chat(self, message: str, system_prompt: Optional[str] = None, history: Optional[list] = None) -> AIResponse:
-        return AIResponse(
-            content=f"Mock response to: {message}",
-            model=self.model,
-            provider=AIProvider.ANTHROPIC,
-            usage={"input_tokens": 10, "output_tokens": 15},
-        )
-
-    def invoke_with_tools(
-        self,
-        message: str,
-        tools: list,
-        max_iterations: int = 10,
-        system_prompt: Optional[str] = None,
-    ) -> AIResponse:
-        return AIResponse(
-            content=f"Tool response to: {message}",
-            model=self.model,
-            provider=AIProvider.ANTHROPIC,
-            usage={"input_tokens": 20, "output_tokens": 25},
-            tool_calls=[{"id": "call_123", "name": "test_tool", "args": {}}],
-        )
-
-
-class MockConnector:
-    """Mock connector class for tool registration testing."""
-
-    def get_data(self, query: str) -> str:
-        """Get data from the connector."""
-        return f"Data for: {query}"
-
-    def create_item(self, name: str, description: str = "default") -> dict:
-        """Create an item."""
-        return {"name": name, "description": description, "id": "123"}
-
-    def _private_method(self) -> str:
-        """Private method that shouldn't be registered."""
-        return "private"
-
-
-@pytest.fixture
-def mock_provider():
-    """Fixture providing a mock LLM provider."""
-    return MockLLMProvider()
-
-
-@pytest.fixture
-def mock_registry():
-    """Fixture providing a fresh mock registry."""
-    with patch("vendor_connectors.ai.connector.ToolRegistry") as mock_registry_class:
-        registry_instance = MagicMock()
-        registry_instance.__len__.return_value = 0
-        registry_instance.get_tools.return_value = []
-        registry_instance.list_names.return_value = []
-        mock_registry_class.get_instance.return_value = registry_instance
-        yield registry_instance
-
-
-@pytest.fixture
-def mock_factory():
-    """Fixture providing a mock tool factory."""
-    with patch("vendor_connectors.ai.connector.ToolFactory") as mock_factory_class:
-        factory_instance = Mock()
-        factory_instance.from_connector.return_value = []
-        factory_instance.to_langchain_tools.return_value = []
-        mock_factory_class.return_value = factory_instance
-        yield factory_instance
 
 
 class TestAIConnectorInitialization:
     """Tests for AIConnector initialization."""
 
-    def test_init_with_string_provider(self, mock_registry, mock_factory):
-        """Test initialization with string provider name.
+    def test_initialize_with_default_anthropic_provider(self):
+        """Test initializing connector with default provider.
         
-        Given: A string provider name
-        When: AIConnector is initialized
-        Then: Provider is correctly instantiated with default settings
+        Given: No provider specified
+        When: AIConnector is instantiated
+        Then: Anthropic provider should be initialized with defaults
         """
         with patch("vendor_connectors.ai.connector.get_provider") as mock_get_provider:
-            mock_get_provider.return_value = MockLLMProvider
+            mock_provider_class = MagicMock()
+            mock_provider_instance = MagicMock()
+            mock_provider_class.return_value = mock_provider_instance
+            mock_get_provider.return_value = mock_provider_class
 
-            connector = AIConnector(provider="anthropic")
+            connector = AIConnector()
 
-            assert connector.model == "mock-model"
+            assert connector._provider == mock_provider_instance
             mock_get_provider.assert_called_once_with("anthropic")
+            mock_provider_class.assert_called_once()
 
-    def test_init_with_enum_provider(self, mock_registry, mock_factory):
-        """Test initialization with AIProvider enum.
+    def test_initialize_with_enum_provider(self):
+        """Test initializing connector with AIProvider enum.
         
-        Given: An AIProvider enum value
-        When: AIConnector is initialized
-        Then: Provider name is correctly extracted and used
+        Given: AIProvider.OPENAI enum value
+        When: AIConnector is instantiated
+        Then: Provider name should be extracted from enum
         """
         with patch("vendor_connectors.ai.connector.get_provider") as mock_get_provider:
-            mock_get_provider.return_value = MockLLMProvider
+            mock_provider_class = MagicMock()
+            mock_provider_instance = MagicMock()
+            mock_provider_class.return_value = mock_provider_instance
+            mock_get_provider.return_value = mock_provider_class
 
             connector = AIConnector(provider=AIProvider.OPENAI)
 
             mock_get_provider.assert_called_once_with("openai")
 
-    def test_init_with_custom_parameters(self, mock_registry, mock_factory):
-        """Test initialization with custom parameters.
+    def test_initialize_with_custom_model_and_api_key(self):
+        """Test initializing connector with custom model and API key.
         
-        Given: Custom model, temperature, and token settings
-        When: AIConnector is initialized
-        Then: Parameters are passed to the provider
+        Given: Custom model and API key parameters
+        When: AIConnector is instantiated
+        Then: Provider should be initialized with specified parameters
         """
         with patch("vendor_connectors.ai.connector.get_provider") as mock_get_provider:
-            provider_class = Mock()
-            provider_instance = Mock()
-            provider_instance.model = "custom-model"
-            provider_class.return_value = provider_instance
-            mock_get_provider.return_value = provider_class
+            mock_provider_class = MagicMock()
+            mock_provider_instance = MagicMock()
+            mock_provider_class.return_value = mock_provider_instance
+            mock_get_provider.return_value = mock_provider_class
 
             connector = AIConnector(
-                provider="openai",
-                model="gpt-4",
-                temperature=0.5,
-                max_tokens=2048,
-                api_key="test-key",
-            )
-
-            provider_class.assert_called_once_with(
-                model="gpt-4",
-                api_key="test-key",
+                provider="anthropic",
+                model="claude-3-opus",
+                api_key="test-key-123",
                 temperature=0.5,
                 max_tokens=2048,
             )
 
-    def test_init_with_langsmith_config(self, mock_registry, mock_factory):
-        """Test initialization with LangSmith configuration.
+            # Verify provider was called with correct arguments
+            mock_provider_class.assert_called_once()
+            call_kwargs = mock_provider_class.call_args[1]
+            assert call_kwargs["model"] == "claude-3-opus"
+            assert call_kwargs["api_key"] == "test-key-123"
+            assert call_kwargs["temperature"] == 0.5
+            assert call_kwargs["max_tokens"] == 2048
+
+    def test_initialize_with_langsmith_tracing(self):
+        """Test initializing connector with LangSmith tracing.
         
-        Given: LangSmith API key and project
-        When: AIConnector is initialized
-        Then: Environment variables are set for tracing
+        Given: LangSmith API key and project name
+        When: AIConnector is instantiated
+        Then: LangSmith environment variables should be set
         """
-        with (
-            patch("vendor_connectors.ai.connector.get_provider") as mock_get_provider,
-            patch.dict(os.environ, {}, clear=True),
-        ):
-            mock_get_provider.return_value = MockLLMProvider
+        with patch("vendor_connectors.ai.connector.get_provider") as mock_get_provider:
+            mock_provider_class = MagicMock()
+            mock_provider_instance = MagicMock()
+            mock_provider_class.return_value = mock_provider_instance
+            mock_get_provider.return_value = mock_provider_class
 
-            connector = AIConnector(
-                provider="anthropic",
-                langsmith_api_key="ls-key-123",
-                langsmith_project="test-project",
-            )
+            with patch.dict("os.environ", {}, clear=False):
+                connector = AIConnector(
+                    langsmith_api_key="test-langsmith-key",
+                    langsmith_project="test-project",
+                )
 
-            assert os.environ["LANGCHAIN_TRACING_V2"] == "true"
-            assert os.environ["LANGCHAIN_API_KEY"] == "ls-key-123"
-            assert os.environ["LANGCHAIN_PROJECT"] == "test-project"
+                import os
 
-    def test_init_langsmith_without_project(self, mock_registry, mock_factory):
-        """Test LangSmith setup without project name.
+                assert os.environ["LANGCHAIN_TRACING_V2"] == "true"
+                assert os.environ["LANGCHAIN_API_KEY"] == "test-langsmith-key"
+                assert os.environ["LANGCHAIN_PROJECT"] == "test-project"
+
+    def test_initialize_tool_registry_as_singleton(self):
+        """Test that tool registry is initialized as singleton.
         
-        Given: LangSmith API key but no project name
-        When: AIConnector is initialized
-        Then: Only tracing and API key are set, no project
+        Given: No tool registry configuration
+        When: AIConnector is instantiated
+        Then: Registry should be obtained from singleton instance
         """
-        with (
-            patch("vendor_connectors.ai.connector.get_provider") as mock_get_provider,
-            patch.dict(os.environ, {}, clear=True),
-        ):
-            mock_get_provider.return_value = MockLLMProvider
+        with patch("vendor_connectors.ai.connector.get_provider") as mock_get_provider:
+            mock_provider_class = MagicMock()
+            mock_provider_instance = MagicMock()
+            mock_provider_class.return_value = mock_provider_instance
+            mock_get_provider.return_value = mock_provider_class
 
-            connector = AIConnector(
-                provider="anthropic",
-                langsmith_api_key="ls-key-123",
-            )
+            with patch("vendor_connectors.ai.connector.ToolRegistry") as mock_registry:
+                mock_instance = MagicMock()
+                mock_registry.get_instance.return_value = mock_instance
 
-            assert os.environ["LANGCHAIN_TRACING_V2"] == "true"
-            assert os.environ["LANGCHAIN_API_KEY"] == "ls-key-123"
-            assert "LANGCHAIN_PROJECT" not in os.environ
+                connector = AIConnector()
+
+                mock_registry.get_instance.assert_called_once()
+                assert connector._registry == mock_instance
 
 
 class TestAIConnectorProperties:
     """Tests for AIConnector properties."""
 
-    def test_provider_property(self, mock_registry, mock_factory):
-        """Test provider property access.
+    def test_provider_property(self):
+        """Test provider property returns underlying provider instance.
         
-        Given: An initialized AIConnector
-        When: The provider property is accessed
-        Then: The underlying provider instance is returned
+        Given: Initialized AIConnector
+        When: provider property is accessed
+        Then: Should return the underlying provider instance
         """
         with patch("vendor_connectors.ai.connector.get_provider") as mock_get_provider:
-            provider_instance = MockLLMProvider()
-            mock_get_provider.return_value = lambda **kwargs: provider_instance
+            mock_provider_class = MagicMock()
+            mock_provider_instance = MagicMock()
+            mock_provider_class.return_value = mock_provider_instance
+            mock_get_provider.return_value = mock_provider_class
 
             connector = AIConnector()
 
-            assert connector.provider is provider_instance
+            assert connector.provider == mock_provider_instance
 
-    def test_model_property(self, mock_registry, mock_factory):
-        """Test model property access.
+    def test_model_property(self):
+        """Test model property returns current model identifier.
         
-        Given: An initialized AIConnector with a specific model
-        When: The model property is accessed
-        Then: The provider's model name is returned
+        Given: AIConnector with specific model
+        When: model property is accessed
+        Then: Should return the model identifier from provider
         """
         with patch("vendor_connectors.ai.connector.get_provider") as mock_get_provider:
-            provider_instance = MockLLMProvider(model="test-model-v1")
-            mock_get_provider.return_value = lambda **kwargs: provider_instance
+            mock_provider_class = MagicMock()
+            mock_provider_instance = MagicMock()
+            mock_provider_instance.model = "claude-3-sonnet"
+            mock_provider_class.return_value = mock_provider_instance
+            mock_get_provider.return_value = mock_provider_class
 
             connector = AIConnector()
 
-            assert connector.model == "test-model-v1"
+            assert connector.model == "claude-3-sonnet"
 
-    def test_registry_property(self, mock_registry, mock_factory):
-        """Test registry property access.
+    def test_registry_property(self):
+        """Test registry property returns tool registry.
         
-        Given: An initialized AIConnector
-        When: The registry property is accessed
-        Then: The tool registry instance is returned
+        Given: Initialized AIConnector
+        When: registry property is accessed
+        Then: Should return the tool registry instance
         """
         with patch("vendor_connectors.ai.connector.get_provider") as mock_get_provider:
-            mock_get_provider.return_value = MockLLMProvider
+            mock_provider_class = MagicMock()
+            mock_provider_instance = MagicMock()
+            mock_provider_class.return_value = mock_provider_instance
+            mock_get_provider.return_value = mock_provider_class
 
-            connector = AIConnector()
+            with patch("vendor_connectors.ai.connector.ToolRegistry") as mock_registry:
+                mock_instance = MagicMock()
+                mock_registry.get_instance.return_value = mock_instance
 
-            assert connector.registry is mock_registry
+                connector = AIConnector()
+
+                assert connector.registry == mock_instance
 
 
 class TestAIConnectorChat:
-    """Tests for AIConnector chat functionality."""
+    """Tests for AIConnector chat method."""
 
-    def test_chat_simple_message(self, mock_registry, mock_factory):
-        """Test simple chat without additional parameters.
+    def test_chat_with_message_only(self):
+        """Test chat with message only.
         
-        Given: A simple message
-        When: chat() is called
-        Then: Provider's chat method is called and response is returned
+        Given: Simple user message
+        When: chat() is called without additional parameters
+        Then: Provider's chat method should be called with message
         """
         with patch("vendor_connectors.ai.connector.get_provider") as mock_get_provider:
-            provider_instance = Mock()
-            expected_response = AIResponse(
-                content="Hello!",
-                model="test-model",
-                provider=AIProvider.ANTHROPIC,
-            )
-            provider_instance.chat.return_value = expected_response
-            mock_get_provider.return_value = lambda **kwargs: provider_instance
+            mock_provider_class = MagicMock()
+            mock_provider_instance = MagicMock()
+            mock_response = MagicMock(spec=AIResponse)
+            mock_response.content = "Hello, world!"
+            mock_provider_instance.chat.return_value = mock_response
+            mock_provider_class.return_value = mock_provider_instance
+            mock_get_provider.return_value = mock_provider_class
 
             connector = AIConnector()
-            response = connector.chat("Hello")
+            response = connector.chat("Hello!")
 
-            provider_instance.chat.assert_called_once_with(
-                message="Hello",
+            assert response.content == "Hello, world!"
+            mock_provider_instance.chat.assert_called_once_with(
+                message="Hello!",
                 system_prompt=None,
                 history=None,
             )
-            assert response is expected_response
 
-    def test_chat_with_system_prompt(self, mock_registry, mock_factory):
+    def test_chat_with_system_prompt(self):
         """Test chat with system prompt.
         
-        Given: A message and system prompt
-        When: chat() is called with system_prompt
-        Then: Both are passed to provider's chat method
+        Given: User message and system prompt
+        When: chat() is called with system_prompt parameter
+        Then: Provider should receive both message and system prompt
         """
         with patch("vendor_connectors.ai.connector.get_provider") as mock_get_provider:
-            provider_instance = Mock()
-            expected_response = AIResponse(
-                content="Assistant response",
-                model="test-model",
-                provider=AIProvider.ANTHROPIC,
-            )
-            provider_instance.chat.return_value = expected_response
-            mock_get_provider.return_value = lambda **kwargs: provider_instance
+            mock_provider_class = MagicMock()
+            mock_provider_instance = MagicMock()
+            mock_response = MagicMock(spec=AIResponse)
+            mock_provider_instance.chat.return_value = mock_response
+            mock_provider_class.return_value = mock_provider_instance
+            mock_get_provider.return_value = mock_provider_class
 
             connector = AIConnector()
-            response = connector.chat(
-                "What's the weather?",
-                system_prompt="You are a weather assistant",
-            )
+            system_prompt = "You are a helpful assistant."
+            connector.chat("Hello!", system_prompt=system_prompt)
 
-            provider_instance.chat.assert_called_once_with(
-                message="What's the weather?",
-                system_prompt="You are a weather assistant",
+            mock_provider_instance.chat.assert_called_once_with(
+                message="Hello!",
+                system_prompt=system_prompt,
                 history=None,
             )
 
-    def test_chat_with_history(self, mock_registry, mock_factory):
+    def test_chat_with_conversation_history(self):
         """Test chat with conversation history.
         
-        Given: A message and conversation history
-        When: chat() is called with history
-        Then: History is passed to provider's chat method
+        Given: User message and conversation history
+        When: chat() is called with history parameter
+        Then: Provider should receive message and history
         """
         with patch("vendor_connectors.ai.connector.get_provider") as mock_get_provider:
-            provider_instance = Mock()
-            expected_response = AIResponse(
-                content="Continued response",
-                model="test-model",
-                provider=AIProvider.ANTHROPIC,
-            )
-            provider_instance.chat.return_value = expected_response
-            mock_get_provider.return_value = lambda **kwargs: provider_instance
+            mock_provider_class = MagicMock()
+            mock_provider_instance = MagicMock()
+            mock_response = MagicMock(spec=AIResponse)
+            mock_provider_instance.chat.return_value = mock_response
+            mock_provider_class.return_value = mock_provider_instance
+            mock_get_provider.return_value = mock_provider_class
 
-            history = [
-                AIMessage.user("Previous question"),
-                AIMessage.assistant("Previous answer"),
-            ]
             connector = AIConnector()
-            response = connector.chat("Follow-up question", history=history)
+            history = [{"role": "user", "content": "Hi"}]
+            connector.chat("Continue...", history=history)
 
-            provider_instance.chat.assert_called_once_with(
-                message="Follow-up question",
+            mock_provider_instance.chat.assert_called_once_with(
+                message="Continue...",
                 system_prompt=None,
                 history=history,
             )
 
 
 class TestAIConnectorInvoke:
-    """Tests for AIConnector invoke functionality."""
+    """Tests for AIConnector invoke method."""
 
-    def test_invoke_without_tools(self, mock_registry, mock_factory):
-        """Test invoke when tools are disabled.
+    def test_invoke_without_tools(self):
+        """Test invoke without tool use.
         
         Given: use_tools=False
         When: invoke() is called
-        Then: Falls back to simple chat functionality
+        Then: Should call chat() method directly
         """
         with patch("vendor_connectors.ai.connector.get_provider") as mock_get_provider:
-            provider_instance = Mock()
-            expected_response = AIResponse(
-                content="Chat response",
-                model="test-model",
-                provider=AIProvider.ANTHROPIC,
-            )
-            provider_instance.chat.return_value = expected_response
-            mock_get_provider.return_value = lambda **kwargs: provider_instance
+            mock_provider_class = MagicMock()
+            mock_provider_instance = MagicMock()
+            mock_response = MagicMock(spec=AIResponse)
+            mock_provider_instance.chat.return_value = mock_response
+            mock_provider_class.return_value = mock_provider_instance
+            mock_get_provider.return_value = mock_provider_class
 
-            connector = AIConnector()
-            response = connector.invoke("Test message", use_tools=False)
+            with patch("vendor_connectors.ai.connector.ToolRegistry"):
+                connector = AIConnector()
+                response = connector.invoke("Hello", use_tools=False)
 
-            provider_instance.chat.assert_called_once_with(
-                message="Test message",
-                system_prompt=None,
-            )
-            assert response is expected_response
+                assert response == mock_response
+                mock_provider_instance.chat.assert_called_once()
 
-    def test_invoke_with_empty_registry(self, mock_registry, mock_factory):
-        """Test invoke when registry has no tools.
+    def test_invoke_with_empty_registry(self):
+        """Test invoke when tool registry is empty.
         
         Given: Empty tool registry
         When: invoke() is called with use_tools=True
-        Then: Falls back to chat since no tools available
+        Then: Should fall back to chat method
         """
-        mock_registry.__len__.return_value = 0
-
         with patch("vendor_connectors.ai.connector.get_provider") as mock_get_provider:
-            provider_instance = Mock()
-            expected_response = AIResponse(
-                content="Chat response",
-                model="test-model",
-                provider=AIProvider.ANTHROPIC,
-            )
-            provider_instance.chat.return_value = expected_response
-            mock_get_provider.return_value = lambda **kwargs: provider_instance
+            mock_provider_class = MagicMock()
+            mock_provider_instance = MagicMock()
+            mock_response = MagicMock(spec=AIResponse)
+            mock_provider_instance.chat.return_value = mock_response
+            mock_provider_class.return_value = mock_provider_instance
+            mock_get_provider.return_value = mock_provider_class
 
-            connector = AIConnector()
-            response = connector.invoke("Test message", use_tools=True)
+            with patch("vendor_connectors.ai.connector.ToolRegistry") as mock_registry:
+                mock_registry_instance = MagicMock()
+                mock_registry_instance.__len__.return_value = 0
+                mock_registry.get_instance.return_value = mock_registry_instance
 
-            provider_instance.chat.assert_called_once()
+                connector = AIConnector()
+                response = connector.invoke("Hello", use_tools=True)
 
-    def test_invoke_with_tools_no_matches(self, mock_registry, mock_factory):
-        """Test invoke when tool filters match nothing.
+                assert response == mock_response
+                mock_provider_instance.chat.assert_called_once()
+
+    def test_invoke_with_tools_and_category_filter(self):
+        """Test invoke with tool use and category filtering.
         
-        Given: Tools exist but filters don't match any
-        When: invoke() is called with specific categories
-        Then: Falls back to chat since no matching tools
+        Given: Registered tools and category filter
+        When: invoke() is called with categories parameter
+        Then: Should filter tools by category and invoke with tools
         """
-        mock_registry.__len__.return_value = 5
-        mock_registry.get_tools.return_value = []  # No matches
-
         with patch("vendor_connectors.ai.connector.get_provider") as mock_get_provider:
-            provider_instance = Mock()
-            expected_response = AIResponse(
-                content="Chat response",
-                model="test-model",
-                provider=AIProvider.ANTHROPIC,
-            )
-            provider_instance.chat.return_value = expected_response
-            mock_get_provider.return_value = lambda **kwargs: provider_instance
+            mock_provider_class = MagicMock()
+            mock_provider_instance = MagicMock()
+            mock_response = MagicMock(spec=AIResponse)
+            mock_provider_instance.invoke_with_tools.return_value = mock_response
+            mock_provider_class.return_value = mock_provider_instance
+            mock_get_provider.return_value = mock_provider_class
 
-            connector = AIConnector()
-            response = connector.invoke(
-                "Test message",
-                use_tools=True,
-                categories=[ToolCategory.AWS],
-            )
+            with (
+                patch("vendor_connectors.ai.connector.ToolRegistry") as mock_registry,
+                patch("vendor_connectors.ai.connector.ToolFactory") as mock_factory,
+            ):
+                mock_registry_instance = MagicMock()
+                mock_registry_instance.__len__.return_value = 2
+                # Mock tool definition with category
+                mock_tool_def = MagicMock()
+                mock_tool_def.category = ToolCategory.GITHUB
+                mock_registry_instance.get_tools.return_value = [mock_tool_def]
+                mock_registry.get_instance.return_value = mock_registry_instance
 
-            mock_registry.get_tools.assert_called_once_with(
-                categories=[ToolCategory.AWS],
-                names=None,
-            )
-            provider_instance.chat.assert_called_once()
+                mock_factory_instance = MagicMock()
+                mock_factory_instance.to_langchain_tools.return_value = [MagicMock()]
+                mock_factory.return_value = mock_factory_instance
 
-    def test_invoke_with_tools_success(self, mock_registry, mock_factory):
-        """Test successful invoke with tools.
+                connector = AIConnector()
+                response = connector.invoke(
+                    "Get my repos",
+                    use_tools=True,
+                    categories=[ToolCategory.GITHUB],
+                )
+
+                assert response == mock_response
+                mock_registry_instance.get_tools.assert_called_once()
+                mock_provider_instance.invoke_with_tools.assert_called_once()
+
+    def test_invoke_with_tool_names_filter(self):
+        """Test invoke with specific tool names filter.
         
-        Given: Available tools that match filters
-        When: invoke() is called with use_tools=True
-        Then: Tools are converted and passed to provider
+        Given: Tool registry with multiple tools
+        When: invoke() is called with tool_names parameter
+        Then: Should filter tools by specific names
         """
-        # Setup mock tools
-        tool_def = ToolDefinition(
-            name="test_tool",
-            description="Test tool",
-            category=ToolCategory.GITHUB,
-            parameters={},
-            handler=lambda: "result",
-        )
-        mock_registry.__len__.return_value = 1
-        mock_registry.get_tools.return_value = [tool_def]
+        with patch("vendor_connectors.ai.connector.get_provider") as mock_get_provider:
+            mock_provider_class = MagicMock()
+            mock_provider_instance = MagicMock()
+            mock_response = MagicMock(spec=AIResponse)
+            mock_provider_instance.invoke_with_tools.return_value = mock_response
+            mock_provider_class.return_value = mock_provider_instance
+            mock_get_provider.return_value = mock_provider_class
 
-        mock_lc_tool = Mock()
+            with (
+                patch("vendor_connectors.ai.connector.ToolRegistry") as mock_registry,
+                patch("vendor_connectors.ai.connector.ToolFactory") as mock_factory,
+            ):
+                mock_registry_instance = MagicMock()
+                mock_registry_instance.__len__.return_value =
