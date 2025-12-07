@@ -21,13 +21,13 @@ Usage:
     llm = ChatAnthropic(model="claude-3-5-sonnet-20241022")
     tools = get_tools()
     agent = create_react_agent(llm, tools)
-    
+
     result = agent.invoke({"messages": [("user", "Generate a 3D sword")]})
 
 For CrewAI:
     from vendor_connectors.meshy.tools import get_crewai_tools
     from crewai import Agent
-    
+
     agent = Agent(role="3D Artist", tools=get_crewai_tools())
 """
 

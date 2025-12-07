@@ -9,7 +9,7 @@ Usage:
 
     # Programmatic
     from vendor_connectors.meshy.mcp import create_server, run_server
-    
+
     server = create_server()
     run_server(server)
 
