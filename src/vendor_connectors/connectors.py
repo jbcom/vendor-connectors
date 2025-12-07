@@ -9,12 +9,9 @@ from directed_inputs_class import DirectedInputsClass
 from extended_data_types import get_default_dict, get_unique_signature, make_hashable
 from lifecyclelogging import Logging
 
-from vendor_connectors.anthropic import AnthropicConnector
 from vendor_connectors.aws import AWSConnector
-from vendor_connectors.cursor import CursorConnector
 from vendor_connectors.github import GithubConnector
 from vendor_connectors.google import GoogleConnector
-from vendor_connectors.meshy import MeshyConnector
 from vendor_connectors.slack import SlackConnector
 from vendor_connectors.vault import VaultConnector
 from vendor_connectors.zoom import ZoomConnector
