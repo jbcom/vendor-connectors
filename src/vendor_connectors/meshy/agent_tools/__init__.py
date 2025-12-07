@@ -1,43 +1,67 @@
-"""Agent tools for mesh-toolkit - AI agent integrations for 3D asset generation.
+"""Agent tools for mesh-toolkit - MOVED to vendor_connectors.ai
 
-This subpackage provides integrations with various AI agent frameworks:
-- CrewAI tools
-- MCP (Model Context Protocol) server
-- Future: Langchain, Autogen, etc.
+This module now provides backwards compatibility by re-exporting from
+the new vendor_connectors.ai package.
 
-Architecture:
-    agent_tools/
-        __init__.py          # This file - registry and exports
-        base.py              # Base classes and interfaces
-        registry.py          # Tool provider registry
-        crewai/              # CrewAI-specific tools
-        mcp/                 # MCP server implementation
+DEPRECATION NOTICE:
+The agent_tools subpackage has been refactored and moved to vendor_connectors.ai.
+This compatibility layer will be removed in a future version.
+
+Old import:
+    from vendor_connectors.meshy.agent_tools import get_provider
+
+New import:
+    from vendor_connectors.ai.providers import crewai, mcp
+
+Architecture now:
+    vendor_connectors/
+    └── ai/                      # NEW top-level AI package
+        ├── base.py              # ToolParameter, ToolDefinition, ToolCategory
+        ├── tools/
+        │   └── meshy_tools.py   # Meshy-specific tools
+        └── providers/
+            ├── crewai/          # CrewAI integration
+            └── mcp/             # MCP server
 
 Usage:
-    # CrewAI integration
-    from vendor_connectors.meshy.agent_tools.crewai import get_tools
-    tools = get_tools()
+    # For Meshy tools
+    from vendor_connectors.ai.tools.meshy_tools import get_meshy_tools
+    tools = get_meshy_tools()
 
-    # MCP server
-    from vendor_connectors.meshy.agent_tools.mcp import create_server
+    # For CrewAI integration
+    from vendor_connectors.ai.providers.crewai import get_tools
+    crewai_tools = get_tools()
+
+    # For MCP server
+    from vendor_connectors.ai.providers.mcp import create_server
     server = create_server()
-
-    # Registry for all providers
-    from vendor_connectors.meshy.agent_tools import get_provider, list_providers
 """
 
 from __future__ import annotations
 
-from vendor_connectors.meshy.agent_tools.registry import (
-    ToolProvider,
-    get_provider,
-    list_providers,
-    register_provider,
+# Re-export from new location for backwards compatibility
+from vendor_connectors.ai.base import (
+    ToolCategory,
+    ToolDefinition,
+    ToolParameter,
+    ToolResult,
 )
 
 __all__ = [
-    "ToolProvider",
-    "get_provider",
-    "list_providers",
-    "register_provider",
+    "ToolCategory",
+    "ToolDefinition", 
+    "ToolParameter",
+    "ToolResult",
 ]
+
+# Deprecation warning
+import warnings
+
+warnings.warn(
+    "vendor_connectors.meshy.agent_tools is deprecated. "
+    "Use vendor_connectors.ai instead. "
+    "This compatibility layer will be removed in a future version.",
+    DeprecationWarning,
+    stacklevel=2,
+)
+

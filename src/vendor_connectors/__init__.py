@@ -30,7 +30,7 @@ from __future__ import annotations
 __version__ = "0.1.1"
 
 # Meshy AI connector for 3D asset generation
-from vendor_connectors import meshy
+from vendor_connectors import ai, meshy
 from vendor_connectors.aws import (
     AWSConnector,
     AWSConnectorFull,
@@ -85,4 +85,6 @@ __all__ = [
     # Meshy AI (3D asset generation)
     "MeshyConnector",
     "meshy",
+    # AI tools sub-package
+    "ai",
 ]

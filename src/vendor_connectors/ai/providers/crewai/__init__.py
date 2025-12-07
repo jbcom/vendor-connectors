@@ -53,7 +53,7 @@ def __getattr__(name: str):
 
     if name in tool_names:
         if name not in _tool_classes:
-            from vendor_connectors.meshy.agent_tools.base import get_tool_definition
+            from vendor_connectors.ai.base import get_tool_definition
             from vendor_connectors.meshy.agent_tools.crewai.provider import _create_tool_class
 
             definition = get_tool_definition(tool_names[name])
