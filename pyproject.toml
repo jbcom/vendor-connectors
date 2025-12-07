@@ -184,7 +184,8 @@ omit = [
 
 [tool.coverage.report]
 # Target: 75% (tracked in issue #21)
-# Current: ~47% - threshold set to pass CI while tests are being added
+# Current: ~47% - threshold set to pass CI while tests are being added.
+# A 2% buffer is provided to avoid CI failures due to minor coverage fluctuations as tests are being added.
 fail_under = 45
 exclude_lines = [
     "pragma: no cover",
