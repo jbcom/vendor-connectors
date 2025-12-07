@@ -424,4 +424,3 @@ class VendorConnectors(DirectedInputsClass):
             account_id=account_id,
         )
         return connector
-

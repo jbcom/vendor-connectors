@@ -43,6 +43,7 @@ def __getattr__(name: str):
     """Lazy load tool classes."""
     tool_names = {
         "Text3DGenerateTool": "text3d_generate",
+        "Image3DGenerateTool": "image3d_generate",
         "RigModelTool": "rig_model",
         "ApplyAnimationTool": "apply_animation",
         "RetextureModelTool": "retexture_model",
@@ -74,6 +75,7 @@ __all__ = [
     "CheckTaskStatusTool",
     "CrewAIToolProvider",
     "GetAnimationTool",
+    "Image3DGenerateTool",
     "ListAnimationsTool",
     "RetextureModelTool",
     "RigModelTool",

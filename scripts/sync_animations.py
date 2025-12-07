@@ -328,9 +328,7 @@ def generate_animations_py(animations: list[dict]) -> None:
     with open(ANIMATIONS_PY, "w") as f:
         f.write("\n".join(lines))
 
-    console.print(
-        f"[green]✓[/green] Generated [cyan]{ANIMATIONS_PY}[/cyan] with {len(animations)} animations"
-    )
+    console.print(f"[green]✓[/green] Generated [cyan]{ANIMATIONS_PY}[/cyan] with {len(animations)} animations")
 
 
 def display_summary(animations: list[dict]) -> None:
