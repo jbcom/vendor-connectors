@@ -63,6 +63,7 @@ tests = [
     "pytest-cov>=5.0.0",
     "pytest-mock>=3.14.0",
     "pytest-asyncio>=0.23.0",
+    "pytest-timeout>=2.4.0",
 ]
 # Meshy webhooks support
 webhooks = [
@@ -168,6 +169,9 @@ testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
+# Timeout settings to prevent tests from stalling indefinitely
+timeout = 30
+timeout_method = "signal"
 addopts = [
     "--verbose",
     "--cov=vendor_connectors",
@@ -233,5 +237,6 @@ prerelease = false
 [dependency-groups]
 dev = [
     "beautifulsoup4>=4.14.3",
+    "pytest-timeout>=2.4.0",
     "rich>=14.2.0",
 ]
