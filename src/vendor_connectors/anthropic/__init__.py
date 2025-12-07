@@ -226,7 +226,9 @@ class AnthropicConnector(DirectedInputsClass):
         self.logger = self.logging.logger
 
         # Get API key
-        self.api_key = api_key or self.get_input("ANTHROPIC_API_KEY", required=False) or os.environ.get("ANTHROPIC_API_KEY")
+        self.api_key = (
+            api_key or self.get_input("ANTHROPIC_API_KEY", required=False) or os.environ.get("ANTHROPIC_API_KEY")
+        )
         if not self.api_key:
             raise AnthropicError("ANTHROPIC_API_KEY is required. Set it in environment or pass to constructor.")
 
@@ -556,8 +558,8 @@ If the task requires code changes, describe exactly what changes should be made.
         # Using verified model IDs from Anthropic API
         recommendations = {
             "general": "claude-sonnet-4-5-20250929",  # Claude Sonnet 4.5 - best balance
-            "coding": "claude-sonnet-4-5-20250929",   # Claude Sonnet 4.5 - great for code
-            "fast": "claude-haiku-4-5-20251001",      # Claude Haiku 4.5 - fastest
-            "powerful": "claude-opus-4-5-20251101",   # Claude Opus 4.5 - most capable
+            "coding": "claude-sonnet-4-5-20250929",  # Claude Sonnet 4.5 - great for code
+            "fast": "claude-haiku-4-5-20251001",  # Claude Haiku 4.5 - fastest
+            "powerful": "claude-opus-4-5-20251101",  # Claude Opus 4.5 - most capable
         }
         return recommendations.get(use_case, recommendations["general"])

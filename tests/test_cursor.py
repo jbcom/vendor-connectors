@@ -115,11 +115,13 @@ class TestModels:
 
     def test_agent_model_extra_fields(self):
         """Agent model should allow extra fields from API."""
-        agent = Agent.model_validate({
-            "id": "test",
-            "state": "running",
-            "custom_field": "value",
-        })
+        agent = Agent.model_validate(
+            {
+                "id": "test",
+                "state": "running",
+                "custom_field": "value",
+            }
+        )
         assert agent.id == "test"
         assert hasattr(agent, "custom_field")
 

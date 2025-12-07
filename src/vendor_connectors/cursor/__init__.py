@@ -284,7 +284,9 @@ def sanitize_error(error: Any) -> str:
     message = str(error) if not isinstance(error, str) else error
     # Remove potential API keys, tokens, or sensitive patterns
     message = re.sub(r"Bearer\s+[a-zA-Z0-9._-]+", "Bearer [REDACTED]", message, flags=re.IGNORECASE)
-    message = re.sub(r"api[_-]?key[=:]\s*[\"']?[a-zA-Z0-9._-]+[\"']?", "api_key=[REDACTED]", message, flags=re.IGNORECASE)
+    message = re.sub(
+        r"api[_-]?key[=:]\s*[\"']?[a-zA-Z0-9._-]+[\"']?", "api_key=[REDACTED]", message, flags=re.IGNORECASE
+    )
     message = re.sub(r"token[=:]\s*[\"']?[a-zA-Z0-9._-]+[\"']?", "token=[REDACTED]", message, flags=re.IGNORECASE)
     return message
 

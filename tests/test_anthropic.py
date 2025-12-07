@@ -83,6 +83,7 @@ class TestAnthropicConnector:
     def test_init_with_api_key(self):
         """Initialization with API key should succeed."""
         import httpx
+
         with patch.object(httpx, "Client"):
             connector = AnthropicConnector(api_key="test-key")
             assert connector.api_key == "test-key"
@@ -108,6 +109,7 @@ class TestAnthropicConnector:
     def test_validate_model(self):
         """validate_model should check against known models."""
         import httpx
+
         with patch.object(httpx, "Client"):
             connector = AnthropicConnector(api_key="test-key")
             assert connector.validate_model("claude-sonnet-4-20250514") is True
@@ -116,6 +118,7 @@ class TestAnthropicConnector:
     def test_get_recommended_model(self):
         """get_recommended_model should return appropriate models."""
         import httpx
+
         with patch.object(httpx, "Client"):
             connector = AnthropicConnector(api_key="test-key")
             # Using verified model IDs from https://docs.anthropic.com/en/docs/about-claude/models
@@ -126,6 +129,7 @@ class TestAnthropicConnector:
     def test_create_message(self):
         """create_message should send correct request and return message."""
         import httpx
+
         mock_client = MagicMock()
 
         mock_response = MagicMock()
@@ -164,6 +168,7 @@ class TestAnthropicConnector:
     def test_create_message_with_system(self):
         """create_message should include system prompt."""
         import httpx
+
         mock_client = MagicMock()
 
         mock_response = MagicMock()
@@ -193,6 +198,7 @@ class TestAnthropicConnector:
     def test_list_models(self):
         """list_models should return parsed models."""
         import httpx
+
         mock_client = MagicMock()
 
         mock_response = MagicMock()
@@ -215,7 +221,7 @@ class TestAnthropicConnector:
 
 class TestClaudeModels:
     """Tests for Claude model constants.
-    
+
     Source of truth: https://docs.anthropic.com/en/docs/about-claude/models
     """
 
