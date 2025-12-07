@@ -205,7 +205,7 @@ def generate_animations_py(animations: list[dict]) -> None:
     lines.append("")
     for cat in cat_names:
         enum_name = re.sub(r"[^A-Za-z0-9]", "_", cat).upper()
-        lines.append(f'    {enum_name} = "{cat}"')
+        lines.append(f"    {enum_name} = {repr(cat)}")
     lines.append("")
     lines.append("")
 
@@ -216,7 +216,7 @@ def generate_animations_py(animations: list[dict]) -> None:
     lines.append("")
     for subcat in subcat_names:
         enum_name = re.sub(r"[^A-Za-z0-9]", "_", subcat).upper()
-        lines.append(f'    {enum_name} = "{subcat}"')
+        lines.append(f"    {enum_name} = {repr(subcat)}")
     lines.append("")
     lines.append("")
 
@@ -232,10 +232,10 @@ def generate_animations_py(animations: list[dict]) -> None:
 
         lines.append(f"    {aid}: AnimationMeta(")
         lines.append(f"        {aid},")
-        lines.append(f'        "{name}",')
-        lines.append(f'        "{cat}",')
-        lines.append(f'        "{subcat}",')
-        lines.append(f'        "{preview}",')
+        lines.append(f"        {repr(name)},")
+        lines.append(f"        {repr(cat)},")
+        lines.append(f"        {repr(subcat)},")
+        lines.append(f"        {repr(preview)},")
         lines.append("    ),")
 
     lines.append("}")
