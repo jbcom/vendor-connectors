@@ -33,8 +33,8 @@ context:
   # Key directories to index
   directories:
     - path: src/vendor_connectors
-      priority: high
-      description: Main source code
+      priority: medium
+      description: Main source code (use high priority for specific connectors being modified)
       exclude:
         - "**/__pycache__"
         - "**/*.pyc"
@@ -59,15 +59,15 @@ knowledge:
       
   - question: What's the current architecture direction?
     answer: |
-      We're moving from a central ai/ package to tools living alongside each 
-      connector (e.g., meshy/tools.py instead of ai/tools/meshy_tools.py).
-      Each connector should provide: Python API, LangChain tools, MCP server.
+      Tools live alongside each connector (e.g., meshy/tools.py, meshy/mcp.py).
+      Each connector provides three interfaces: Python API, LangChain tools, MCP server.
+      See src/vendor_connectors/meshy/ for the canonical example.
       
   - question: Why is coverage failing?
     answer: |
       Coverage threshold is 45% (target 75%). Current is ~47%. This is tracked 
-      in Issue #21. The ai/ and meshy/agent_tools/ packages are excluded from 
-      coverage because they require optional dependencies.
+      in Issue #21. The meshy/agent_tools/ package is excluded from coverage 
+      because it requires optional dependencies (crewai, mcp).
       
   - question: What Python version do I need?
     answer: |

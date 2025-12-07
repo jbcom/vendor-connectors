@@ -36,20 +36,18 @@ This directory contains custom agent profiles that provide specialized expertise
 - MCP server implementation
 
 ### 3. AI Refactor Agent (`ai-refactor-agent.yml`)
-**Purpose:** Execute the AI tooling refactor (Issue #33, PR #34)
+**Purpose:** Add LangChain tools and MCP servers to connectors
 
 **Use when:**
-- Migrating tools from central ai/ package to connectors
-- Creating LangChain StructuredTools
-- Implementing MCP servers
-- Cleaning up deprecated AI package code
+- Adding LangChain StructuredTools to a connector
+- Implementing MCP servers for a connector
+- Following the three-interface pattern (API + tools + MCP)
 
 **Expertise:**
-- Current refactor status and goals
 - LangChain StructuredTool patterns
-- MCP (Model Context Protocol)
-- Import path migrations
-- Breaking change management
+- MCP (Model Context Protocol) servers
+- Three-interface connector architecture
+- Tool creation patterns from meshy/ example
 
 ## How to Use Custom Agents
 
@@ -75,7 +73,7 @@ Tag the agent in PR review comments:
 
 ```
 @copilot use agent:ai-refactor-agent
-Help migrate AWS connector tools from ai/tools/aws_tools.py to aws/tools.py
+Help add LangChain tools and MCP server to the AWS connector
 ```
 
 ## Agent Context

@@ -89,8 +89,8 @@ uv build
 ```
 
 **Expected Output:**
-- Creates `dist/vendor_connectors-0.2.0.tar.gz`
-- Creates `dist/vendor_connectors-0.2.0-py3-none-any.whl`
+- Creates `dist/vendor_connectors-*.tar.gz`
+- Creates `dist/vendor_connectors-*-py3-none-any.whl`
 
 ### Type Checking
 ```bash
@@ -146,11 +146,6 @@ vendor-connectors/
 │   ├── __init__.py                   # Public API exports
 │   ├── connectors.py                 # VendorConnectors unified API with caching
 │   ├── cloud_params.py               # Cloud parameter utilities
-│   ├── ai/                           # LangChain-based AI sub-package (NEW)
-│   │   ├── connector.py              # AIConnector - unified multi-provider interface
-│   │   ├── providers/                # Claude, GPT, Gemini, Grok, Ollama
-│   │   ├── tools/                    # Auto-generated tools from connectors
-│   │   └── workflows/                # LangGraph workflow builders
 │   ├── anthropic/                    # Anthropic Claude API connector
 │   ├── aws/                          # AWS (boto3) with Organizations, SSO, S3, CodeDeploy mixins
 │   ├── cursor/                       # Cursor Background Agent API
@@ -158,7 +153,8 @@ vendor-connectors/
 │   ├── google/                       # Google Cloud (Workspace, GCP, Billing, Services)
 │   ├── meshy/                        # Meshy AI 3D asset generation
 │   │   ├── text3d.py, rigging.py, animate.py, retexture.py  # Core 3D ops
-│   │   ├── agent_tools/              # CrewAI and MCP integrations (optional deps)
+│   │   ├── tools.py                  # LangChain StructuredTools
+│   │   ├── mcp.py                    # MCP server
 │   │   ├── persistence/              # Local caching, vector store (sqlite-vec)
 │   │   └── webhooks/                 # FastAPI webhook server (optional)
 │   ├── slack/                        # Slack SDK wrapper
@@ -213,17 +209,11 @@ The package has many optional features. **DO NOT** import these modules without 
 |-------|---------|-----------------|
 | `tests` | pytest, pytest-cov, pytest-mock | `uv sync --extra tests` |
 | `webhooks` | meshy.webhooks (FastAPI, uvicorn, pyngrok) | `uv sync --extra webhooks` |
-| `crewai` | meshy.agent_tools.crewai | `uv sync --extra crewai` |
-| `mcp` | meshy.agent_tools.mcp | `uv sync --extra mcp` |
+| `crewai` | meshy tools for CrewAI | `uv sync --extra crewai` |
+| `mcp` | meshy MCP server | `uv sync --extra mcp` |
 | `vector` | meshy.persistence.vector_store (sqlite-vec, sentence-transformers) | `uv sync --extra vector` |
-| `ai` | ai/* (langchain-core, langgraph) | `uv sync --extra ai` |
-| `ai-anthropic` | ai/providers/anthropic.py | `uv sync --extra ai-anthropic` |
-| `ai-openai` | ai/providers/openai.py | `uv sync --extra ai-openai` |
-| `ai-google` | ai/providers/google.py | `uv sync --extra ai-google` |
-| `ai-xai` | ai/providers/xai.py | `uv sync --extra ai-xai` |
-| `ai-ollama` | ai/providers/ollama.py | `uv sync --extra ai-ollama` |
 
-**Coverage Exclusions:** pyproject.toml excludes `ai/*` and `meshy/agent_tools/*` from coverage since they require optional deps.
+**Coverage Exclusions:** pyproject.toml excludes `meshy/agent_tools/*` from coverage because they require optional dependencies (crewai, mcp) that aren't installed with `--extra tests`. CI would fail without `--all-extras`.
 
 ## Environment Variables
 
@@ -361,7 +351,7 @@ export PATH="$HOME/.local/bin:$PATH"
 # For new connector creation
 @copilot use agent:connector-builder-agent
 
-# For AI package refactoring
+# For adding LangChain tools and MCP servers to connectors
 @copilot use agent:ai-refactor-agent
 ```
 See [.github/agents/README.md](.github/agents/README.md) for details.
@@ -390,42 +380,37 @@ python-semantic-release will auto-bump version on merge to main.
 
 ## Current Direction and Open Work
 
-### Active PRs (Review These for Context)
-**Note:** PR numbers below reflect status as of December 2025. Check current PR list for latest.
+### Recent Changes
+**Note:** Check git log and PR history for latest changes.
 
-- **PR #34**: Refactoring AI tooling - moving tools from central `ai/` package to individual connectors (meshy/tools.py, meshy/mcp.py). Breaking change that eliminates ~4,343 lines of abstraction.
-- **PR #19**: Preparing Meshy connector interface improvements (class-based, DirectedInputsClass pattern)
+- **AI tooling refactor complete**: Tools now live with connectors (meshy/tools.py, meshy/mcp.py). No central ai/ package.
+- **Meshy connector**: Full 3D asset generation with LangChain tools and MCP server
 
 ### Key Open Issues
-**Note:** Issue numbers reflect status as of December 2025. Check issue tracker for latest.
+**Note:** Check issue tracker for current status.
 
-- **Issue #33**: AI package restructure - each connector owns its tools (HIGH PRIORITY)
-- **Issue #18**: Add Meshy connector for 3D asset generation (in progress via PR #19)
 - **Issue #21**: Increase test coverage to 75% (currently ~47%, threshold 45%)
-- **Issue #26-30**: AI sub-package improvements (error handling, validation, docs, LangSmith threading)
 - **Issue #8**: Fix CI/PyPI publish issues
 - **Issue #3**: Complete GitHub Actions CI workflow setup
 
 ### Strategic Direction
-1. **Decentralizing AI tooling**: Moving away from central `vendor_connectors.ai` to tools living alongside each connector
-2. **Meshy integration**: Adding comprehensive 3D asset generation capabilities
+1. **Tools live with connectors**: Each connector owns its LangChain tools and MCP server (no central ai/ package)
+2. **Meshy integration**: Comprehensive 3D asset generation with tools.py and mcp.py
 3. **Test coverage**: Incrementally improving from 47% to 75% target
-4. **Tool patterns**: Each connector should provide three interfaces:
+4. **Three-interface pattern**: Each connector should provide:
    - Direct Python API (`meshy.text3d.generate()`)
    - LangChain tools (`meshy.tools.get_tools()`)
    - MCP server (`meshy-mcp` CLI)
 
-### Architecture Evolution
-**Old pattern (being removed):**
+### Connector Tool Architecture
 ```
-vendor_connectors/ai/tools/meshy_tools.py  # Central AI package
+vendor_connectors/<service>/
+├── __init__.py    # Python API
+├── tools.py       # LangChain StructuredTools
+└── mcp.py         # MCP server entry point
 ```
 
-**New pattern (current):**
-```
-vendor_connectors/meshy/tools.py  # Tools live with connector
-vendor_connectors/meshy/mcp.py    # MCP server with connector
-```
+See `src/vendor_connectors/meshy/` for the canonical example.
 
 ## Memory Bank - Read First
 

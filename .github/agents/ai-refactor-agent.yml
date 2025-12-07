@@ -1,55 +1,52 @@
-# Custom Copilot Agent: AI Tooling Refactor Expert
-# Specialized agent for the ongoing AI package restructure (Issue #33, PR #34)
+# Custom Copilot Agent: Connector Tools Expert
+# Expert on adding LangChain tools and MCP servers to connectors
 
 name: ai-refactor-agent
-description: Expert in the AI tooling refactor - moving tools to connectors
+description: Expert in connector tool architecture - adding LangChain tools and MCP servers
 
 expertise:
   - LangChain StructuredTool creation
   - MCP (Model Context Protocol) server implementation
   - CrewAI tool integration
-  - Tool abstraction patterns
-  - Import path migrations
+  - Three-interface pattern (API + Tools + MCP)
 
 context:
   always_include:
     - path: .github/copilot-instructions.md
-      reason: Current architecture direction
+      reason: Architecture patterns and conventions
     - path: memory-bank/activeContext.md
-      reason: Active refactor status
-  
-  # Note: Issue/PR numbers verified as of Dec 2025 - check current status
-  issues:
-    - number: 33
-      reason: Main refactor issue defining the pattern
-    - number: 34
-      reason: Active PR implementing the changes
+      reason: Current development context
+    - path: src/vendor_connectors/meshy/tools.py
+      reason: Canonical example of connector tools
 
-current_state: |
-  The central vendor_connectors/ai/ package is being REMOVED (PR #34). Tools now
-  live alongside each connector, eliminating unnecessary abstraction.
+architecture: |
+  Each connector provides THREE interfaces:
   
-  REMOVED (no longer exists):
-    vendor_connectors/ai/tools/meshy_tools.py
-    vendor_connectors/ai/providers/
-    vendor_connectors/ai/connector.py
-    vendor_connectors/ai/workflows/
-    
-  CURRENT PATTERN:
-    vendor_connectors/meshy/tools.py      # LangChain StructuredTools
-    vendor_connectors/meshy/mcp.py        # MCP server
-    vendor_connectors/<service>/tools.py  # Pattern for other connectors
-    vendor_connectors/<service>/mcp.py    # MCP server per connector
+  1. Python API (direct usage):
+     from vendor_connectors.meshy import text3d
+     model = text3d.generate("a sword")
+  
+  2. LangChain tools (for agents):
+     from vendor_connectors.meshy.tools import get_tools
+     tools = get_tools()  # Standard StructuredTools
+  
+  3. MCP server (for AI assistants):
+     meshy-mcp  # Command line entry point
+  
+  File structure per connector:
+    vendor_connectors/<service>/
+    ├── __init__.py       # Python API
+    ├── tools.py          # LangChain StructuredTools
+    └── mcp.py            # MCP server
 
 guidelines:
-  - "NEW tools should live WITH their connector (e.g., meshy/agent_tools/)"
-  - "EXISTING ai/ package remains supported for backwards compatibility"
+  - "Tools live WITH their connector, not in a central package"
   - "Each connector provides 3 interfaces: Python API, LangChain tools, MCP server"
   - "LangChain StructuredTool is the standard - works with LangChain, CrewAI, LangGraph"
-  - "Entry points in pyproject.toml: <service>-mcp = vendor_connectors.<service>.agent_tools.mcp.__main__:main"
-  - "AIConnector and providers in ai/ are valid for users who want unified multi-provider access"
+  - "Entry points in pyproject.toml: <service>-mcp = vendor_connectors.<service>.mcp:main"
+  - "Users use LangChain LLM providers directly - no wrapper classes needed"
 
-migration_pattern:
+adding_tools_pattern:
   step1_create_tools_file: |
     # In vendor_connectors/<service>/tools.py
     from langchain_core.tools import StructuredTool
@@ -76,92 +73,63 @@ migration_pattern:
   
   step2_create_mcp_server: |
     # In vendor_connectors/<service>/mcp.py
-    # Note: Actual MCP imports may vary - check mcp package documentation
-    # This is a conceptual example showing the pattern
+    # See src/vendor_connectors/meshy/mcp.py for complete example
+    from mcp.server import Server
+    from .tools import get_tools
     
-    def create_server():
-        # Import and configure MCP server
-        # Implementation depends on mcp package version
-        from .tools import get_tools
-        
-        # Example: Create server instance
-        # server = configure_mcp_server("service-mcp")
-        # for tool in get_tools():
-        #     server.register_tool(tool)
+    def create_server() -> Server:
+        server = Server("<service>-mcp")
+        # Register tools with MCP server
+        for tool in get_tools():
+            # Convert LangChain tool to MCP tool
+            pass
         return server
     
     def main():
         server = create_server()
-        # Start MCP server
-        # server.run()
+        server.run()
     
     if __name__ == "__main__":
         main()
   
   step3_update_pyproject: |
-    # Add to pyproject.toml [project.scripts]
+    # Add entry point to pyproject.toml [project.scripts]
     [project.scripts]
-    meshy-mcp = "vendor_connectors.meshy.mcp:main"
-    
-  step4_update_imports: |
-    # OLD
-    from vendor_connectors.ai.tools.meshy_tools import get_meshy_tools
-    
-    # NEW
-    from vendor_connectors.meshy.tools import get_tools
-    
-  step5_delete_old: |
-    # After migration complete:
-    rm -rf src/vendor_connectors/ai/
+    <service>-mcp = "vendor_connectors.<service>.mcp:main"
 
 tasks:
-  - name: migrate_connector_tools
+  - name: add_tools_to_connector
     prompt: |
-      Migrate a connector's tools from ai/ to the connector package:
+      Add LangChain tools to a connector:
       1. Create <connector>/tools.py with StructuredTools
       2. Create <connector>/mcp.py with MCP server
-      3. Update entry point in pyproject.toml
-      4. Create tests for tools
-      5. Update imports in any examples/docs
-      6. Verify old ai/tools/<connector>_tools.py can be deleted
+      3. Add entry point in pyproject.toml [project.scripts]
+      4. Create tests in tests/test_<connector>_tools.py
+      5. Reference src/vendor_connectors/meshy/tools.py as example
       
-  - name: verify_migration
+  - name: verify_tools
     prompt: |
-      After migrating a connector:
-      1. Test tools work: from vendor_connectors.<service>.tools import get_tools
-      2. Test MCP server: <service>-mcp (command line)
-      3. Run existing tests: uv run pytest tests/test_<service>*.py
-      4. Check no imports from vendor_connectors.ai remain
-      5. Update documentation
-
-  - name: audit_ai_package
-    prompt: |
-      Check what's left in ai/ package:
-      1. List files in src/vendor_connectors/ai/
-      2. Identify which connectors still have tools in ai/tools/
-      3. Check for any shared code that's actually needed
-      4. Create migration plan for remaining connectors
-
-breaking_changes:
-  - old: "from vendor_connectors.ai.tools.meshy_tools import get_meshy_tools"
-    new: "from vendor_connectors.meshy.tools import get_tools"
-    
-  - old: "from vendor_connectors.ai import AIConnector"
-    new: "Use LangChain directly: from langchain_anthropic import ChatAnthropic"
-    
-  - old: "vendor_connectors.ai.providers.anthropic.AnthropicProvider"
-    new: "Use langchain-anthropic directly, no wrapper needed"
+      Verify connector tools work correctly:
+      1. Test import: from vendor_connectors.<service>.tools import get_tools
+      2. Test MCP server: <service>-mcp --help
+      3. Run tests: uv run pytest tests/test_<service>*.py -v
 
 examples:
   - file: src/vendor_connectors/meshy/tools.py
-    description: Complete migration example with 8 tools
+    description: Canonical example - 8 LangChain StructuredTools for Meshy 3D
   - file: src/vendor_connectors/meshy/mcp.py
-    description: MCP server implementation
-  - pr: 34
-    description: Full refactor PR showing deletions and migrations
+    description: MCP server implementation for Meshy
 
-related_issues:
-  - 33: "Main refactor issue"
-  - 34: "Active refactor PR"
-  - 18: "Meshy connector (uses new pattern)"
-  - 19: "Meshy interface improvements"
+usage_example: |
+  # Using tools with any LangChain-compatible agent
+  from vendor_connectors.meshy.tools import get_tools
+  from langchain_anthropic import ChatAnthropic
+  from langgraph.prebuilt import create_react_agent
+  
+  llm = ChatAnthropic(model="claude-sonnet-4-20250514")
+  tools = get_tools()
+  agent = create_react_agent(llm, tools)
+  
+  # Using with CrewAI
+  from crewai import Agent
+  agent = Agent(role="3D Artist", tools=get_tools())
