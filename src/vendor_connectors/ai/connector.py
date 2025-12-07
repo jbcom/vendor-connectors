@@ -71,8 +71,8 @@ class AIConnector:
             **kwargs,
         )
 
-        # Tool management
-        self._registry = ToolRegistry()
+        # Tool management - use singleton registry for workflow compatibility
+        self._registry = ToolRegistry.get_instance()
         self._factory = ToolFactory()
         self._connector_instances: dict[ToolCategory, Any] = {}
 
