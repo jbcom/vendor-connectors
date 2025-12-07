@@ -6,7 +6,7 @@ with vendor connector tools.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Callable, Optional
+from typing import TYPE_CHECKING, Any, Callable
 
 if TYPE_CHECKING:
     pass
@@ -37,8 +37,8 @@ class WorkflowBuilder:
         self._nodes: dict[str, Callable] = {}
         self._edges: list[tuple[str, str]] = []
         self._conditional_edges: list[tuple[str, Callable, dict]] = []
-        self._entry_point: Optional[str] = None
-        self._state_schema: Optional[type] = None
+        self._entry_point: str | None = None
+        self._state_schema: type | None = None
 
     def set_state_schema(self, schema: type) -> WorkflowBuilder:
         """Set the state schema for the workflow.

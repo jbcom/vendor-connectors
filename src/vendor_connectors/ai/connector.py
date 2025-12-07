@@ -6,7 +6,7 @@ with AI providers through a unified API.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any
 
 from vendor_connectors.ai.base import AIProvider, AIResponse, ToolCategory
 from vendor_connectors.ai.providers import get_provider
@@ -38,12 +38,12 @@ class AIConnector:
     def __init__(
         self,
         provider: str | AIProvider = "anthropic",
-        model: Optional[str] = None,
-        api_key: Optional[str] = None,
+        model: str | None = None,
+        api_key: str | None = None,
         temperature: float = 0.7,
         max_tokens: int = 4096,
-        langsmith_api_key: Optional[str] = None,
-        langsmith_project: Optional[str] = None,
+        langsmith_api_key: str | None = None,
+        langsmith_project: str | None = None,
         **kwargs,
     ):
         """Initialize the AI connector.
@@ -109,8 +109,8 @@ class AIConnector:
     def chat(
         self,
         message: str,
-        system_prompt: Optional[str] = None,
-        history: Optional[list] = None,
+        system_prompt: str | None = None,
+        history: list | None = None,
     ) -> AIResponse:
         """Send a chat message without tools.
 
@@ -132,9 +132,9 @@ class AIConnector:
         self,
         message: str,
         use_tools: bool = True,
-        categories: Optional[list[ToolCategory]] = None,
-        tool_names: Optional[list[str]] = None,
-        system_prompt: Optional[str] = None,
+        categories: list[ToolCategory | None] = None,
+        tool_names: list[str | None] = None,
+        system_prompt: str | None = None,
         max_iterations: int = 10,
     ) -> AIResponse:
         """Invoke the AI with optional tool use.
@@ -180,7 +180,7 @@ class AIConnector:
         self,
         connector_instance: Any,
         category: ToolCategory,
-        method_filter: Optional[callable] = None,
+        method_filter: callable | None = None,
     ) -> list[str]:
         """Register tools from a connector instance.
 
@@ -242,7 +242,7 @@ class AIConnector:
         )
         self._registry.register(tool)
 
-    def list_tools(self, category: Optional[ToolCategory] = None) -> list[str]:
+    def list_tools(self, category: ToolCategory | None = None) -> list[str]:
         """List registered tool names.
 
         Args:

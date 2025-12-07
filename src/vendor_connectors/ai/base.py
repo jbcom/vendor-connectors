@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import TYPE_CHECKING, Any, Callable, Optional
+from typing import TYPE_CHECKING, Any, Callable
 
 if TYPE_CHECKING:
     pass
@@ -78,7 +78,7 @@ class ToolParameter:
     type: type = str
     required: bool = True
     default: Any = None
-    enum_values: Optional[list[str]] = None
+    enum_values: list[str | None] = None
 
     def to_json_schema(self) -> dict[str, Any]:
         """Convert to JSON Schema format for LangChain tools."""
@@ -127,8 +127,8 @@ class ToolDefinition:
     category: ToolCategory
     parameters: dict[str, ToolParameter]
     handler: Callable[..., Any]
-    connector_class: Optional[type] = None
-    method_name: Optional[str] = None
+    connector_class: type | None = None
+    method_name: str | None = None
 
     def get_required_params(self) -> list[str]:
         """Get list of required parameter names."""
@@ -165,9 +165,9 @@ class AIMessage:
 
     role: AIRole
     content: str
-    name: Optional[str] = None
-    tool_call_id: Optional[str] = None
-    tool_calls: Optional[list[dict[str, Any]]] = None
+    name: str | None = None
+    tool_call_id: str | None = None
+    tool_calls: list[dict[str, Any | None]] = None
 
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary format."""
@@ -189,7 +189,7 @@ class AIMessage:
         return cls(role=AIRole.USER, content=content)
 
     @classmethod
-    def assistant(cls, content: str, tool_calls: Optional[list[dict]] = None) -> AIMessage:
+    def assistant(cls, content: str, tool_calls: list[dict | None] = None) -> AIMessage:
         """Create an assistant message."""
         return cls(role=AIRole.ASSISTANT, content=content, tool_calls=tool_calls)
 
@@ -222,9 +222,9 @@ class AIResponse:
     model: str
     provider: AIProvider
     usage: dict[str, int] = field(default_factory=dict)
-    tool_calls: Optional[list[dict[str, Any]]] = None
-    stop_reason: Optional[str] = None
-    raw_response: Optional[Any] = None
+    tool_calls: list[dict[str, Any | None]] = None
+    stop_reason: str | None = None
+    raw_response: Any | None = None
 
     @property
     def has_tool_calls(self) -> bool:

@@ -17,8 +17,8 @@ Example structure:
         category: ToolCategory
         parameters: dict[str, ToolParameter]
         handler: Callable[..., Any]
-        connector_class: Optional[type] = None
-        method_name: Optional[str] = None
+        connector_class: type | None = None
+        method_name: str | None = None
 
     _tool_registry: dict[str, list[StructuredTool]] = {}
 

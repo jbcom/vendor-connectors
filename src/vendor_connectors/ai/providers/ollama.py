@@ -5,7 +5,7 @@ This module provides local model access through Ollama.
 
 from __future__ import annotations
 
-from typing import Any, Optional
+from typing import Any
 
 from vendor_connectors.ai.base import AIProvider
 from vendor_connectors.ai.providers.base import BaseLLMProvider
@@ -27,7 +27,7 @@ class OllamaProvider(BaseLLMProvider):
 
     def __init__(
         self,
-        model: Optional[str] = None,
+        model: str | None = None,
         base_url: str = "http://localhost:11434",
         temperature: float = 0.7,
         **kwargs,

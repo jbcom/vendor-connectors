@@ -6,7 +6,7 @@ vendor connectors, allowing easy discovery and filtering.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from vendor_connectors.ai.base import ToolCategory, ToolDefinition
 
@@ -29,7 +29,7 @@ class ToolRegistry:
         >>> tools = registry.get_tools(categories=[ToolCategory.AWS])
     """
 
-    _instance: Optional[ToolRegistry] = None
+    _instance: ToolRegistry | None = None
 
     def __init__(self):
         """Initialize empty registry."""
@@ -73,7 +73,7 @@ class ToolRegistry:
             if tool.category in self._categories:
                 self._categories[tool.category].discard(name)
 
-    def get(self, name: str) -> Optional[ToolDefinition]:
+    def get(self, name: str) -> ToolDefinition | None:
         """Get a tool by name.
 
         Args:
@@ -86,8 +86,8 @@ class ToolRegistry:
 
     def get_tools(
         self,
-        categories: Optional[list[ToolCategory]] = None,
-        names: Optional[list[str]] = None,
+        categories: list[ToolCategory | None] = None,
+        names: list[str | None] = None,
     ) -> list[ToolDefinition]:
         """Get tools, optionally filtered.
 
@@ -113,7 +113,7 @@ class ToolRegistry:
 
         return tools
 
-    def list_names(self, category: Optional[ToolCategory] = None) -> list[str]:
+    def list_names(self, category: ToolCategory | None = None) -> list[str]:
         """List all registered tool names.
 
         Args:
@@ -148,7 +148,7 @@ class ToolRegistry:
         """
         self._connector_instances[category] = instance
 
-    def get_connector_instance(self, category: ToolCategory) -> Optional[object]:
+    def get_connector_instance(self, category: ToolCategory) -> object | None:
         """Get a connector instance by category.
 
         Args:

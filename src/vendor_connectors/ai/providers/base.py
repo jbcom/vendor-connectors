@@ -7,7 +7,7 @@ provider implementations must follow.
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any
 
 from vendor_connectors.ai.base import AIMessage, AIProvider, AIResponse
 
@@ -32,8 +32,8 @@ class BaseLLMProvider(ABC):
 
     def __init__(
         self,
-        model: Optional[str] = None,
-        api_key: Optional[str] = None,
+        model: str | None = None,
+        api_key: str | None = None,
         temperature: float = 0.7,
         max_tokens: int = 4096,
         **kwargs,
@@ -85,9 +85,9 @@ class BaseLLMProvider(ABC):
     def chat(
         self,
         message: str,
-        system_prompt: Optional[str] = None,
-        history: Optional[list[AIMessage]] = None,
-        tools: Optional[list] = None,
+        system_prompt: str | None = None,
+        history: list[AIMessage | None] = None,
+        tools: list | None = None,
     ) -> AIResponse:
         """Send a chat message and get a response.
 
@@ -190,7 +190,7 @@ class BaseLLMProvider(ABC):
         message: str,
         tools: list,
         max_iterations: int = 10,
-        system_prompt: Optional[str] = None,
+        system_prompt: str | None = None,
     ) -> AIResponse:
         """Execute chat with automatic tool calling loop.
 

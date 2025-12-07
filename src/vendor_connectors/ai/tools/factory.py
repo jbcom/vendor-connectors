@@ -7,7 +7,7 @@ tools from vendor connector methods.
 from __future__ import annotations
 
 import inspect
-from typing import TYPE_CHECKING, Any, Callable, Optional, get_type_hints
+from typing import TYPE_CHECKING, Any, Callable, get_type_hints
 
 from vendor_connectors.ai.base import ToolCategory, ToolDefinition, ToolParameter
 
@@ -30,7 +30,7 @@ def _python_type_to_json_type(py_type: type) -> str:
     # Handle Optional, Union, etc.
     origin = getattr(py_type, "__origin__", None)
     if origin is not None:
-        # For Optional[X], get the inner type
+        # For X | None, get the inner type
         args = getattr(py_type, "__args__", ())
         if args:
             return _python_type_to_json_type(args[0])
@@ -39,10 +39,10 @@ def _python_type_to_json_type(py_type: type) -> str:
 
 def tool_from_method(
     method: Callable,
-    name: Optional[str] = None,
-    description: Optional[str] = None,
+    name: str | None = None,
+    description: str | None = None,
     category: ToolCategory = ToolCategory.AWS,
-    connector_class: Optional[type] = None,
+    connector_class: type | None = None,
 ) -> ToolDefinition:
     """Create a ToolDefinition from a method.
 
@@ -120,7 +120,7 @@ def create_tool(
     description: str,
     handler: Callable,
     category: ToolCategory,
-    parameters: Optional[dict[str, ToolParameter]] = None,
+    parameters: dict[str, ToolParameter | None] = None,
 ) -> ToolDefinition:
     """Create a ToolDefinition manually.
 
@@ -175,7 +175,7 @@ class ToolFactory:
         connector_class: type,
         category: ToolCategory,
         include_private: bool = False,
-        method_filter: Optional[Callable[[str], bool]] = None,
+        method_filter: Callable[[str | None, bool]] = None,
     ) -> list[ToolDefinition]:
         """Generate tools from a connector class.
 
@@ -217,7 +217,7 @@ class ToolFactory:
     def to_langchain_tools(
         self,
         tools: list[ToolDefinition],
-        connector_instance: Optional[Any] = None,
+        connector_instance: Any | None = None,
     ) -> list:
         """Convert ToolDefinitions to LangChain StructuredTools.
 
