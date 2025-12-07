@@ -246,6 +246,10 @@ class TestSSOGroups:
                 {"GroupId": "group-2", "DisplayName": "Users"},
             ]
         }
+        # Mock list_group_memberships to prevent infinite loops
+        mock_identitystore.list_group_memberships.return_value = {
+            "GroupMemberships": []
+        }
 
         def get_client(client_name, **kwargs):
             if client_name == "identitystore":
