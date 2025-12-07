@@ -14,52 +14,39 @@ ai = [
     "langgraph>=0.2.0",
 ]
 
-# Individual AI provider extras - users install only what they need
+# Individual AI provider extras - reference core 'ai' to avoid duplication
 ai-anthropic = [
-    "langchain>=0.3.0",
-    "langchain-core>=0.3.0",
-    "langgraph>=0.2.0",
+    "vendor-connectors[ai]",
     "langchain-anthropic>=0.3.0",
 ]
 
 ai-openai = [
-    "langchain>=0.3.0",
-    "langchain-core>=0.3.0",
-    "langgraph>=0.2.0",
+    "vendor-connectors[ai]",
     "langchain-openai>=0.3.0",
 ]
 
 ai-google = [
-    "langchain>=0.3.0",
-    "langchain-core>=0.3.0",
-    "langgraph>=0.2.0",
+    "vendor-connectors[ai]",
     "langchain-google-genai>=2.0.0",
 ]
 
 ai-xai = [
-    "langchain>=0.3.0",
-    "langchain-core>=0.3.0",
-    "langgraph>=0.2.0",
+    "vendor-connectors[ai]",
     "langchain-xai>=0.2.0",
 ]
 
 ai-ollama = [
-    "langchain>=0.3.0",
-    "langchain-core>=0.3.0",
-    "langgraph>=0.2.0",
+    "vendor-connectors[ai]",
     "langchain-ollama>=0.2.0",
 ]
 
-# Bundle: All AI providers
+# Bundle: All AI providers - reference provider extras to avoid duplication
 ai-all = [
-    "langchain>=0.3.0",
-    "langchain-core>=0.3.0",
-    "langgraph>=0.2.0",
-    "langchain-anthropic>=0.3.0",
-    "langchain-openai>=0.3.0",
-    "langchain-google-genai>=2.0.0",
-    "langchain-xai>=0.2.0",
-    "langchain-ollama>=0.2.0",
+    "vendor-connectors[ai-anthropic]",
+    "vendor-connectors[ai-openai]",
+    "vendor-connectors[ai-google]",
+    "vendor-connectors[ai-xai]",
+    "vendor-connectors[ai-ollama]",
 ]
 
 # AI observability - LangSmith tracing
@@ -69,15 +56,8 @@ ai-observability = [
 
 # Full AI installation with all providers and observability
 ai-full = [
-    "langchain>=0.3.0",
-    "langchain-core>=0.3.0",
-    "langgraph>=0.2.0",
-    "langchain-anthropic>=0.3.0",
-    "langchain-openai>=0.3.0",
-    "langchain-google-genai>=2.0.0",
-    "langchain-xai>=0.2.0",
-    "langchain-ollama>=0.2.0",
-    "langsmith>=0.2.0",
+    "vendor-connectors[ai-all]",
+    "vendor-connectors[ai-observability]",
 ]
 
 # ============================================================================

@@ -24,7 +24,7 @@ Universal vendor connectors for cloud providers and third-party services.
 - `mcp`: MCP server integration
 - `vector`: Vector store for RAG
 - `all`: Everything
-- `ai`: LangChain-based AI sub-package (NEW - blocked by PR #16)
+- `ai`: LangChain-based AI sub-package (PR #20)
 - `ai-anthropic`, `ai-openai`, `ai-google`, `ai-xai`, `ai-ollama`: Provider-specific extras
 
 ### Development
