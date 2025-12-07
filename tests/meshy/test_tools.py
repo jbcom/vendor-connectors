@@ -7,7 +7,6 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-
 # Expected tools list - canonical reference for all Meshy tools
 EXPECTED_MESHY_TOOLS = {
     "text3d_generate",
@@ -354,10 +353,10 @@ class TestCrewAITools:
     def test_get_crewai_tools_requires_crewai(self):
         """Test that get_crewai_tools raises ImportError without crewai."""
         with patch.dict("sys.modules", {"crewai_tools": None}):
-            from vendor_connectors.meshy import tools as meshy_tools
-
             # Reload to clear imports
             import importlib
+
+            from vendor_connectors.meshy import tools as meshy_tools
 
             importlib.reload(meshy_tools)
 
