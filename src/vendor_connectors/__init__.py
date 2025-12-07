@@ -1,9 +1,12 @@
 """Vendor Connectors - Universal vendor connectors for the jbcom ecosystem.
 
 This package provides modular connectors for various cloud providers and services:
+- Anthropic: Claude AI API and Agent SDK (NEW)
 - AWS: Organizations, SSO/Identity Center, S3, Secrets Manager
+- Cursor: Background Agent API for AI coding agents (NEW)
 - Google Cloud: Workspace, Cloud Platform, Billing, Services (GKE, Compute, etc.)
 - GitHub: Repository operations, PR management
+- Meshy: 3D asset generation
 - Slack: Channel and message operations
 - Vault: HashiCorp Vault secret management
 - Zoom: User and meeting management
@@ -18,6 +21,16 @@ Usage:
     connector = AWSConnectorFull()
     accounts = connector.get_accounts()
 
+    # Cursor AI agents
+    from vendor_connectors.cursor import CursorConnector
+    cursor = CursorConnector()
+    agents = cursor.list_agents()
+
+    # Anthropic Claude AI
+    from vendor_connectors.anthropic import AnthropicConnector
+    anthropic = AnthropicConnector()
+    response = anthropic.create_message(...)
+
     # Mixin approach for custom connectors
     from vendor_connectors.aws import AWSConnector, AWSOrganizationsMixin
 
@@ -27,10 +40,13 @@ Usage:
 
 from __future__ import annotations
 
-__version__ = "0.1.1"
+__version__ = "0.2.0"
 
 # Meshy AI connector for 3D asset generation
 from vendor_connectors import meshy
+
+# AI/Agent connectors
+from vendor_connectors.anthropic import AnthropicConnector
 from vendor_connectors.aws import (
     AWSConnector,
     AWSConnectorFull,
@@ -44,6 +60,7 @@ from vendor_connectors.cloud_params import (
     get_google_call_params,
 )
 from vendor_connectors.connectors import VendorConnectors
+from vendor_connectors.cursor import CursorConnector
 from vendor_connectors.github import GithubConnector
 from vendor_connectors.google import (
     GoogleBillingMixin,
@@ -58,6 +75,9 @@ from vendor_connectors.vault import VaultConnector
 from vendor_connectors.zoom import ZoomConnector
 
 __all__ = [
+    # AI/Agent connectors
+    "AnthropicConnector",
+    "CursorConnector",
     # AWS
     "AWSConnector",
     "AWSConnectorFull",
