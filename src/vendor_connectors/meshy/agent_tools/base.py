@@ -2,6 +2,13 @@
 
 This module defines the abstract interfaces that all tool providers must implement,
 enabling a consistent API across different agent frameworks (CrewAI, MCP, etc.).
+
+ALIGNMENT NOTE:
+This module uses naming aligned with PR #20's vendor_connectors.ai.base module:
+- ToolParameter (was ParameterDefinition)
+- ToolDefinition with connector_class and method_name fields
+
+This ensures compatibility regardless of which PR merges first.
 """
 
 from __future__ import annotations
@@ -26,31 +33,7 @@ class ToolCategory(str, Enum):
 
 
 @dataclass
-class ToolDefinition:
-    """Definition of a tool that can be exposed to agents.
-
-    This is framework-agnostic - each provider converts this to their
-    native tool format (CrewAI BaseTool, MCP Tool, etc.).
-
-    Attributes:
-        name: Unique tool identifier (snake_case)
-        description: Human-readable description for agents
-        category: Tool category for organization
-        parameters: Dict of parameter name -> ParameterDefinition
-        handler: The actual function that implements the tool
-        requires_api_key: Whether MESHY_API_KEY is required
-    """
-
-    name: str
-    description: str
-    category: ToolCategory
-    parameters: dict[str, ParameterDefinition]
-    handler: Callable[..., str]
-    requires_api_key: bool = True
-
-
-@dataclass
-class ParameterDefinition:
+class ToolParameter:
     """Definition of a tool parameter.
 
     Attributes:
@@ -68,6 +51,40 @@ class ParameterDefinition:
     required: bool = True
     default: Any = None
     enum_values: list[str] | None = None
+
+
+# Backwards compatibility alias
+ParameterDefinition = ToolParameter
+
+
+@dataclass
+class ToolDefinition:
+    """Definition of a tool that can be exposed to agents.
+
+    This is framework-agnostic - each provider converts this to their
+    native tool format (CrewAI BaseTool, MCP Tool, etc.).
+
+    Compatible with vendor_connectors.ai.base.ToolDefinition from PR #20.
+
+    Attributes:
+        name: Unique tool identifier (snake_case)
+        description: Human-readable description for agents
+        category: Tool category for organization
+        parameters: Dict of parameter name -> ToolParameter
+        handler: The actual function that implements the tool
+        requires_api_key: Whether MESHY_API_KEY is required (Meshy-specific)
+        connector_class: Optional reference to connector class (for PR #20 compatibility)
+        method_name: Optional method name this tool wraps (for PR #20 compatibility)
+    """
+
+    name: str
+    description: str
+    category: ToolCategory
+    parameters: dict[str, ToolParameter]
+    handler: Callable[..., str]
+    requires_api_key: bool = True
+    connector_class: type | None = None
+    method_name: str | None = None
 
 
 @dataclass

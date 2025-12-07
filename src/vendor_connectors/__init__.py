@@ -43,10 +43,7 @@ from __future__ import annotations
 __version__ = "0.2.0"
 
 # Meshy AI connector for 3D asset generation
-from vendor_connectors import meshy
-
-# AI/Agent connectors
-from vendor_connectors.anthropic import AnthropicConnector
+from vendor_connectors import ai, meshy
 from vendor_connectors.aws import (
     AWSConnector,
     AWSConnectorFull,
@@ -54,7 +51,6 @@ from vendor_connectors.aws import (
     AWSS3Mixin,
     AWSSSOmixin,
 )
-from vendor_connectors.meshy import MeshyConnector
 from vendor_connectors.cloud_params import (
     get_aws_call_params,
     get_cloud_call_params,
@@ -71,6 +67,7 @@ from vendor_connectors.google import (
     GoogleServicesMixin,
     GoogleWorkspaceMixin,
 )
+from vendor_connectors.meshy import MeshyConnector
 from vendor_connectors.slack import SlackConnector
 from vendor_connectors.vault import VaultConnector
 from vendor_connectors.zoom import ZoomConnector
@@ -105,4 +102,6 @@ __all__ = [
     # Meshy AI (3D asset generation)
     "MeshyConnector",
     "meshy",
+    # AI tools sub-package
+    "ai",
 ]

@@ -10,8 +10,8 @@ import json
 from typing import Any
 
 # Import to register tools
-import vendor_connectors.meshy.agent_tools.tools  # noqa: F401
-from vendor_connectors.meshy.agent_tools.base import (
+import vendor_connectors.ai.tools.meshy_tools  # noqa: F401
+from vendor_connectors.ai.base import (
     BaseToolProvider,
     get_tool_definition,
     get_tool_definitions,

@@ -10,9 +10,7 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-# Import to register tools
-import vendor_connectors.meshy.agent_tools.tools  # noqa: F401
-from vendor_connectors.meshy.agent_tools.base import (
+from vendor_connectors.ai.base import (
     BaseToolProvider,
     ToolDefinition,
     get_tool_definitions,
@@ -104,6 +102,11 @@ class CrewAIToolProvider(BaseToolProvider):
         """Create tool classes if not already done."""
         if self._tool_classes:
             return
+
+        # Lazy import to ensure tools are registered on-demand
+        from vendor_connectors.ai.tools.meshy_tools import _ensure_tools_registered
+
+        _ensure_tools_registered()
 
         for definition in get_tool_definitions():
             try:
