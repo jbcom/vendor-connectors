@@ -61,7 +61,9 @@ MAX_REPO_LENGTH = 200
 AGENT_ID_PATTERN = re.compile(r"^[a-zA-Z0-9-]+$")
 
 # Blocked patterns for SSRF protection
+# Note: urlparse returns hostname WITHOUT brackets for IPv6, so patterns match raw IPv6
 BLOCKED_HOSTNAME_PATTERNS = [
+    # IPv4 localhost and private ranges
     re.compile(r"^localhost$", re.IGNORECASE),
     re.compile(r"^127\."),
     re.compile(r"^10\."),
@@ -69,10 +71,13 @@ BLOCKED_HOSTNAME_PATTERNS = [
     re.compile(r"^192\.168\."),
     re.compile(r"^169\.254\."),
     re.compile(r"^0\."),
-    re.compile(r"^\[::1\]$"),
-    re.compile(r"^\[fc", re.IGNORECASE),
-    re.compile(r"^\[fd", re.IGNORECASE),
-    re.compile(r"^\[fe80:", re.IGNORECASE),
+    # IPv6 addresses (urlparse strips brackets, so match raw addresses)
+    re.compile(r"^::1$"),  # IPv6 localhost
+    re.compile(r"^fc", re.IGNORECASE),  # IPv6 unique local (fc00::/7)
+    re.compile(r"^fd", re.IGNORECASE),  # IPv6 unique local (fd00::/8)
+    re.compile(r"^fe80:", re.IGNORECASE),  # IPv6 link-local
+    re.compile(r"^::ffff:", re.IGNORECASE),  # IPv4-mapped IPv6
+    # DNS-based blocks
     re.compile(r"^metadata\.", re.IGNORECASE),
     re.compile(r"^internal\.", re.IGNORECASE),
     re.compile(r"\.local$", re.IGNORECASE),
@@ -452,12 +457,14 @@ class CursorConnector(DirectedInputsClass):
 
         Raises:
             CursorValidationError: If agent_id is invalid.
-            CursorAPIError: If the API request fails.
+            CursorAPIError: If the API request fails or returns empty response.
         """
         validate_agent_id(agent_id)
         self.logger.info(f"Getting status for agent: {agent_id}")
 
         data = self._request(f"/agents/{agent_id}")
+        if not data:
+            raise CursorAPIError(f"Empty response when getting agent status for {agent_id}")
         return Agent.model_validate(data)
 
     def get_agent_conversation(self, agent_id: str) -> Conversation:
@@ -563,6 +570,8 @@ class CursorConnector(DirectedInputsClass):
             body["webhook"] = webhook
 
         data = self._request("/agents", method="POST", json_body=body)
+        if not data:
+            raise CursorAPIError("Empty response when launching agent")
         return Agent.model_validate(data)
 
     def add_followup(self, agent_id: str, prompt_text: str) -> None:

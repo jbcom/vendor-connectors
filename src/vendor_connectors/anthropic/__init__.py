@@ -464,7 +464,7 @@ class AnthropicConnector(DirectedInputsClass):
     # Agent Execution (Sandbox Mode)
     # =========================================================================
 
-    async def execute_agent_task(
+    def execute_agent_task(
         self,
         task: str,
         working_dir: Optional[str] = None,
@@ -475,11 +475,12 @@ class AnthropicConnector(DirectedInputsClass):
         """Execute a task using Claude as an agent (sandbox mode).
 
         This is a simplified agent execution pattern for local single-agent
-        workflows. For full agent capabilities, use the Claude Agent SDK directly.
+        workflows. For full agent capabilities, consider using LangChain agents
+        or the agentic-control package.
 
         Args:
             task: The task description.
-            working_dir: Working directory for execution.
+            working_dir: Working directory for execution context.
             model: Model to use (default: claude-sonnet-4-5-20250929).
             max_tokens: Maximum tokens per response.
             system_prompt: Optional custom system prompt.
@@ -488,9 +489,10 @@ class AnthropicConnector(DirectedInputsClass):
             AgentExecutionResult with execution details.
 
         Note:
-            This is a simplified implementation. For production agent workflows,
-            consider using the full Claude Agent SDK (@anthropic-ai/claude-agent-sdk)
-            or the agentic-control package which provides proper agent orchestration.
+            This is a simplified synchronous implementation. For production
+            agent workflows with tools and multi-turn conversations, consider
+            using LangChain/LangGraph which will be available in the
+            vendor_connectors.ai sub-package.
         """
         import time
 

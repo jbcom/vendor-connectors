@@ -88,6 +88,7 @@ class TestValidators:
 
     def test_validate_webhook_url_internal(self):
         """Internal/private URLs should fail (SSRF protection)."""
+        # IPv4 localhost and private ranges
         with pytest.raises(CursorValidationError, match="internal"):
             validate_webhook_url("https://localhost/webhook")
         with pytest.raises(CursorValidationError, match="internal"):
@@ -96,6 +97,20 @@ class TestValidators:
             validate_webhook_url("https://192.168.1.1/webhook")
         with pytest.raises(CursorValidationError, match="internal"):
             validate_webhook_url("https://10.0.0.1/webhook")
+
+    def test_validate_webhook_url_ipv6_internal(self):
+        """IPv6 internal addresses should fail (SSRF protection)."""
+        # IPv6 localhost
+        with pytest.raises(CursorValidationError, match="internal"):
+            validate_webhook_url("https://[::1]/webhook")
+        # IPv6 unique local addresses (fc00::/7, fd00::/8)
+        with pytest.raises(CursorValidationError, match="internal"):
+            validate_webhook_url("https://[fc00::1]/webhook")
+        with pytest.raises(CursorValidationError, match="internal"):
+            validate_webhook_url("https://[fd12:3456::1]/webhook")
+        # IPv6 link-local (fe80::/10)
+        with pytest.raises(CursorValidationError, match="internal"):
+            validate_webhook_url("https://[fe80::1]/webhook")
 
 
 class TestModels:
