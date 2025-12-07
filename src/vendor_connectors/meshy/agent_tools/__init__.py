@@ -46,12 +46,23 @@ from vendor_connectors.ai.base import (
     ToolParameter,
     ToolResult,
 )
+from vendor_connectors.meshy.agent_tools.registry import (
+    ToolProvider,
+    get_provider,
+    list_providers,
+    register_provider,
+)
 
 __all__ = [
     "ToolCategory",
     "ToolDefinition",
     "ToolParameter",
     "ToolResult",
+    # Registry functions for backwards compatibility
+    "ToolProvider",
+    "get_provider",
+    "list_providers",
+    "register_provider",
 ]
 
 # Conditional deprecation warning to avoid breaking applications
