@@ -30,17 +30,19 @@ Expert at creating end-to-end tests that prove complete AI agent workflows.
 ```
 tests/e2e/
 ├── __init__.py
-├── conftest.py          # Shared fixtures
-├── fixtures/
-│   └── models/          # Saved GLB files, images, etc.
+├── conftest.py              # Shared config and markers
 └── <connector>/
     ├── __init__.py
-    ├── conftest.py      # Connector-specific fixtures
-    ├── cassettes/       # VCR cassettes
+    ├── conftest.py          # Connector-specific fixtures
+    ├── cassettes/           # VCR cassettes
+    ├── fixtures/
+    │   └── models/          # Saved GLB files, images, etc.
     ├── test_langchain.py
     ├── test_crewai.py
     └── test_strands.py
 ```
+
+**Important:** Each connector has its OWN fixtures directory, not a shared one.
 
 ## Required Test Pattern
 

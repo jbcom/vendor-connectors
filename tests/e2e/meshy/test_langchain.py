@@ -19,8 +19,12 @@ import pytest
 
 @pytest.fixture
 def output_dir() -> Path:
-    """Output directory for generated models - committed to repository."""
-    path = Path(__file__).parent.parent / "fixtures" / "models"
+    """Output directory for generated models - committed to repository.
+
+    Path: tests/e2e/meshy/fixtures/models/
+    Each connector has its own fixtures directory.
+    """
+    path = Path(__file__).parent / "fixtures" / "models"
     path.mkdir(parents=True, exist_ok=True)
     return path
 

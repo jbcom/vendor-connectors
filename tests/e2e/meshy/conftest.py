@@ -1,4 +1,13 @@
-"""Pytest configuration for Meshy E2E tests."""
+"""Pytest configuration for Meshy E2E tests.
+
+Directory structure:
+    tests/e2e/meshy/
+    ├── conftest.py          # This file
+    ├── cassettes/           # VCR cassettes for API replay
+    ├── fixtures/
+    │   └── models/          # Generated GLB files
+    └── test_*.py            # Test files
+"""
 
 from __future__ import annotations
 
@@ -10,7 +19,8 @@ import pytest
 # Meshy E2E directories
 MESHY_E2E_DIR = Path(__file__).parent
 CASSETTES_DIR = MESHY_E2E_DIR / "cassettes"
-MODELS_OUTPUT_DIR = MESHY_E2E_DIR.parent / "fixtures" / "models"
+FIXTURES_DIR = MESHY_E2E_DIR / "fixtures"
+MODELS_OUTPUT_DIR = FIXTURES_DIR / "models"
 
 
 @pytest.fixture(scope="session")
@@ -22,7 +32,10 @@ def meshy_cassettes_dir() -> Path:
 
 @pytest.fixture
 def models_output_dir() -> Path:
-    """Return the models output directory for downloaded GLBs."""
+    """Return the models output directory for downloaded GLBs.
+
+    Path: tests/e2e/meshy/fixtures/models/
+    """
     MODELS_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     return MODELS_OUTPUT_DIR
 

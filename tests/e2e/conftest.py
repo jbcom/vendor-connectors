@@ -2,6 +2,16 @@
 
 This module provides common fixtures and configuration used across
 all E2E test subpackages.
+
+Directory structure:
+    tests/e2e/
+    ├── conftest.py          # This file (shared config)
+    └── <connector>/
+        ├── conftest.py      # Connector-specific config
+        ├── cassettes/       # VCR cassettes
+        ├── fixtures/        # Connector-specific fixtures
+        │   └── models/      # Generated GLB files, etc.
+        └── test_*.py        # Test files
 """
 
 from __future__ import annotations
@@ -11,16 +21,8 @@ from pathlib import Path
 
 import pytest
 
-# Base directories
+# Base directory
 E2E_DIR = Path(__file__).parent
-FIXTURES_DIR = E2E_DIR / "fixtures"
-
-
-@pytest.fixture(scope="session")
-def e2e_fixtures_dir() -> Path:
-    """Return the shared E2E fixtures directory."""
-    FIXTURES_DIR.mkdir(parents=True, exist_ok=True)
-    return FIXTURES_DIR
 
 
 @pytest.fixture
