@@ -228,3 +228,11 @@ version_variables = ["src/vendor_connectors/__init__.py:__version__"]
 [tool.semantic_release.branches.main]
 match = "main"
 prerelease = false
+
+[tool.uv.sources]
+ai-test-generator = { path = "/tmp/ai-test-cli", editable = true }
+
+[dependency-groups]
+dev = [
+    "ai-test-generator",
+]
