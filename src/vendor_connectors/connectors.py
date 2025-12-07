@@ -34,6 +34,10 @@ class VendorConnectors(DirectedInputsClass):
         slack = vc.get_slack_client(token="...", bot_token="...")
         github = vc.get_github_client(github_owner="org", github_token="...")
         aws_client = vc.get_aws_client("s3")
+
+    For Meshy AI, use the functional interface directly:
+        from vendor_connectors.meshy import text3d, image3d, rigging, animate
+        model = text3d.generate("a medieval sword")
     """
 
     def __init__(
