@@ -10,7 +10,6 @@ from pathlib import Path
 
 import pytest
 
-
 # Meshy E2E directories
 MESHY_E2E_DIR = Path(__file__).parent
 CASSETTES_DIR = MESHY_E2E_DIR / "cassettes"
@@ -42,6 +41,19 @@ def skip_without_meshy(meshy_api_key: str | None):
     """Skip test if MESHY_API_KEY not set."""
     if not meshy_api_key:
         pytest.skip("MESHY_API_KEY required")
+
+
+@pytest.fixture
+def skip_without_anthropic(anthropic_api_key: str | None):
+    """Skip test if ANTHROPIC_API_KEY not set."""
+    if not anthropic_api_key:
+        pytest.skip("ANTHROPIC_API_KEY required")
+
+
+@pytest.fixture
+def anthropic_api_key() -> str | None:
+    """Get Anthropic API key from environment."""
+    return os.environ.get("ANTHROPIC_API_KEY")
 
 
 @pytest.fixture

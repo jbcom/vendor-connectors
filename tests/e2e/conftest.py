@@ -11,7 +11,6 @@ from pathlib import Path
 
 import pytest
 
-
 # Base directories
 E2E_DIR = Path(__file__).parent
 FIXTURES_DIR = E2E_DIR / "fixtures"

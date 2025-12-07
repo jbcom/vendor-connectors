@@ -1,6 +1,6 @@
 """E2E tests for Meshy tools with CrewAI.
 
-CrewAI supports LangChain tools via LangChainTool adapter.
+Uses the reusable CrewAIRunner for framework-agnostic testing.
 """
 
 from __future__ import annotations
@@ -73,12 +73,28 @@ class TestCrewAIAgentMocked:
 @pytest.mark.e2e
 @pytest.mark.crewai
 class TestCrewAIE2E:
-    """E2E tests with real CrewAI agents."""
+    """E2E tests with real CrewAI agents using reusable runner."""
+
+    @pytest.fixture
+    def runner(self):
+        """Create CrewAI runner with Meshy tools."""
+        pytest.importorskip("crewai")
+
+        from tests.e2e.runners import CrewAIRunner
+        from vendor_connectors.meshy.tools import get_tools
+
+        return CrewAIRunner(
+            tools=get_tools(),
+            role="3D Artist",
+            goal="Generate 3D models using Meshy AI",
+            backstory="An AI assistant that creates 3D game assets.",
+        )
 
     @pytest.mark.skip(reason="Requires API keys for cassette recording")
     @pytest.mark.vcr()
-    def test_crewai_agent_generates_model(
+    def test_agent_generates_model(
         self,
+        runner,
         skip_without_anthropic,
         skip_without_meshy,
         models_output_dir: Path,
@@ -87,33 +103,9 @@ class TestCrewAIE2E:
 
         Cassette: crewai_agent_generates_model.yaml
         """
-        pytest.importorskip("crewai")
-
-        from crewai import Agent, Crew, Task
-        from crewai.tools import LangChainTool
-
-        from vendor_connectors.meshy.tools import get_tools
-
-        langchain_tools = get_tools()
-        crewai_tools = [LangChainTool(tool=t) for t in langchain_tools]
-
-        artist = Agent(
-            role="3D Artist",
-            goal="Generate 3D models using Meshy AI",
-            backstory="An AI assistant that creates 3D assets.",
-            tools=crewai_tools,
-            llm="anthropic/claude-haiku-4-5-20251001",
-            verbose=True,
+        result = runner.run(
+            "Generate a 3D model of a wooden sword using text3d_generate."
         )
 
-        task = Task(
-            description="Generate a 3D model of a wooden sword using text3d_generate.",
-            agent=artist,
-            expected_output="A dictionary with task_id, status, and model_url",
-        )
-
-        crew = Crew(agents=[artist], tasks=[task], verbose=True)
-        result = crew.kickoff()
-
-        assert result is not None
-        assert "task_id" in str(result) or "model" in str(result).lower()
+        assert result.success
+        assert "task" in result.output.lower() or "model" in result.output.lower()

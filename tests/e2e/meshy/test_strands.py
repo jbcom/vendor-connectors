@@ -1,6 +1,6 @@
 """E2E tests for Meshy tools with AWS Strands Agents.
 
-Strands supports Python function tools and MCP integration.
+Uses the reusable StrandsRunner for framework-agnostic testing.
 """
 
 from __future__ import annotations
@@ -82,44 +82,47 @@ class TestStrandsAgentMocked:
         assert result["task_id"] == "strands_task_123"
         assert result["status"] == "SUCCEEDED"
 
-    def test_extract_tools_for_strands(self):
-        """Test extracting tool functions for Strands Agent."""
-        from vendor_connectors.meshy.tools import (
-            apply_animation,
-            check_task_status,
-            get_animation,
-            image3d_generate,
-            list_animations,
-            retexture_model,
-            rig_model,
-            text3d_generate,
-        )
+    def test_extract_functions_from_langchain_tools(self):
+        """Test extracting functions from LangChain tools for Strands."""
+        from vendor_connectors.meshy.tools import get_tools
 
-        strands_tools = [
-            text3d_generate,
-            image3d_generate,
-            rig_model,
-            apply_animation,
-            retexture_model,
-            list_animations,
-            check_task_status,
-            get_animation,
-        ]
+        tools = get_tools()
 
-        assert len(strands_tools) == 8
-        for tool in strands_tools:
-            assert callable(tool)
+        # Extract underlying functions (what StrandsRunner does)
+        functions = [tool.func for tool in tools]
+
+        assert len(functions) == 8
+        for func in functions:
+            assert callable(func)
 
 
 @pytest.mark.e2e
 @pytest.mark.strands
 class TestStrandsE2E:
-    """E2E tests with real Strands agents."""
+    """E2E tests with real Strands agents using reusable runner."""
+
+    @pytest.fixture
+    def runner(self):
+        """Create Strands runner with Meshy tools."""
+        pytest.importorskip("strands")
+
+        from tests.e2e.runners import StrandsRunner
+        from vendor_connectors.meshy.tools import (
+            check_task_status,
+            list_animations,
+            text3d_generate,
+        )
+
+        # Strands uses functions directly, not LangChain tools
+        return StrandsRunner(
+            tools=[text3d_generate, list_animations, check_task_status],
+        )
 
     @pytest.mark.skip(reason="Requires API keys for cassette recording")
     @pytest.mark.vcr()
-    def test_strands_agent_generates_model(
+    def test_agent_generates_model(
         self,
+        runner,
         skip_without_anthropic,
         skip_without_meshy,
         models_output_dir: Path,
@@ -128,46 +131,12 @@ class TestStrandsE2E:
 
         Cassette: strands_agent_generates_model.yaml
         """
-        strands = pytest.importorskip("strands")
-
-        from strands import Agent
-
-        from vendor_connectors.meshy.tools import (
-            check_task_status,
-            list_animations,
-            text3d_generate,
-        )
-
-        agent = Agent(
-            tools=[text3d_generate, list_animations, check_task_status],
-        )
-
-        result = agent(
+        result = runner.run(
             "Generate a 3D model of a wooden sword using text3d_generate."
         )
 
-        assert result is not None
-        response_text = str(result)
+        assert result.success
         assert any(
-            term in response_text.lower()
+            term in result.output.lower()
             for term in ["task", "model", "sword", "generated"]
         )
-
-
-@pytest.mark.e2e
-@pytest.mark.strands
-class TestStrandsMCP:
-    """Tests for Strands MCP integration."""
-
-    @pytest.mark.skip(reason="Requires running MCP server")
-    def test_strands_with_meshy_mcp_server(
-        self,
-        skip_without_anthropic,
-        skip_without_meshy,
-    ):
-        """Test Strands using Meshy MCP server.
-
-        Requires MCP server running:
-            python -m vendor_connectors.meshy.mcp
-        """
-        pytest.skip("MCP server integration not yet implemented")
