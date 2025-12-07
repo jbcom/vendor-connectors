@@ -16,6 +16,7 @@ Key Types:
 
 from __future__ import annotations
 
+import threading
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from enum import Enum
@@ -186,20 +187,49 @@ class BaseToolProvider(ABC):
         return [t.name if hasattr(t, "name") else str(t) for t in self.get_tools()]
 
 
-# Core tool definitions - framework-agnostic
-TOOL_DEFINITIONS: dict[str, ToolDefinition] = {}
+# Thread-safe tool registry
+
+
+class ToolRegistry:
+    """Thread-safe registry for tool definitions.
+
+    Addresses thread safety concerns with global mutable state.
+    """
+
+    def __init__(self):
+        self._tools: dict[str, ToolDefinition] = {}
+        self._lock = threading.RLock()
+
+    def register(self, definition: ToolDefinition) -> None:
+        """Register a tool definition."""
+        with self._lock:
+            self._tools[definition.name] = definition
+
+    def get_all(self) -> list[ToolDefinition]:
+        """Get all registered tool definitions."""
+        with self._lock:
+            return list(self._tools.values())
+
+    def get(self, name: str) -> ToolDefinition | None:
+        """Get a specific tool definition by name."""
+        with self._lock:
+            return self._tools.get(name)
+
+
+# Global registry instance
+_registry = ToolRegistry()
 
 
 def register_tool(definition: ToolDefinition) -> None:
     """Register a tool definition."""
-    TOOL_DEFINITIONS[definition.name] = definition
+    _registry.register(definition)
 
 
 def get_tool_definitions() -> list[ToolDefinition]:
     """Get all registered tool definitions."""
-    return list(TOOL_DEFINITIONS.values())
+    return _registry.get_all()
 
 
 def get_tool_definition(name: str) -> ToolDefinition | None:
     """Get a specific tool definition by name."""
-    return TOOL_DEFINITIONS.get(name)
+    return _registry.get(name)

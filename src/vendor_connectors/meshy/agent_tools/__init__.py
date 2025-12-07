@@ -54,13 +54,20 @@ __all__ = [
     "ToolResult",
 ]
 
-# Deprecation warning
+# Conditional deprecation warning to avoid breaking applications
+# that treat warnings as errors. Enable with environment variable.
+import os
 import warnings
 
-warnings.warn(
-    "vendor_connectors.meshy.agent_tools is deprecated. "
-    "Use vendor_connectors.ai instead. "
-    "This compatibility layer will be removed in a future version.",
-    DeprecationWarning,
-    stacklevel=2,
-)
+if os.getenv("VENDOR_CONNECTORS_SHOW_DEPRECATION_WARNINGS", "false").lower() in (
+    "true",
+    "1",
+    "yes",
+):
+    warnings.warn(
+        "vendor_connectors.meshy.agent_tools is deprecated. "
+        "Use vendor_connectors.ai instead. "
+        "This compatibility layer will be removed in a future version.",
+        DeprecationWarning,
+        stacklevel=2,
+    )

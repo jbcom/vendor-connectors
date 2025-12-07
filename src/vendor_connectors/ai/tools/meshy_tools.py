@@ -65,9 +65,11 @@ def handle_text3d_generate(
             success=True,
             data={
                 "id": result.id,
-                "status": result.status.value,
-                "model_url": result.model_urls.glb if result.model_urls else None,
-                "thumbnail_url": result.thumbnail_url,
+                "status": (
+                    getattr(result.status, "value", str(result.status)) if hasattr(result, "status") else "unknown"
+                ),
+                "model_url": (result.model_urls.glb if (hasattr(result, "model_urls") and result.model_urls) else None),
+                "thumbnail_url": getattr(result, "thumbnail_url", None),
             },
             task_id=result.id,
         ).to_json()
@@ -588,5 +590,36 @@ def _register_all_tools():
     )
 
 
-# Register tools on module import
-_register_all_tools()
+# Track if tools have been registered
+_tools_registered = False
+
+
+def _ensure_tools_registered() -> None:
+    """Register tools on-demand to avoid import-time side effects."""
+    global _tools_registered
+    if not _tools_registered:
+        _register_all_tools()
+        _tools_registered = True
+
+
+def get_meshy_tools() -> list[ToolDefinition]:
+    """Get all Meshy tool definitions.
+
+    Returns:
+        List of ToolDefinition objects for Meshy operations.
+    """
+    _ensure_tools_registered()
+    from vendor_connectors.ai.base import get_tool_definitions
+
+    return [
+        tool
+        for tool in get_tool_definitions()
+        if tool.category
+        in [
+            ToolCategory.GENERATION,
+            ToolCategory.RIGGING,
+            ToolCategory.ANIMATION,
+            ToolCategory.TEXTURING,
+            ToolCategory.UTILITY,
+        ]
+    ]
