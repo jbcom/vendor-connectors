@@ -125,8 +125,21 @@ addopts = [
     "--cov-report=term-missing",
 ]
 
+[tool.coverage.run]
+omit = [
+    # AI sub-package is placeholder stubs (blocked by PR #16, not implemented yet)
+    "src/vendor_connectors/ai/*",
+    # Meshy agent_tools requires optional dependencies (crewai, mcp)
+    "src/vendor_connectors/meshy/agent_tools/*",
+]
+
 [tool.coverage.report]
-fail_under = 35
+fail_under = 75
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+    "raise NotImplementedError",
+]
 
 [tool.mypy]
 python_version = "3.9"
