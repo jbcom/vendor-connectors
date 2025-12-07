@@ -15,7 +15,7 @@ Usage:
     )
 
     # Agent execution (sandbox mode)
-    result = await connector.execute_agent_task(
+    result = connector.execute_agent_task(
         task="Implement feature X",
         working_dir="/path/to/repo"
     )
