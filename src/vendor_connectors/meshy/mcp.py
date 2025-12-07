@@ -78,14 +78,22 @@ def _create_mcp_tools() -> list[Any]:
             ),
             "func": tools.text3d_generate,
             "parameters": {
-                "prompt": {"type": "string", "description": "Detailed text description of the 3D model", "required": True},
+                "prompt": {
+                    "type": "string",
+                    "description": "Detailed text description of the 3D model",
+                    "required": True,
+                },
                 "art_style": {
                     "type": "string",
                     "description": "Art style: realistic or sculpture (sculpture disables PBR)",
                     "enum": ["realistic", "sculpture"],
                     "default": "realistic",
                 },
-                "negative_prompt": {"type": "string", "description": "Things to avoid in the generation", "default": ""},
+                "negative_prompt": {
+                    "type": "string",
+                    "description": "Things to avoid in the generation",
+                    "default": "",
+                },
                 "target_polycount": {
                     "type": "integer",
                     "description": "Target polygon count for the model",

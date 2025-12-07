@@ -375,7 +375,7 @@ class VendorConnectorBase(DirectedInputsClass, ABC):
                 if param.annotation != inspect.Parameter.empty:
                     if param.annotation in (int, float):
                         param_type = "number"
-                    elif param.annotation == bool:
+                    elif param.annotation is bool:
                         param_type = "boolean"
 
                 properties[param_name] = {"type": param_type}
@@ -383,15 +383,17 @@ class VendorConnectorBase(DirectedInputsClass, ABC):
                 if param.default == inspect.Parameter.empty:
                     required.append(param_name)
 
-            definitions.append({
-                "name": name,
-                "description": func.__doc__ or f"Tool: {name}",
-                "inputSchema": {
-                    "type": "object",
-                    "properties": properties,
-                    "required": required,
-                },
-            })
+            definitions.append(
+                {
+                    "name": name,
+                    "description": func.__doc__ or f"Tool: {name}",
+                    "inputSchema": {
+                        "type": "object",
+                        "properties": properties,
+                        "required": required,
+                    },
+                }
+            )
 
         return definitions
 

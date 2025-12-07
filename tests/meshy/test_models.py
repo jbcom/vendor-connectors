@@ -45,15 +45,23 @@ class TestTaskStatus:
 
 
 class TestArtStyle:
-    """Tests for ArtStyle enum."""
+    """Tests for ArtStyle enum.
+
+    Per Meshy API docs (https://docs.meshy.ai/en/api/text-to-3d):
+    - realistic: Realistic style
+    - sculpture: Sculpture style (enable_pbr should be false)
+    """
 
     def test_all_styles_exist(self):
         """Verify all expected art styles are defined."""
         assert ArtStyle.REALISTIC == "realistic"
-        assert ArtStyle.CARTOON == "cartoon"
-        assert ArtStyle.LOW_POLY == "low-poly"
-        assert ArtStyle.SCULPT == "sculpt"
-        assert ArtStyle.PBR == "pbr"
+        assert ArtStyle.SCULPTURE == "sculpture"
+
+    def test_only_two_styles(self):
+        """Verify only valid styles exist (per Meshy API)."""
+        styles = list(ArtStyle)
+        assert len(styles) == 2
+        assert {s.value for s in styles} == {"realistic", "sculpture"}
 
 
 class TestText3DRequest:
@@ -71,15 +79,15 @@ class TestText3DRequest:
         request = Text3DRequest(
             mode="refine",
             prompt="A detailed robot",
-            art_style=ArtStyle.CARTOON,
+            art_style=ArtStyle.SCULPTURE,
             negative_prompt="low quality",
             ai_model="meshy-4",
             topology="quad",
             target_polycount=10000,
-            enable_pbr=True,
+            enable_pbr=False,  # sculpture style disables PBR
         )
         assert request.mode == "refine"
-        assert request.art_style == ArtStyle.CARTOON
+        assert request.art_style == ArtStyle.SCULPTURE
         assert request.target_polycount == 10000
 
     def test_model_dump_excludes_none(self):

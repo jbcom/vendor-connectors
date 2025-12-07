@@ -56,6 +56,7 @@ __version__ = "0.2.0"
 
 # Sub-packages
 from vendor_connectors import meshy
+from vendor_connectors.anthropic import AnthropicConnector
 from vendor_connectors.aws import (
     AWSConnector,
     AWSConnectorFull,
@@ -63,6 +64,7 @@ from vendor_connectors.aws import (
     AWSS3Mixin,
     AWSSSOmixin,
 )
+from vendor_connectors.base import VendorConnectorBase
 from vendor_connectors.cloud_params import (
     get_aws_call_params,
     get_cloud_call_params,
@@ -84,6 +86,8 @@ from vendor_connectors.vault import VaultConnector
 from vendor_connectors.zoom import ZoomConnector
 
 __all__ = [
+    # Base class for all connectors
+    "VendorConnectorBase",
     # AI/Agent connectors
     "AnthropicConnector",
     "CursorConnector",

@@ -445,7 +445,7 @@ def get_crewai_tools() -> list[Any]:
         from crewai_tools import tool
     except ImportError as e:
         raise ImportError(
-            "crewai is required for CrewAI tools. " "Install with: pip install vendor-connectors[meshy-crewai]"
+            "crewai is required for CrewAI tools. Install with: pip install vendor-connectors[meshy-crewai]"
         ) from e
 
     # CrewAI uses the @tool decorator to wrap functions

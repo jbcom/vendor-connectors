@@ -68,13 +68,17 @@ class TestLangChainE2E:
         agent = create_react_agent(llm, tools)
 
         # Run the agent - this will wait for the model to be generated
-        result = agent.invoke({
-            "messages": [(
-                "user",
-                "Generate a 3D model of a wooden sword using text3d_generate. "
-                "Use prompt='a simple wooden sword with a carved handle' and art_style='realistic'."
-            )]
-        })
+        result = agent.invoke(
+            {
+                "messages": [
+                    (
+                        "user",
+                        "Generate a 3D model of a wooden sword using text3d_generate. "
+                        "Use prompt='a simple wooden sword with a carved handle' and art_style='realistic'.",
+                    )
+                ]
+            }
+        )
 
         # Verify we got tool calls and a result
         messages = result["messages"]
@@ -124,7 +128,9 @@ class TestLangChainE2E:
 
         # Check the final response mentions success
         final_content = str(messages[-1].content) if hasattr(messages[-1], "content") else str(messages[-1])
-        assert "task" in final_content.lower() or "model" in final_content.lower() or "succeeded" in final_content.lower()
+        assert (
+            "task" in final_content.lower() or "model" in final_content.lower() or "succeeded" in final_content.lower()
+        )
 
     @pytest.mark.vcr()
     @pytest.mark.timeout(60)
@@ -139,12 +145,9 @@ class TestLangChainE2E:
         tools = get_tools()
         agent = create_react_agent(llm, tools)
 
-        result = agent.invoke({
-            "messages": [(
-                "user",
-                "List available animations using list_animations. Show me fighting animations."
-            )]
-        })
+        result = agent.invoke(
+            {"messages": [("user", "List available animations using list_animations. Show me fighting animations.")]}
+        )
 
         messages = result["messages"]
         final_content = str(messages[-1].content) if hasattr(messages[-1], "content") else str(messages[-1])

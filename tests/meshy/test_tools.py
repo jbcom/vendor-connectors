@@ -68,7 +68,12 @@ class TestText3DGenerate:
         assert result["thumbnail_url"] == "https://example.com/thumb.png"
 
     def test_generation_with_defaults(self):
-        """Test generation with default parameters."""
+        """Test generation with default parameters.
+
+        Per Meshy API docs, defaults are:
+        - art_style: realistic
+        - target_polycount: 30000
+        """
         from vendor_connectors.meshy.tools import text3d_generate
 
         mock_result = MagicMock()
@@ -81,12 +86,12 @@ class TestText3DGenerate:
         with patch("vendor_connectors.meshy.text3d.generate", return_value=mock_result) as mock_gen:
             result = text3d_generate(prompt="test prompt")
 
-            # Verify defaults were used
+            # Verify defaults were used (per Meshy API docs)
             mock_gen.assert_called_once_with(
                 "test prompt",
-                art_style="sculpture",
+                art_style="realistic",
                 negative_prompt="",
-                target_polycount=15000,
+                target_polycount=30000,
                 enable_pbr=True,
                 wait=True,
             )

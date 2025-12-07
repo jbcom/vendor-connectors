@@ -18,11 +18,12 @@ class TaskStatus(str, Enum):
 
 class ArtStyle(str, Enum):
     """Art style for text-to-3D generation.
-    
+
     Per Meshy API docs:
     - realistic: Realistic style
     - sculpture: Sculpture style (enable_pbr should be false)
     """
+
     REALISTIC = "realistic"
     SCULPTURE = "sculpture"
 

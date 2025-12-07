@@ -83,16 +83,16 @@ interactions:
     uri: https://api.anthropic.com/v1/messages
   response:
     body:
-      string: '{"model":"claude-haiku-4-5-20251001","id":"msg_01PDzXKJvcd6hin4NAzao5b2","type":"message","role":"assistant","content":[{"type":"tool_use","id":"toolu_01NzR7L9Wm6c5x87G98d9sVf","name":"list_animations","input":{"category":"fighting"}}],"stop_reason":"tool_use","stop_sequence":null,"usage":{"input_tokens":1459,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":54,"service_tier":"standard"}}'
+      string: '{"model":"claude-haiku-4-5-20251001","id":"msg_01C4Gd1zq2qPJx9sAiCQmKSW","type":"message","role":"assistant","content":[{"type":"tool_use","id":"toolu_016TTCHvRPs5MiHX3W33Nw6o","name":"list_animations","input":{"category":"fighting"}}],"stop_reason":"tool_use","stop_sequence":null,"usage":{"input_tokens":1459,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":54,"service_tier":"standard"}}'
     headers:
       CF-RAY:
-      - 9aa772ccec2f8257-IAD
+      - 9aa77cbf68676cc7-IAD
       Connection:
       - keep-alive
       Content-Type:
       - application/json
       Date:
-      - Sun, 07 Dec 2025 22:27:07 GMT
+      - Sun, 07 Dec 2025 22:33:54 GMT
       Server:
       - cloudflare
       Transfer-Encoding:
@@ -106,31 +106,31 @@ interactions:
       anthropic-ratelimit-input-tokens-remaining:
       - '4999000'
       anthropic-ratelimit-input-tokens-reset:
-      - '2025-12-07T22:27:06Z'
+      - '2025-12-07T22:33:54Z'
       anthropic-ratelimit-output-tokens-limit:
       - '800000'
       anthropic-ratelimit-output-tokens-remaining:
       - '800000'
       anthropic-ratelimit-output-tokens-reset:
-      - '2025-12-07T22:27:07Z'
+      - '2025-12-07T22:33:54Z'
       anthropic-ratelimit-tokens-limit:
       - '5800000'
       anthropic-ratelimit-tokens-remaining:
       - '5799000'
       anthropic-ratelimit-tokens-reset:
-      - '2025-12-07T22:27:06Z'
+      - '2025-12-07T22:33:54Z'
       cf-cache-status:
       - DYNAMIC
       content-length:
       - '496'
       request-id:
-      - req_011CVt7ZKTiAqPFd7zZ4PtRG
+      - req_011CVt85MLfFWT1szwm78VdV
       retry-after:
-      - '54'
+      - '6'
       strict-transport-security:
       - max-age=31536000; includeSubDomains; preload
       x-envoy-upstream-service-time:
-      - '703'
+      - '620'
     status:
       code: 200
       message: OK
@@ -138,7 +138,7 @@ interactions:
     body: '{"max_tokens": 64000, "messages": [{"role": "user", "content": "List available
       animations using list_animations. Show me fighting animations."}, {"role": "assistant",
       "content": [{"type": "tool_use", "name": "list_animations", "input": {"category":
-      "fighting"}, "id": "toolu_01NzR7L9Wm6c5x87G98d9sVf"}]}, {"role": "user", "content":
+      "fighting"}, "id": "toolu_016TTCHvRPs5MiHX3W33Nw6o"}]}, {"role": "user", "content":
       [{"type": "tool_result", "content": "{\"count\": 50, \"total\": 154, \"animations\":
       [{\"id\": 4, \"name\": \"Attack\", \"category\": \"Fighting\", \"subcategory\":
       \"AttackingwithWeapon\"}, {\"id\": 7, \"name\": \"BeHit_FlyUp\", \"category\":
@@ -205,7 +205,7 @@ interactions:
       \"Blocking\"}, {\"id\": 148, \"name\": \"Sword_Parry_Backward\", \"category\":
       \"Fighting\", \"subcategory\": \"Blocking\"}, {\"id\": 149, \"name\": \"Two_Handed_Parry\",
       \"category\": \"Fighting\", \"subcategory\": \"Blocking\"}]}", "tool_use_id":
-      "toolu_01NzR7L9Wm6c5x87G98d9sVf", "is_error": false}]}], "model": "claude-haiku-4-5-20251001",
+      "toolu_016TTCHvRPs5MiHX3W33Nw6o", "is_error": false}]}], "model": "claude-haiku-4-5-20251001",
       "tools": [{"name": "text3d_generate", "input_schema": {"properties": {"prompt":
       {"type": "string"}, "art_style": {"default": "realistic", "type": "string"},
       "negative_prompt": {"default": "", "type": "string"}, "target_polycount": {"default":
@@ -287,34 +287,32 @@ interactions:
     uri: https://api.anthropic.com/v1/messages
   response:
     body:
-      string: '{"model":"claude-haiku-4-5-20251001","id":"msg_019Y1eSHErrVXY2UwUQuxvJZ","type":"message","role":"assistant","content":[{"type":"text","text":"Great!
-        Here are the available fighting animations. I found 50 animations out of 154
-        total fighting animations. Here''s a breakdown by subcategory:\n\n**Attacking
-        with Weapon:**\n- Attack (ID: 4)\n- Basic_Jump (ID: 86)\n- Combat_Stance (ID:
-        89)\n- Double_Blade_Spin (ID: 91)\n- Double_Combo_Attack (ID: 92)\n- Gun_Hold_Left_Turn
-        (ID: 95)\n- Left_Slash (ID: 97)\n- Run_and_Shoot (ID: 98)\n- Sword_Judgment
-        (ID: 102)\n- Simple_Kick (ID: 103)\n- Side_Shot (ID: 104)\n- Triple_Combo_Attack
-        (ID: 105)\n- Heavy_Hammer_Swing (ID: 128)\n\n**Punching:**\n- Boxing_Practice
-        (ID: 87)\n- Counterstrike (ID: 90)\n- Dodge_and_Counter (ID: 93)\n- Flying_Fist_Kick
-        (ID: 94)\n- Kung_Fu_Punch (ID: 96)\n\n**Casting Spell:**\n- Charged_Spell_Cast
-        (IDs: 125, 126)\n- Charged_Ground_Slam (ID: 127)\n- Mage_Spell_Cast (IDs:
-        129-137)\n\n**Blocking:**\n- Block1-Block10 (IDs: 138-146)\n- Sword_Parry
-        (ID: 147)\n- Sword_Parry_Backward (ID: 148)\n- Two_Handed_Parry (ID: 149)\n\n**Other
-        Fighting Animations:**\n- BeHit_FlyUp (ID: 7) - Getting Hit\n- Dead (ID: 8)
-        - Dying\n- ForwardLeft_Run_Fight (ID: 9) - Transitioning\n- ForwardRight_Run_Fight
-        (ID: 10) - Transitioning\n- Axe_Stance (ID: 85) - Transitioning\n- Chest_Pound_Taunt
-        (ID: 88) - Transitioning\n- Reaping_Swing (ID: 99) - Transitioning\n- Rightward_Spin
-        (ID: 100) - Transitioning\n\nWould you like more details about any specific
-        animation, or would you like to apply one to a 3D model?"}],"stop_reason":"end_turn","stop_sequence":null,"usage":{"input_tokens":3302,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":589,"service_tier":"standard"}}'
+      string: '{"model":"claude-haiku-4-5-20251001","id":"msg_016M4EKkeChgb4esAVcd2vyK","type":"message","role":"assistant","content":[{"type":"text","text":"Great!
+        I found 50 fighting animations (out of 154 total). Here''s a breakdown organized
+        by subcategory:\n\n## **Attacking with Weapon** (8 animations)\n- ID 4: Attack\n-
+        ID 86: Basic_Jump\n- ID 89: Combat_Stance\n- ID 91: Double_Blade_Spin\n- ID
+        92: Double_Combo_Attack\n- ID 97: Left_Slash\n- ID 102: Sword_Judgment\n-
+        ID 103: Simple_Kick\n- ID 104: Side_Shot\n- ID 105: Triple_Combo_Attack\n-
+        ID 128: Heavy_Hammer_Swing\n\n## **Punching** (5 animations)\n- ID 87: Boxing_Practice\n-
+        ID 90: Counterstrike\n- ID 93: Dodge_and_Counter\n- ID 94: Flying_Fist_Kick\n-
+        ID 96: Kung_Fu_Punch\n\n## **Getting Hit** (1 animation)\n- ID 7: BeHit_FlyUp\n\n##
+        **Dying** (1 animation)\n- ID 8: Dead\n\n## **Transitioning** (5 animations)\n-
+        ID 9: ForwardLeft_Run_Fight\n- ID 10: ForwardRight_Run_Fight\n- ID 85: Axe_Stance\n-
+        ID 88: Chest_Pound_Taunt\n- ID 99: Reaping_Swing\n- ID 100: Rightward_Spin\n\n##
+        **Spell Casting** (10 animations)\n- ID 125-137: Various charged spell casts
+        and mage spell casts\n\n## **Blocking** (10 animations)\n- ID 138-149: Various
+        blocking and parry animations\n\nThere are more animations available. Would
+        you like me to see the rest, or would you like details about any specific
+        animation?"}],"stop_reason":"end_turn","stop_sequence":null,"usage":{"input_tokens":3302,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":444,"service_tier":"standard"}}'
     headers:
       CF-RAY:
-      - 9aa772d1cc95d6c4-IAD
+      - 9aa77cc3d8de3938-IAD
       Connection:
       - keep-alive
       Content-Type:
       - application/json
       Date:
-      - Sun, 07 Dec 2025 22:27:12 GMT
+      - Sun, 07 Dec 2025 22:33:59 GMT
       Server:
       - cloudflare
       Transfer-Encoding:
@@ -328,31 +326,31 @@ interactions:
       anthropic-ratelimit-input-tokens-remaining:
       - '4998000'
       anthropic-ratelimit-input-tokens-reset:
-      - '2025-12-07T22:27:07Z'
+      - '2025-12-07T22:33:55Z'
       anthropic-ratelimit-output-tokens-limit:
       - '800000'
       anthropic-ratelimit-output-tokens-remaining:
-      - '799000'
+      - '800000'
       anthropic-ratelimit-output-tokens-reset:
-      - '2025-12-07T22:27:12Z'
+      - '2025-12-07T22:33:59Z'
       anthropic-ratelimit-tokens-limit:
       - '5800000'
       anthropic-ratelimit-tokens-remaining:
-      - '5797000'
+      - '5798000'
       anthropic-ratelimit-tokens-reset:
-      - '2025-12-07T22:27:07Z'
+      - '2025-12-07T22:33:55Z'
       cf-cache-status:
       - DYNAMIC
       content-length:
-      - '1828'
+      - '1617'
       request-id:
-      - req_011CVt7ZNhg3AqqmfXuFofXN
+      - req_011CVt85Qa8QthoCBhhrbjgw
       retry-after:
-      - '54'
+      - '5'
       strict-transport-security:
       - max-age=31536000; includeSubDomains; preload
       x-envoy-upstream-service-time:
-      - '5138'
+      - '4847'
     status:
       code: 200
       message: OK
