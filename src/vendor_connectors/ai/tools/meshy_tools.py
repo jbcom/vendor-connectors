@@ -5,6 +5,7 @@ with various AI frameworks (LangChain, CrewAI, MCP, etc.).
 
 Tools provided:
 - text3d_generate: Generate 3D models from text descriptions
+- image3d_generate: Generate 3D models from images
 - rig_model: Add skeleton/rig to static models
 - apply_animation: Apply animations to rigged models
 - retexture_model: Change model textures
@@ -56,6 +57,51 @@ def handle_text3d_generate(
             prompt,
             art_style=art_style,
             negative_prompt=negative_prompt,
+            target_polycount=target_polycount,
+            enable_pbr=enable_pbr,
+            wait=True,
+        )
+
+        return ToolResult(
+            success=True,
+            data={
+                "id": result.id,
+                "status": (
+                    getattr(result.status, "value", str(result.status)) if hasattr(result, "status") else "unknown"
+                ),
+                "model_url": (result.model_urls.glb if (hasattr(result, "model_urls") and result.model_urls) else None),
+                "thumbnail_url": getattr(result, "thumbnail_url", None),
+            },
+            task_id=result.id,
+        ).to_json()
+
+    except Exception as e:
+        return ToolResult(success=False, error=str(e)).to_json()
+
+
+def handle_image3d_generate(
+    image_url: str,
+    topology: str = "",
+    target_polycount: int = 15000,
+    enable_pbr: bool = True,
+) -> str:
+    """Generate a 3D model from an image.
+
+    Args:
+        image_url: URL to the source image
+        topology: Mesh topology ("quad" or "triangle"), empty for default
+        target_polycount: Target polygon count
+        enable_pbr: Enable PBR materials
+
+    Returns:
+        JSON result with task_id and status
+    """
+    try:
+        from vendor_connectors.meshy import image3d
+
+        result = image3d.generate(
+            image_url,
+            topology=topology if topology else None,
             target_polycount=target_polycount,
             enable_pbr=enable_pbr,
             wait=True,
@@ -273,11 +319,12 @@ def handle_check_task_status(
         JSON with task status and progress
     """
     try:
-        from vendor_connectors.meshy import animate, retexture, rigging, text3d
+        from vendor_connectors.meshy import animate, image3d, retexture, rigging, text3d
 
         # Call the appropriate get function based on task type
         get_funcs = {
             "text-to-3d": text3d.get,
+            "image-to-3d": image3d.get,
             "rigging": rigging.get,
             "animation": animate.get,
             "retexture": retexture.get,
@@ -406,6 +453,49 @@ def _register_all_tools():
                 ),
             },
             handler=handle_text3d_generate,
+        )
+    )
+
+    register_tool(
+        ToolDefinition(
+            name="image3d_generate",
+            description=(
+                "Generate a 3D GLB model from an image using Meshy AI. "
+                "Provide a URL to the source image. Returns the model "
+                "file paths and metadata on success."
+            ),
+            category=ToolCategory.GENERATION,
+            parameters={
+                "image_url": ToolParameter(
+                    name="image_url",
+                    description="URL to the source image",
+                    type=str,
+                    required=True,
+                ),
+                "topology": ToolParameter(
+                    name="topology",
+                    description="Mesh topology type",
+                    type=str,
+                    required=False,
+                    default="",
+                    enum_values=["", "quad", "triangle"],
+                ),
+                "target_polycount": ToolParameter(
+                    name="target_polycount",
+                    description="Target polygon count for the model",
+                    type=int,
+                    required=False,
+                    default=15000,
+                ),
+                "enable_pbr": ToolParameter(
+                    name="enable_pbr",
+                    description="Enable PBR (physically-based rendering) materials",
+                    type=bool,
+                    required=False,
+                    default=True,
+                ),
+            },
+            handler=handle_image3d_generate,
         )
     )
 
@@ -562,7 +652,7 @@ def _register_all_tools():
                     type=str,
                     required=False,
                     default="text-to-3d",
-                    enum_values=["text-to-3d", "rigging", "animation", "retexture"],
+                    enum_values=["text-to-3d", "image-to-3d", "rigging", "animation", "retexture"],
                 ),
             },
             handler=handle_check_task_status,
