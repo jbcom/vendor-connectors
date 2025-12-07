@@ -34,11 +34,17 @@ pip install vendor-connectors
 # For Meshy webhooks
 pip install vendor-connectors[webhooks]
 
-# For CrewAI agent integration
-pip install vendor-connectors[crewai]
+# For Meshy AI tools (LangChain)
+pip install vendor-connectors[meshy-langchain]
 
-# For MCP server integration  
-pip install vendor-connectors[mcp]
+# For Meshy AI tools (CrewAI)
+pip install vendor-connectors[meshy-crewai]
+
+# For Meshy MCP server
+pip install vendor-connectors[meshy-mcp]
+
+# All Meshy AI integrations
+pip install vendor-connectors[meshy-ai]
 
 # For Meshy vector store/RAG
 pip install vendor-connectors[vector]
@@ -163,6 +169,8 @@ repos = cursor.list_repositories()
 
 ### Meshy AI (3D Asset Generation)
 
+#### Basic API Usage
+
 ```python
 from vendor_connectors import meshy
 
@@ -178,6 +186,76 @@ animated = meshy.animate.apply(rigged.id, animation_id=0)  # Idle
 
 # Or retexture it
 gold = meshy.retexture.apply(model.id, "golden with embedded gems")
+```
+
+#### AI Agent Integration
+
+**LangChain Tools:**
+
+```python
+from vendor_connectors.meshy.tools import get_tools
+from langchain_anthropic import ChatAnthropic
+from langgraph.prebuilt import create_react_agent
+
+# Create a LangChain agent with Meshy tools
+llm = ChatAnthropic(model="claude-3-5-sonnet-20241022")
+tools = get_tools()
+agent = create_react_agent(llm, tools)
+
+# Use the agent
+result = agent.invoke({
+    "messages": [("user", "Generate a 3D model of a futuristic spaceship")]
+})
+```
+
+**CrewAI Tools:**
+
+```python
+from vendor_connectors.meshy.tools import get_crewai_tools
+from crewai import Agent, Task, Crew
+
+# Create a CrewAI agent with Meshy tools
+tools = get_crewai_tools()
+artist = Agent(
+    role="3D Artist",
+    goal="Create 3D assets as requested",
+    tools=tools,
+    backstory="Expert 3D modeler specializing in game assets"
+)
+
+task = Task(
+    description="Create a medieval sword and make it ready for animation",
+    agent=artist
+)
+
+crew = Crew(agents=[artist], tasks=[task])
+result = crew.kickoff()
+```
+
+**MCP Server (for Claude Desktop, Cline, etc.):**
+
+```python
+# Run the MCP server
+from vendor_connectors.meshy.mcp import run_server
+run_server()
+
+# Or via command line:
+# meshy-mcp
+```
+
+Configure in Claude Desktop (`~/Library/Application Support/Claude/claude_desktop_config.json`):
+
+```json
+{
+  "mcpServers": {
+    "meshy": {
+      "command": "meshy-mcp",
+      "env": {
+        "MESHY_API_KEY": "your-api-key-here"
+      }
+    }
+  }
+}
 ```
 
 ## Architecture
