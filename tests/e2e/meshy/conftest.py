@@ -1,7 +1,4 @@
-"""Pytest configuration for Meshy E2E tests.
-
-Provides Meshy-specific fixtures and VCR configuration.
-"""
+"""Pytest configuration for Meshy E2E tests."""
 
 from __future__ import annotations
 
@@ -16,7 +13,7 @@ CASSETTES_DIR = MESHY_E2E_DIR / "cassettes"
 MODELS_OUTPUT_DIR = MESHY_E2E_DIR.parent / "fixtures" / "models"
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def meshy_cassettes_dir() -> Path:
     """Return the Meshy cassettes directory."""
     CASSETTES_DIR.mkdir(parents=True, exist_ok=True)
@@ -37,36 +34,16 @@ def meshy_api_key() -> str | None:
 
 
 @pytest.fixture
-def skip_without_meshy(meshy_api_key: str | None):
-    """Skip test if MESHY_API_KEY not set."""
-    if not meshy_api_key:
-        pytest.skip("MESHY_API_KEY required")
-
-
-@pytest.fixture
-def skip_without_anthropic(anthropic_api_key: str | None):
-    """Skip test if ANTHROPIC_API_KEY not set."""
-    if not anthropic_api_key:
-        pytest.skip("ANTHROPIC_API_KEY required")
-
-
-@pytest.fixture
 def anthropic_api_key() -> str | None:
     """Get Anthropic API key from environment."""
     return os.environ.get("ANTHROPIC_API_KEY")
 
 
-@pytest.fixture
-def vcr_config(meshy_cassettes_dir: Path):
-    """VCR configuration for recording Meshy API cassettes.
-
-    Configuration:
-    - Records once (won't re-record if cassette exists)
-    - Filters sensitive API keys from cassettes
-    - Matches requests by method, scheme, host, port, path, query
-    """
+@pytest.fixture(scope="module")
+def vcr_config():
+    """VCR configuration for recording Meshy API cassettes."""
     return {
-        "cassette_library_dir": str(meshy_cassettes_dir),
+        "cassette_library_dir": str(CASSETTES_DIR),
         "record_mode": "once",
         "match_on": ["method", "scheme", "host", "port", "path", "query"],
         "filter_headers": [

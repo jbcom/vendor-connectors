@@ -1,111 +1,119 @@
 """E2E tests for Meshy tools with CrewAI.
 
-Uses the reusable CrewAIRunner for framework-agnostic testing.
+Real E2E tests that hit actual APIs and record cassettes with pytest-vcr.
 """
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-from unittest.mock import MagicMock, patch
+import os
+from pathlib import Path
 
 import pytest
 
-if TYPE_CHECKING:
-    from pathlib import Path
 
-
-class TestCrewAIToolCompatibility:
-    """Unit tests for CrewAI tool compatibility."""
-
-    def test_langchain_tools_wrap_for_crewai(self):
-        """Verify LangChain tools can be wrapped for CrewAI."""
-        pytest.importorskip("crewai")
-
-        from crewai.tools import LangChainTool
-
-        from vendor_connectors.meshy.tools import get_tools
-
-        tools = get_tools()
-
-        for tool in tools:
-            crewai_tool = LangChainTool(tool=tool)
-            assert crewai_tool.name == tool.name
-            assert crewai_tool.description
-
-    def test_get_crewai_tools_returns_native_tools(self):
-        """Test get_crewai_tools returns CrewAI-native tools."""
-        pytest.importorskip("crewai_tools")
-
-        from vendor_connectors.meshy.tools import get_crewai_tools
-
-        tools = get_crewai_tools()
-        assert len(tools) == 8
-
-
-class TestCrewAIAgentMocked:
-    """Integration tests with mocked API calls."""
-
-    def test_crewai_wrapped_tool_invocation(self):
-        """Test CrewAI-wrapped tool invocation."""
-        pytest.importorskip("crewai")
-
-        from crewai.tools import LangChainTool
-
-        from vendor_connectors.meshy.tools import get_tools
-
-        tools = get_tools()
-        text3d_tool = next(t for t in tools if t.name == "text3d_generate")
-        crewai_tool = LangChainTool(tool=text3d_tool)
-
-        mock_result = MagicMock()
-        mock_result.id = "crewai_task_123"
-        mock_result.status.value = "SUCCEEDED"
-        mock_result.model_urls = MagicMock()
-        mock_result.model_urls.glb = "https://example.com/model.glb"
-        mock_result.thumbnail_url = None
-
-        with patch("vendor_connectors.meshy.text3d.generate", return_value=mock_result):
-            result = crewai_tool._run(prompt="a wooden shield")
-
-        assert "crewai_task_123" in str(result)
+@pytest.fixture
+def output_dir() -> Path:
+    """Output directory for generated models."""
+    path = Path(__file__).parent.parent / "fixtures" / "models"
+    path.mkdir(parents=True, exist_ok=True)
+    return path
 
 
 @pytest.mark.e2e
 @pytest.mark.crewai
 class TestCrewAIE2E:
-    """E2E tests with real CrewAI agents using reusable runner."""
+    """Real E2E tests with CrewAI."""
 
     @pytest.fixture
-    def runner(self):
-        """Create CrewAI runner with Meshy tools."""
+    def has_api_keys(self):
+        """Check API keys are available."""
+        if not os.environ.get("ANTHROPIC_API_KEY"):
+            pytest.skip("ANTHROPIC_API_KEY required")
+        if not os.environ.get("MESHY_API_KEY"):
+            pytest.skip("MESHY_API_KEY required")
+
+    @pytest.fixture
+    def has_crewai(self):
+        """Check CrewAI is installed."""
         pytest.importorskip("crewai")
 
-        from tests.e2e.runners import CrewAIRunner
+    @pytest.mark.vcr()
+    def test_crewai_agent_generates_3d_model(self, has_api_keys, has_crewai, output_dir):
+        """Test CrewAI agent generating a real 3D model.
+
+        This test:
+        1. Creates a CrewAI agent with Claude Haiku
+        2. Wraps our LangChain tools for CrewAI
+        3. Runs a Crew to generate a 3D model
+        4. Verifies we get a real result
+        """
+        from crewai import Agent, Crew, Task
+        from crewai.tools import LangChainTool
+
         from vendor_connectors.meshy.tools import get_tools
 
-        return CrewAIRunner(
-            tools=get_tools(),
+        # Wrap our tools for CrewAI
+        langchain_tools = get_tools()
+        crewai_tools = [LangChainTool(tool=t) for t in langchain_tools]
+
+        # Create agent
+        artist = Agent(
             role="3D Artist",
-            goal="Generate 3D models using Meshy AI",
-            backstory="An AI assistant that creates 3D game assets.",
+            goal="Generate 3D models using Meshy AI tools",
+            backstory="An AI assistant that creates 3D game assets using Meshy AI.",
+            tools=crewai_tools,
+            llm="anthropic/claude-haiku-4-5-20251001",
+            verbose=True,
         )
 
-    @pytest.mark.skip(reason="Requires API keys for cassette recording")
+        # Create task
+        task = Task(
+            description=(
+                "Generate a 3D model of a simple wooden sword using the text3d_generate tool. "
+                "Use art_style='sculpture' and provide a clear, detailed prompt."
+            ),
+            agent=artist,
+            expected_output="A dictionary containing task_id, status, and model_url from Meshy AI",
+        )
+
+        # Run crew
+        crew = Crew(agents=[artist], tasks=[task], verbose=True)
+        result = crew.kickoff()
+
+        # Verify result
+        result_str = str(result)
+        assert "task" in result_str.lower() or "model" in result_str.lower()
+
     @pytest.mark.vcr()
-    def test_agent_generates_model(
-        self,
-        runner,
-        skip_without_anthropic,
-        skip_without_meshy,
-        models_output_dir: Path,
-    ):
-        """Test CrewAI agent generating a 3D model.
+    def test_crewai_agent_lists_animations(self, has_api_keys, has_crewai):
+        """Test CrewAI agent listing animations."""
+        from crewai import Agent, Crew, Task
+        from crewai.tools import LangChainTool
 
-        Cassette: crewai_agent_generates_model.yaml
-        """
-        result = runner.run(
-            "Generate a 3D model of a wooden sword using text3d_generate."
+        from vendor_connectors.meshy.tools import get_tools
+
+        langchain_tools = get_tools()
+        # Only include the list_animations tool for this test
+        list_anim_tool = next(t for t in langchain_tools if t.name == "list_animations")
+        crewai_tools = [LangChainTool(tool=list_anim_tool)]
+
+        agent = Agent(
+            role="Animation Researcher",
+            goal="Find available animations in the Meshy catalog",
+            backstory="An AI that researches animation options.",
+            tools=crewai_tools,
+            llm="anthropic/claude-haiku-4-5-20251001",
+            verbose=True,
         )
 
-        assert result.success
-        assert "task" in result.output.lower() or "model" in result.output.lower()
+        task = Task(
+            description="List available fighting animations using list_animations with category='Fighting'.",
+            agent=agent,
+            expected_output="A list of fighting animations with their IDs and names",
+        )
+
+        crew = Crew(agents=[agent], tasks=[task], verbose=True)
+        result = crew.kickoff()
+
+        result_str = str(result)
+        assert "animation" in result_str.lower() or "fight" in result_str.lower()

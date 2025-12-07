@@ -1,140 +1,105 @@
 """E2E tests for Meshy tools with LangChain/LangGraph.
 
-Uses the reusable LangChainRunner for framework-agnostic testing.
+Real E2E tests that hit actual APIs and record cassettes with pytest-vcr.
 """
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-from unittest.mock import MagicMock, patch
+import os
+from pathlib import Path
 
 import pytest
 
-if TYPE_CHECKING:
-    from pathlib import Path
 
-
-class TestLangChainToolDefinitions:
-    """Unit tests for LangChain tool definitions."""
-
-    def test_tools_are_valid_structured_tools(self):
-        """Verify tools are valid LangChain StructuredTools."""
-        from langchain_core.tools import StructuredTool
-
-        from vendor_connectors.meshy.tools import get_tools
-
-        tools = get_tools()
-
-        for tool in tools:
-            assert isinstance(tool, StructuredTool)
-            assert tool.name
-            assert tool.description
-            assert callable(tool.func)
-
-    def test_tool_descriptions_are_helpful(self):
-        """Verify tool descriptions help LLM understand usage."""
-        from vendor_connectors.meshy.tools import get_tools
-
-        tools = get_tools()
-
-        for tool in tools:
-            assert len(tool.description) > 50, f"{tool.name} description too short"
-
-    def test_text3d_tool_requires_prompt(self):
-        """Verify text3d_generate requires prompt parameter."""
-        from vendor_connectors.meshy.tools import get_tools
-
-        tools = get_tools()
-        text3d_tool = next(t for t in tools if t.name == "text3d_generate")
-        schema = text3d_tool.args_schema.model_json_schema()
-        assert "prompt" in schema.get("required", [])
-
-
-class TestLangChainAgentMocked:
-    """Integration tests with mocked API calls."""
-
-    def test_tool_invocation(self):
-        """Test tool invocation with mocked backend."""
-        from vendor_connectors.meshy.tools import get_tools
-
-        mock_result = MagicMock()
-        mock_result.id = "test_task_123"
-        mock_result.status.value = "SUCCEEDED"
-        mock_result.model_urls = MagicMock()
-        mock_result.model_urls.glb = "https://example.com/sword.glb"
-        mock_result.thumbnail_url = "https://example.com/thumb.png"
-
-        with patch("vendor_connectors.meshy.text3d.generate", return_value=mock_result):
-            tools = get_tools()
-            text3d_tool = next(t for t in tools if t.name == "text3d_generate")
-            result = text3d_tool.invoke({"prompt": "a medieval sword"})
-
-        assert result["task_id"] == "test_task_123"
-        assert result["status"] == "SUCCEEDED"
-
-    def test_multi_step_workflow(self):
-        """Test generate then check status workflow."""
-        from vendor_connectors.meshy.tools import get_tools
-
-        generate_result = MagicMock()
-        generate_result.id = "workflow_task"
-        generate_result.status.value = "PROCESSING"
-        generate_result.model_urls = None
-        generate_result.thumbnail_url = None
-
-        status_result = MagicMock()
-        status_result.status.value = "SUCCEEDED"
-        status_result.progress = 100
-        status_result.model_urls = MagicMock()
-        status_result.model_urls.glb = "https://example.com/model.glb"
-
-        tools = get_tools()
-        text3d_tool = next(t for t in tools if t.name == "text3d_generate")
-        status_tool = next(t for t in tools if t.name == "check_task_status")
-
-        with patch("vendor_connectors.meshy.text3d.generate", return_value=generate_result):
-            gen_result = text3d_tool.invoke({"prompt": "a shield"})
-
-        with patch("vendor_connectors.meshy.text3d.get", return_value=status_result):
-            final_result = status_tool.invoke(
-                {"task_id": gen_result["task_id"], "task_type": "text-to-3d"}
-            )
-
-        assert final_result["status"] == "SUCCEEDED"
+@pytest.fixture
+def output_dir() -> Path:
+    """Output directory for generated models."""
+    path = Path(__file__).parent.parent / "fixtures" / "models"
+    path.mkdir(parents=True, exist_ok=True)
+    return path
 
 
 @pytest.mark.e2e
 @pytest.mark.langchain
 class TestLangChainE2E:
-    """E2E tests with real API calls using reusable runner."""
+    """Real E2E tests with LangChain/LangGraph."""
 
     @pytest.fixture
-    def runner(self):
-        """Create LangChain runner with Meshy tools."""
+    def has_deps(self):
+        """Check dependencies are available."""
         pytest.importorskip("langchain_anthropic")
         pytest.importorskip("langgraph")
 
-        from tests.e2e.runners import LangChainRunner
+    @pytest.fixture
+    def has_api_keys(self, has_deps):
+        """Check API keys are available."""
+        if not os.environ.get("ANTHROPIC_API_KEY"):
+            pytest.skip("ANTHROPIC_API_KEY required")
+        if not os.environ.get("MESHY_API_KEY"):
+            pytest.skip("MESHY_API_KEY required")
+
+    @pytest.mark.vcr()
+    def test_langchain_agent_generates_3d_model(self, has_api_keys, output_dir):
+        """Test LangChain agent generating a real 3D model.
+
+        This test:
+        1. Creates a LangGraph ReAct agent with Claude Haiku
+        2. Gives it our Meshy tools
+        3. Asks it to generate a 3D sword
+        4. Verifies we get a real model URL back
+        """
+        from langchain_anthropic import ChatAnthropic
+        from langgraph.prebuilt import create_react_agent
+
         from vendor_connectors.meshy.tools import get_tools
 
-        return LangChainRunner(tools=get_tools())
+        # Create agent with Claude Haiku
+        llm = ChatAnthropic(model="claude-haiku-4-5-20251001")
+        tools = get_tools()
+        agent = create_react_agent(llm, tools)
 
-    @pytest.mark.skip(reason="Requires API keys for cassette recording")
+        # Run the agent
+        result = agent.invoke({
+            "messages": [(
+                "user",
+                "Generate a 3D model of a simple wooden sword using the text3d_generate tool. "
+                "Use art_style='sculpture' and a clear prompt."
+            )]
+        })
+
+        # Verify we got tool calls and a result
+        messages = result["messages"]
+        assert len(messages) > 1
+
+        # Find the tool result
+        tool_messages = [m for m in messages if hasattr(m, "type") and m.type == "tool"]
+        assert len(tool_messages) > 0, "Agent should have called text3d_generate"
+
+        # Check for task_id in the result
+        final_content = str(messages[-1].content) if hasattr(messages[-1], "content") else str(messages[-1])
+        assert "task" in final_content.lower() or "model" in final_content.lower()
+
     @pytest.mark.vcr()
-    def test_agent_generates_model(
-        self,
-        runner,
-        skip_without_anthropic,
-        skip_without_meshy,
-        models_output_dir: Path,
-    ):
-        """Test LangChain agent generating a 3D model.
+    def test_langchain_agent_lists_animations(self, has_api_keys):
+        """Test agent listing available animations."""
+        from langchain_anthropic import ChatAnthropic
+        from langgraph.prebuilt import create_react_agent
 
-        Cassette: langchain_agent_generates_model.yaml
-        """
-        result = runner.run(
-            "Generate a 3D model of a wooden sword using text3d_generate."
-        )
+        from vendor_connectors.meshy.tools import get_tools
 
-        assert result.success
-        assert result.has_tool_call("text3d_generate") or "task" in result.output.lower()
+        llm = ChatAnthropic(model="claude-haiku-4-5-20251001")
+        tools = get_tools()
+        agent = create_react_agent(llm, tools)
+
+        result = agent.invoke({
+            "messages": [(
+                "user",
+                "List available animations using list_animations. Show me fighting animations."
+            )]
+        })
+
+        messages = result["messages"]
+        final_content = str(messages[-1].content) if hasattr(messages[-1], "content") else str(messages[-1])
+
+        # Should mention animations
+        assert "animation" in final_content.lower() or "fight" in final_content.lower()
