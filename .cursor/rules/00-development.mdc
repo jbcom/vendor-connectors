@@ -1,25 +1,98 @@
+---
+description: Core development guidelines for vendor-connectors
+globs: "**/*"
+alwaysApply: true
+---
+
 # vendor-connectors Development
 
 ## Package Overview
 
-Universal vendor connectors including Meshy AI for 3D generation.
+Universal vendor connectors for the jbcom ecosystem providing:
+- Cloud providers: AWS, Google Cloud
+- Third-party services: GitHub, Slack, Vault, Zoom
+- AI APIs: Anthropic Claude, Cursor agents, Meshy 3D
 
-## Commands
+## CRITICAL: GitHub Authentication
 
 ```bash
-uv sync --extra tests    # Install deps
-uv run pytest tests/ -v  # Run tests
-uvx ruff check src/      # Lint
-uv build                 # Build package
+# ALWAYS use this pattern for jbcom repos
+GH_TOKEN="$GITHUB_JBCOM_TOKEN" gh <command>
+
+# Examples
+GH_TOKEN="$GITHUB_JBCOM_TOKEN" gh pr list
+GH_TOKEN="$GITHUB_JBCOM_TOKEN" gh issue view 33
+GH_TOKEN="$GITHUB_JBCOM_TOKEN" gh pr create --title "..." --body "..."
 ```
 
-## Connectors
+**NEVER** use `$GITHUB_TOKEN` directly - always wrap with `GH_TOKEN="$GITHUB_JBCOM_TOKEN"`.
 
-- AWS, Google Cloud, GitHub, Slack, Vault, Zoom
-- Meshy AI (3D asset generation)
+## Before Starting Any Task
 
-## Key Patterns
+```bash
+# 1. Check current context
+cat memory-bank/activeContext.md
 
-- Python 3.10+ (crewai requirement)
-- Use absolute imports
-- Meshy module at `vendor_connectors.meshy`
+# 2. Check related issues/PRs
+GH_TOKEN="$GITHUB_JBCOM_TOKEN" gh issue list
+GH_TOKEN="$GITHUB_JBCOM_TOKEN" gh pr status
+```
+
+## Development Commands
+
+```bash
+# Install dependencies (REQUIRED before tests)
+uv sync --extra tests
+
+# Run tests
+uv run pytest tests/ -v
+
+# Lint and format
+uvx ruff check src/ tests/ --fix
+uvx ruff format src/ tests/
+
+# Build package
+uv build
+```
+
+## Architecture
+
+**VendorConnectorBase** - Base class for ALL new connectors:
+```python
+from vendor_connectors.base import VendorConnectorBase
+
+class MyConnector(VendorConnectorBase):
+    BASE_URL = "https://api.example.com"
+    API_KEY_ENV = "MY_API_KEY"
+```
+
+**Three-Interface Pattern** - Each AI-enabled connector provides:
+1. Python API (`__init__.py`)
+2. LangChain Tools (`tools.py`)
+3. MCP Server (`mcp.py`)
+
+## Code Style
+
+- Python 3.10+ required
+- Ruff linting (120 char line length)
+- Type hints on public functions
+- Modern style: `list[str]` not `List[str]`
+- Absolute imports only
+- Google-style docstrings
+
+## Commit Messages
+
+```
+feat(aws): add new operation        # Minor version
+fix(meshy): handle timeout          # Patch version
+docs(readme): update setup          # No version
+test(e2e): add langchain tests      # No version
+```
+
+## Key Files
+
+- `AGENTS.md` - Comprehensive agent instructions
+- `CLAUDE.md` - Claude-specific guidance
+- `memory-bank/activeContext.md` - Current development context
+- `.cursor/rules/` - Cursor rules and agent profiles
+- `pyproject.toml` - Dependencies and configuration

@@ -1,0 +1,219 @@
+---
+description: Agent profile for AI tooling refactoring
+globs: "src/vendor_connectors/**/tools.py,src/vendor_connectors/**/mcp.py"
+---
+
+# AI Refactor Agent
+
+Expert at adding LangChain tools and MCP servers to connectors.
+
+## Context
+
+The repository is undergoing a refactor (Issue #33, PR #34):
+- **FROM:** Central `ai/` package with abstracted tool definitions
+- **TO:** Each connector owns its tools (`tools.py`) and MCP server (`mcp.py`)
+
+## Current Architecture
+
+```
+src/vendor_connectors/
+├── meshy/
+│   ├── tools.py      # ✅ LangChain StructuredTools
+│   └── mcp.py        # ✅ MCP server
+├── aws/
+│   ├── tools.py      # ❌ TODO: Add tools
+│   └── mcp.py        # ❌ TODO: Add MCP
+├── github/
+│   ├── tools.py      # ❌ TODO: Add tools
+│   └── mcp.py        # ❌ TODO: Add MCP
+└── ...
+```
+
+## Reference: meshy/tools.py Pattern
+
+```python
+"""LangChain tools for <Connector> operations.
+
+Usage:
+    from vendor_connectors.<connector>.tools import get_tools
+    from langchain_anthropic import ChatAnthropic
+    from langgraph.prebuilt import create_react_agent
+    
+    llm = ChatAnthropic(model="claude-3-5-sonnet-20241022")
+    tools = get_tools()
+    agent = create_react_agent(llm, tools)
+"""
+
+from __future__ import annotations
+from typing import Any
+
+# Tool implementation functions
+def my_operation(param1: str, param2: int = 10) -> dict[str, Any]:
+    """Do something with the connector.
+    
+    Args:
+        param1: Description of param1
+        param2: Description of param2 (default: 10)
+    
+    Returns:
+        Dict with result fields
+    """
+    from . import MyConnector
+    connector = MyConnector()
+    result = connector.my_operation(param1, param2)
+    return {
+        "status": "success",
+        "result": result,
+    }
+
+# Tool registration
+def get_tools():
+    """Get all LangChain tools for this connector."""
+    try:
+        from langchain_core.tools import StructuredTool
+    except ImportError as e:
+        raise ImportError(
+            "langchain-core required for tools. "
+            "Install with: pip install vendor-connectors[<connector>-tools]"
+        ) from e
+    
+    return [
+        StructuredTool.from_function(
+            func=my_operation,
+            name="my_operation",
+            description="Do something with the connector",
+        ),
+    ]
+
+# CrewAI adapter
+def get_crewai_tools():
+    """Get tools wrapped for CrewAI."""
+    try:
+        from crewai.tools import LangChainTool
+    except ImportError as e:
+        raise ImportError(
+            "crewai required. Install with: pip install crewai"
+        ) from e
+    
+    return [LangChainTool(tool=t) for t in get_tools()]
+```
+
+## Reference: meshy/mcp.py Pattern
+
+```python
+"""MCP server for <Connector>.
+
+Run with:
+    python -m vendor_connectors.<connector>.mcp
+
+Or in MCP config:
+    {
+        "mcpServers": {
+            "<connector>": {
+                "command": "python",
+                "args": ["-m", "vendor_connectors.<connector>.mcp"]
+            }
+        }
+    }
+"""
+
+from __future__ import annotations
+from typing import Any
+from . import tools
+
+TOOL_DEFINITIONS: dict[str, dict[str, Any]] = {
+    "my_operation": {
+        "description": "Do something with the connector",
+        "func": tools.my_operation,
+        "parameters": {
+            "param1": {
+                "type": "string",
+                "description": "Description of param1",
+                "required": True,
+            },
+            "param2": {
+                "type": "integer", 
+                "description": "Description of param2",
+                "default": 10,
+            },
+        },
+    },
+}
+
+def create_server():
+    """Create MCP server instance."""
+    try:
+        from mcp.server import Server
+        from mcp.server.stdio import stdio_server
+        from mcp.types import Tool, TextContent
+    except ImportError as e:
+        raise ImportError(
+            "mcp required. Install with: pip install mcp"
+        ) from e
+    
+    server = Server("<connector>")
+    
+    @server.list_tools()
+    async def list_tools() -> list[Tool]:
+        return [
+            Tool(
+                name=name,
+                description=defn["description"],
+                inputSchema={
+                    "type": "object",
+                    "properties": defn["parameters"],
+                    "required": [
+                        k for k, v in defn["parameters"].items()
+                        if v.get("required", False)
+                    ],
+                },
+            )
+            for name, defn in TOOL_DEFINITIONS.items()
+        ]
+    
+    @server.call_tool()
+    async def call_tool(name: str, arguments: dict) -> list[TextContent]:
+        if name not in TOOL_DEFINITIONS:
+            raise ValueError(f"Unknown tool: {name}")
+        
+        func = TOOL_DEFINITIONS[name]["func"]
+        result = func(**arguments)
+        
+        import json
+        return [TextContent(type="text", text=json.dumps(result, indent=2))]
+    
+    return server
+
+def run_server():
+    """Run MCP server on stdio."""
+    import asyncio
+    from mcp.server.stdio import stdio_server
+    
+    server = create_server()
+    asyncio.run(stdio_server(server))
+
+if __name__ == "__main__":
+    run_server()
+```
+
+## Migration Checklist
+
+For each connector:
+
+1. [ ] Create `tools.py` with StructuredTools
+2. [ ] Create `mcp.py` with MCP server
+3. [ ] Add optional dependency in `pyproject.toml`
+4. [ ] Add unit tests in `tests/<connector>/test_tools.py`
+5. [ ] Add E2E tests in `tests/e2e/<connector>/`
+6. [ ] Update documentation
+
+## Connector Priority
+
+1. **meshy** ✅ - Complete (reference implementation)
+2. **aws** - High priority (most used)
+3. **github** - High priority
+4. **google** - Medium priority
+5. **slack** - Medium priority
+6. **anthropic** - Already has AI tools
+7. **cursor** - Already has AI tools
+8. **vault**, **zoom** - Lower priority

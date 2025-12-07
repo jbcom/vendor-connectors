@@ -111,4 +111,50 @@ pip install langchain-google-genai  # For Gemini
 ```
 
 ---
+
+## Session: 2025-12-07 (E2E Testing & Documentation)
+
+### Completed
+- **VendorConnectorBase created** (`src/vendor_connectors/base.py`)
+  - Proper base class for ALL connectors
+  - Extends DirectedInputsClass
+  - HTTP client with retries, rate limiting
+  - MCP/LangChain tool helpers
+
+- **Meshy base.py updated** to use DirectedInputsClass for credential loading
+
+- **ArtStyle enum fixed** per Meshy API docs
+  - Changed from invalid values (cartoon, low-poly, sculpt, pbr)
+  - To correct values: `realistic`, `sculpture`
+
+- **E2E tests created** (`tests/e2e/meshy/`)
+  - `test_langchain.py` - LangGraph ReAct agent tests
+  - `test_crewai.py` - CrewAI agent tests
+  - `test_strands.py` - AWS Strands agent tests
+  - Tests generate REAL 3D models and save GLB files
+
+- **Real artifacts saved**
+  - `tests/e2e/fixtures/models/langchain_sword_*.glb` (720KB)
+  - VCR cassettes for API replay
+
+- **Documentation created**
+  - `AGENTS.md` - Comprehensive agent instructions
+  - `.cursor/rules/agents/` - Agent profiles
+    - `connector-builder.mdc`
+    - `e2e-testing.mdc`
+    - `ai-refactor.mdc`
+  - Updated `CLAUDE.md` with GITHUB_JBCOM_TOKEN pattern
+
+### Key Patterns Established
+1. **GITHUB_JBCOM_TOKEN**: Always use `GH_TOKEN="$GITHUB_JBCOM_TOKEN" gh <command>`
+2. **VendorConnectorBase**: All new connectors extend this
+3. **Three-Interface Pattern**: API + tools.py + mcp.py
+4. **E2E Tests**: Must save real artifacts to prove functionality
+
+### Next Steps
+- [ ] Run CrewAI and Strands E2E tests
+- [ ] Create sub-issues for other connector AI tooling
+- [ ] Update GitHub Projects
+
+---
 *Last updated: 2025-12-07*

@@ -1,0 +1,174 @@
+---
+description: Agent profile for E2E testing with AI agents
+globs: "tests/e2e/**/*.py"
+---
+
+# E2E Testing Agent
+
+Expert at creating end-to-end tests that prove complete AI agent workflows.
+
+## Expertise
+
+- pytest-vcr for recording API interactions
+- LangChain/LangGraph agent testing
+- CrewAI agent testing
+- AWS Strands agent testing
+- Long-running test management
+
+## Core Principle
+
+**E2E tests MUST prove complete workflows:**
+1. Create real AI agent
+2. Agent invokes tools
+3. Tools call external APIs
+4. **WAIT for completion** (no mocking core functionality)
+5. Save real artifacts to repository
+6. Artifacts prove it worked
+
+## Test Structure
+
+```
+tests/e2e/
+├── __init__.py
+├── conftest.py          # Shared fixtures
+├── fixtures/
+│   └── models/          # Saved GLB files, images, etc.
+└── <connector>/
+    ├── __init__.py
+    ├── conftest.py      # Connector-specific fixtures
+    ├── cassettes/       # VCR cassettes
+    ├── test_langchain.py
+    ├── test_crewai.py
+    └── test_strands.py
+```
+
+## Required Test Pattern
+
+```python
+import pytest
+from pathlib import Path
+
+@pytest.fixture
+def output_dir() -> Path:
+    """Output directory for artifacts - committed to repository."""
+    path = Path(__file__).parent.parent / "fixtures" / "models"
+    path.mkdir(parents=True, exist_ok=True)
+    return path
+
+@pytest.mark.e2e
+@pytest.mark.timeout(600)  # 10 minutes - AI generation takes time
+@pytest.mark.vcr()
+def test_agent_generates_artifact(output_dir):
+    """Test agent generates REAL artifact.
+    
+    This test:
+    1. Creates agent with our tools
+    2. Invokes tool through agent
+    3. WAITS for completion
+    4. Downloads artifact
+    5. Saves to repository
+    6. Verifies artifact exists
+    """
+    # Create agent
+    from langchain_anthropic import ChatAnthropic
+    from langgraph.prebuilt import create_react_agent
+    from vendor_connectors.myservice.tools import get_tools
+    
+    llm = ChatAnthropic(model="claude-haiku-4-5-20251001")
+    tools = get_tools()
+    agent = create_react_agent(llm, tools)
+    
+    # Run agent - WAITS for completion
+    result = agent.invoke({
+        "messages": [("user", "Generate X using tool Y")]
+    })
+    
+    # Extract artifact URL from result
+    artifact_url = extract_url_from_result(result)
+    assert artifact_url, "Must have artifact URL"
+    
+    # Download and save artifact
+    from vendor_connectors.myservice import base
+    artifact_path = output_dir / "test_artifact.ext"
+    file_size = base.download(artifact_url, str(artifact_path))
+    
+    # Verify artifact
+    assert artifact_path.exists(), "Artifact must be saved"
+    assert file_size > 1000, "Artifact must have real content"
+```
+
+## VCR Configuration
+
+```python
+# In conftest.py
+@pytest.fixture(scope="module")
+def vcr_config():
+    return {
+        "filter_headers": ["authorization", "x-api-key"],
+        "record_mode": "once",
+        "match_on": ["method", "scheme", "host", "port", "path"],
+    }
+```
+
+## Recording New Cassettes
+
+```bash
+# 1. Delete existing cassettes
+rm tests/e2e/<connector>/cassettes/*.yaml
+
+# 2. Set API keys
+export ANTHROPIC_API_KEY=sk-ant-xxx
+export MYSERVICE_API_KEY=xxx
+
+# 3. Run tests with long timeout
+uv run pytest tests/e2e/<connector>/ -v -s --timeout=600
+
+# 4. Commit cassettes AND artifacts
+git add tests/e2e/<connector>/cassettes/
+git add tests/e2e/fixtures/
+git commit -m "test(<connector>): record E2E cassettes"
+```
+
+## Required API Keys
+
+```bash
+# For AI agent testing
+ANTHROPIC_API_KEY=sk-ant-xxx
+
+# For specific connectors
+MESHY_API_KEY=msy_xxx
+AWS_ACCESS_KEY_ID=xxx
+# etc.
+```
+
+## Anti-Patterns
+
+**DON'T mock core functionality:**
+```python
+# BAD - defeats the purpose of E2E testing
+@patch("vendor_connectors.meshy.text3d.generate")
+def test_agent(mock_generate):
+    mock_generate.return_value = Mock(...)
+```
+
+**DON'T skip waiting:**
+```python
+# BAD - E2E tests must wait for completion
+result = generate(prompt, wait=False)  # Returns immediately
+```
+
+**DON'T forget to save artifacts:**
+```python
+# BAD - no proof it worked
+result = agent.invoke(...)
+assert "success" in str(result)  # Just checking string, not real output
+```
+
+## Timeout Guidelines
+
+| Test Type | Timeout |
+|-----------|---------|
+| 3D model generation | 600s (10 min) |
+| Image generation | 300s (5 min) |
+| Text operations | 60s (1 min) |
+| Animation listing | 60s (1 min) |
