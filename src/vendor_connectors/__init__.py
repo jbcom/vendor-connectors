@@ -10,6 +10,7 @@ This package provides modular connectors for various cloud providers and service
 - Slack: Channel and message operations
 - Vault: HashiCorp Vault secret management
 - Zoom: User and meeting management
+- Meshy: AI 3D asset generation
 
 Usage:
     # Basic connector (session management + secrets)
@@ -36,21 +37,28 @@ Usage:
 
     class MyConnector(AWSConnector, AWSOrganizationsMixin):
         pass
+
+    # Meshy AI 3D generation (functional interface)
+    from vendor_connectors.meshy import text3d, image3d, rigging, animate
+
+    model = text3d.generate("a medieval sword")
+    rigged = rigging.rig(model.id)
+    animated = animate.apply(rigged.id, animation_id=0)
+
+    # AI tools for agents
+    from vendor_connectors.ai.tools.meshy_tools import get_meshy_tools
+    from vendor_connectors.ai.providers.crewai import get_tools
 """
 
 from __future__ import annotations
 
 __version__ = "0.2.0"
 
-# Meshy AI connector for 3D asset generation
-<<<<<<< HEAD
-from vendor_connectors import meshy
+# Sub-packages
+from vendor_connectors import ai, meshy
 
 # AI/Agent connectors
 from vendor_connectors.anthropic import AnthropicConnector
-=======
-from vendor_connectors import ai, meshy
->>>>>>> 0cfc317 (feat(meshy): Add Meshy connector and AI package foundation (#23))
 from vendor_connectors.aws import (
     AWSConnector,
     AWSConnectorFull,
@@ -74,7 +82,6 @@ from vendor_connectors.google import (
     GoogleServicesMixin,
     GoogleWorkspaceMixin,
 )
-from vendor_connectors.meshy import MeshyConnector
 from vendor_connectors.slack import SlackConnector
 from vendor_connectors.vault import VaultConnector
 from vendor_connectors.zoom import ZoomConnector
@@ -87,7 +94,7 @@ __all__ = [
     "AWSConnector",
     "AWSConnectorFull",
     "AWSOrganizationsMixin",
-    "AWSSSOixin",
+    "AWSSSOmixin",
     "AWSS3Mixin",
     # Google
     "GoogleConnector",
@@ -106,8 +113,7 @@ __all__ = [
     "get_cloud_call_params",
     "get_aws_call_params",
     "get_google_call_params",
-    # Meshy AI (3D asset generation)
-    "MeshyConnector",
+    # Meshy AI (3D asset generation) - functional interface
     "meshy",
     # AI tools sub-package
     "ai",
