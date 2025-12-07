@@ -118,9 +118,10 @@ class TestAnthropicConnector:
         import httpx
         with patch.object(httpx, "Client"):
             connector = AnthropicConnector(api_key="test-key")
-            assert connector.get_recommended_model("general") == "claude-sonnet-4-20250514"
-            assert connector.get_recommended_model("fast") == "claude-3-5-haiku-20241022"
-            assert connector.get_recommended_model("powerful") == "claude-opus-4-20250514"
+            # Using verified model IDs from https://docs.anthropic.com/en/docs/about-claude/models
+            assert connector.get_recommended_model("general") == "claude-sonnet-4-5-20250929"
+            assert connector.get_recommended_model("fast") == "claude-haiku-4-5-20251001"
+            assert connector.get_recommended_model("powerful") == "claude-opus-4-5-20251101"
 
     def test_create_message(self):
         """create_message should send correct request and return message."""
@@ -213,14 +214,23 @@ class TestAnthropicConnector:
 
 
 class TestClaudeModels:
-    """Tests for Claude model constants."""
+    """Tests for Claude model constants.
+    
+    Source of truth: https://docs.anthropic.com/en/docs/about-claude/models
+    """
 
     def test_claude_models_dict(self):
-        """CLAUDE_MODELS should contain expected models."""
+        """CLAUDE_MODELS should contain verified models from Anthropic API."""
+        # Claude 4.5 family
+        assert "claude-sonnet-4-5-20250929" in CLAUDE_MODELS
+        assert "claude-opus-4-5-20251101" in CLAUDE_MODELS
+        assert "claude-haiku-4-5-20251001" in CLAUDE_MODELS
+        # Claude 4 family
         assert "claude-sonnet-4-20250514" in CLAUDE_MODELS
         assert "claude-opus-4-20250514" in CLAUDE_MODELS
-        assert "claude-3-5-sonnet-20241022" in CLAUDE_MODELS
+        # Claude 3.5/3.7 family
         assert "claude-3-5-haiku-20241022" in CLAUDE_MODELS
+        assert "claude-3-7-sonnet-20250219" in CLAUDE_MODELS
 
     def test_claude_models_has_descriptions(self):
         """Each model should have a description."""

@@ -29,7 +29,7 @@ import os
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import TYPE_CHECKING, Any, AsyncIterator, Optional
+from typing import TYPE_CHECKING, Any, Optional
 
 from directed_inputs_class import DirectedInputsClass
 from lifecyclelogging import Logging
@@ -60,17 +60,26 @@ DEFAULT_TIMEOUT = 60.0
 DEFAULT_MAX_TOKENS = 4096
 
 # Available Claude models
+# SOURCE OF TRUTH: https://docs.anthropic.com/en/docs/about-claude/models
+# API verification: curl https://api.anthropic.com/v1/models -H "x-api-key: $KEY" -H "anthropic-version: 2023-06-01"
+# Last verified: 2025-12-07
 CLAUDE_MODELS = {
+    # Claude 4.5 family (latest)
+    "claude-opus-4-5-20251101": "Claude Opus 4.5",
+    "claude-sonnet-4-5-20250929": "Claude Sonnet 4.5",
+    "claude-haiku-4-5-20251001": "Claude Haiku 4.5",
+    # Claude 4.1 family
+    "claude-opus-4-1-20250805": "Claude Opus 4.1",
     # Claude 4 family
-    "claude-sonnet-4-20250514": "Claude Sonnet 4 (latest)",
+    "claude-sonnet-4-20250514": "Claude Sonnet 4",
     "claude-opus-4-20250514": "Claude Opus 4",
+    # Claude 3.7 family
+    "claude-3-7-sonnet-20250219": "Claude Sonnet 3.7",
     # Claude 3.5 family
-    "claude-3-5-sonnet-20241022": "Claude 3.5 Sonnet v2",
-    "claude-3-5-haiku-20241022": "Claude 3.5 Haiku",
+    "claude-3-5-haiku-20241022": "Claude Haiku 3.5",
     # Claude 3 family
-    "claude-3-opus-20240229": "Claude 3 Opus",
-    "claude-3-sonnet-20240229": "Claude 3 Sonnet",
-    "claude-3-haiku-20240307": "Claude 3 Haiku",
+    "claude-3-opus-20240229": "Claude Opus 3",
+    "claude-3-haiku-20240307": "Claude Haiku 3",
 }
 
 
@@ -457,8 +466,7 @@ class AnthropicConnector(DirectedInputsClass):
         self,
         task: str,
         working_dir: Optional[str] = None,
-        model: str = "claude-sonnet-4-20250514",
-        max_turns: int = 10,
+        model: str = "claude-sonnet-4-5-20250929",  # Claude Sonnet 4.5 - verified
         max_tokens: int = DEFAULT_MAX_TOKENS,
         system_prompt: Optional[str] = None,
     ) -> AgentExecutionResult:
@@ -470,8 +478,7 @@ class AnthropicConnector(DirectedInputsClass):
         Args:
             task: The task description.
             working_dir: Working directory for execution.
-            model: Model to use.
-            max_turns: Maximum conversation turns.
+            model: Model to use (default: claude-sonnet-4-5-20250929).
             max_tokens: Maximum tokens per response.
             system_prompt: Optional custom system prompt.
 
@@ -546,10 +553,11 @@ If the task requires code changes, describe exactly what changes should be made.
         Returns:
             Recommended model ID.
         """
+        # Using verified model IDs from Anthropic API
         recommendations = {
-            "general": "claude-sonnet-4-20250514",
-            "coding": "claude-sonnet-4-20250514",
-            "fast": "claude-3-5-haiku-20241022",
-            "powerful": "claude-opus-4-20250514",
+            "general": "claude-sonnet-4-5-20250929",  # Claude Sonnet 4.5 - best balance
+            "coding": "claude-sonnet-4-5-20250929",   # Claude Sonnet 4.5 - great for code
+            "fast": "claude-haiku-4-5-20251001",      # Claude Haiku 4.5 - fastest
+            "powerful": "claude-opus-4-5-20251101",   # Claude Opus 4.5 - most capable
         }
         return recommendations.get(use_case, recommendations["general"])
