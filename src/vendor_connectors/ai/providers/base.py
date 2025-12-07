@@ -105,8 +105,7 @@ class BaseLLMProvider(ABC):
             from langchain_core.messages import HumanMessage, SystemMessage
         except ImportError as e:
             raise ImportError(
-                "LangChain is required for AI providers. "
-                "Install with: pip install vendor-connectors[ai]"
+                "LangChain is required for AI providers. Install with: pip install vendor-connectors[ai]"
             ) from e
 
         messages = []
@@ -211,8 +210,7 @@ class BaseLLMProvider(ABC):
             from langgraph.prebuilt import create_react_agent
         except ImportError as e:
             raise ImportError(
-                "LangGraph is required for tool execution. "
-                "Install with: pip install vendor-connectors[ai]"
+                "LangGraph is required for tool execution. Install with: pip install vendor-connectors[ai]"
             ) from e
 
         agent = create_react_agent(self.llm, tools)

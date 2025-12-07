@@ -1,0 +1,146 @@
+"""Tool registry for managing available AI tools.
+
+This module provides a central registry for all tools generated from
+vendor connectors, allowing easy discovery and filtering.
+"""
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Optional
+
+from vendor_connectors.ai.base import ToolCategory, ToolDefinition
+
+if TYPE_CHECKING:
+    pass
+
+__all__ = ["ToolRegistry"]
+
+
+class ToolRegistry:
+    """Central registry for AI tools.
+
+    Tools are registered by name and can be filtered by category.
+    The registry supports lazy loading of tools from connector classes.
+
+    Example:
+        >>> registry = ToolRegistry()
+        >>> registry.register(my_tool_definition)
+        >>> tools = registry.get_tools(categories=[ToolCategory.AWS])
+    """
+
+    _instance: Optional[ToolRegistry] = None
+
+    def __init__(self):
+        """Initialize empty registry."""
+        self._tools: dict[str, ToolDefinition] = {}
+        self._categories: dict[ToolCategory, set[str]] = {}
+
+    @classmethod
+    def get_instance(cls) -> ToolRegistry:
+        """Get the singleton registry instance."""
+        if cls._instance is None:
+            cls._instance = cls()
+        return cls._instance
+
+    def register(self, tool: ToolDefinition) -> None:
+        """Register a tool definition.
+
+        Args:
+            tool: The tool definition to register.
+
+        Raises:
+            ValueError: If a tool with the same name already exists.
+        """
+        if tool.name in self._tools:
+            raise ValueError(f"Tool '{tool.name}' is already registered")
+
+        self._tools[tool.name] = tool
+
+        if tool.category not in self._categories:
+            self._categories[tool.category] = set()
+        self._categories[tool.category].add(tool.name)
+
+    def unregister(self, name: str) -> None:
+        """Unregister a tool by name.
+
+        Args:
+            name: The tool name to remove.
+        """
+        if name in self._tools:
+            tool = self._tools.pop(name)
+            if tool.category in self._categories:
+                self._categories[tool.category].discard(name)
+
+    def get(self, name: str) -> Optional[ToolDefinition]:
+        """Get a tool by name.
+
+        Args:
+            name: The tool name.
+
+        Returns:
+            ToolDefinition or None if not found.
+        """
+        return self._tools.get(name)
+
+    def get_tools(
+        self,
+        categories: Optional[list[ToolCategory]] = None,
+        names: Optional[list[str]] = None,
+    ) -> list[ToolDefinition]:
+        """Get tools, optionally filtered.
+
+        Args:
+            categories: Filter by categories (returns tools in any category).
+            names: Filter by specific tool names.
+
+        Returns:
+            List of matching tool definitions.
+        """
+        tools = list(self._tools.values())
+
+        if categories:
+            category_names: set[str] = set()
+            for cat in categories:
+                if cat in self._categories:
+                    category_names.update(self._categories[cat])
+            tools = [t for t in tools if t.name in category_names]
+
+        if names:
+            name_set = set(names)
+            tools = [t for t in tools if t.name in name_set]
+
+        return tools
+
+    def list_names(self, category: Optional[ToolCategory] = None) -> list[str]:
+        """List all registered tool names.
+
+        Args:
+            category: Optional category filter.
+
+        Returns:
+            List of tool names.
+        """
+        if category:
+            return list(self._categories.get(category, set()))
+        return list(self._tools.keys())
+
+    def list_categories(self) -> list[ToolCategory]:
+        """List all categories with registered tools.
+
+        Returns:
+            List of categories.
+        """
+        return list(self._categories.keys())
+
+    def clear(self) -> None:
+        """Clear all registered tools."""
+        self._tools.clear()
+        self._categories.clear()
+
+    def __len__(self) -> int:
+        """Get number of registered tools."""
+        return len(self._tools)
+
+    def __contains__(self, name: str) -> bool:
+        """Check if a tool is registered."""
+        return name in self._tools

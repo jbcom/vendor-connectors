@@ -1,44 +1,72 @@
 """AI Sub-Package for vendor-connectors.
 
-This package provides a unified AI interface leveraging LangChain/LangGraph for:
-- Multi-provider AI access (Anthropic, OpenAI, Google, xAI, Ollama)
-- Tool abstraction - expose existing vendor connectors as AI-callable tools
-- Tracing/observability via LangSmith
+This package provides a unified interface for AI provider interactions
+with automatic tool generation from vendor connectors.
 
-Status: PLACEHOLDER - Implementation blocked by PR #16
-Design Document: docs/development/ai-subpackage-design.md
+Features:
+- Multi-provider support (Anthropic, OpenAI, Google, xAI, Ollama)
+- Auto-generated tools from connector methods
+- LangGraph workflow support
+- Optional LangSmith tracing
 
-Usage (after implementation):
-    from vendor_connectors.ai import AIConnector
+Example:
+    >>> from vendor_connectors.ai import AIConnector, AIProvider, ToolCategory
+    >>>
+    >>> # Create connector with Anthropic
+    >>> connector = AIConnector(provider="anthropic", api_key="...")
+    >>>
+    >>> # Simple chat
+    >>> response = connector.chat("Hello!")
+    >>> print(response.content)
+    >>>
+    >>> # With tools from a GitHub connector
+    >>> from vendor_connectors.github import GitHubConnector
+    >>> gh = GitHubConnector(token="...")
+    >>> connector.register_connector_tools(gh, ToolCategory.GITHUB)
+    >>>
+    >>> # Invoke with tool use
+    >>> response = connector.invoke("List my repositories")
+    >>> print(response.content)
 
-    # Same interface, different providers
-    ai = AIConnector(provider="anthropic")  # or "openai", "google", "ollama"
-    response = ai.chat("Explain this code")
+Installation:
+    # Core AI support
+    pip install vendor-connectors[ai]
 
-    # With tools for agentic workflows
-    from vendor_connectors.ai.tools import get_all_tools
+    # Specific provider
+    pip install vendor-connectors[ai-anthropic]
 
-    ai = AIConnector(
-        provider="openai",
-        tools=get_all_tools(),
-    )
-    response = ai.invoke_with_tools("Create a GitHub issue for this bug")
+    # All providers
+    pip install vendor-connectors[ai-all]
 
-Related:
-    - Epic: jbcom/jbcom-control-center#340
-    - Blocks: PR #18 (Meshy), jbcom/jbcom-control-center#342 (agentic-crew)
+    # With observability
+    pip install vendor-connectors[ai-observability]
 """
 
-from __future__ import annotations
+from vendor_connectors.ai.base import (
+    AIMessage,
+    AIProvider,
+    AIResponse,
+    AIRole,
+    ToolCategory,
+    ToolDefinition,
+    ToolParameter,
+)
+from vendor_connectors.ai.connector import AIConnector
+from vendor_connectors.ai.tools import ToolFactory, ToolRegistry
 
 __all__ = [
-    # Will export:
-    # "AIConnector",
-    # "AIProvider",
-    # "AIResponse",
-    # "AIMessage",
+    # Main connector
+    "AIConnector",
+    # Enums
+    "AIProvider",
+    "AIRole",
+    "ToolCategory",
+    # Types
+    "AIMessage",
+    "AIResponse",
+    "ToolParameter",
+    "ToolDefinition",
+    # Tools
+    "ToolFactory",
+    "ToolRegistry",
 ]
-
-# Placeholder - actual imports will be added after PR #16 merges
-# from vendor_connectors.ai.base import AIProvider, AIResponse, AIMessage
-# from vendor_connectors.ai.connector import AIConnector
