@@ -36,7 +36,7 @@ DOCS_URL = "https://docs.meshy.ai/en/api/animation-library"
 # Alternative: Use the API directly if available
 API_BASE = "https://api.meshy.ai"
 
-# Output paths - adjusted for vendor-connectors structure
+# Output paths
 PACKAGE_ROOT = Path(__file__).parent.parent
 MESHY_DIR = PACKAGE_ROOT / "src" / "vendor_connectors" / "meshy"
 ANIMATIONS_PY = MESHY_DIR / "animations.py"
@@ -199,7 +199,7 @@ def generate_animations_py(animations: list[dict]) -> None:
     ]
 
     # Generate category enum
-    cat_names = sorted(set(a.get("category", "Unknown") for a in animations))
+    cat_names = sorted({a.get("category", "Unknown") for a in animations})
     lines.append("class AnimationCategory(str, Enum):")
     lines.append('    """Animation categories."""')
     lines.append("")
@@ -210,7 +210,7 @@ def generate_animations_py(animations: list[dict]) -> None:
     lines.append("")
 
     # Generate subcategory enum
-    subcat_names = sorted(set(a.get("subcategory", "Unknown") for a in animations))
+    subcat_names = sorted({a.get("subcategory", "Unknown") for a in animations})
     lines.append("class AnimationSubcategory(str, Enum):")
     lines.append('    """Animation subcategories."""')
     lines.append("")
