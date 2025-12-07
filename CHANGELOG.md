@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v0.2.0 (2025-12-07)
+
+### Features
+
+- **connectors**: Add Cursor and Anthropic connectors
+  ([#16](https://github.com/jbcom/vendor-connectors/pull/16),
+  [`2edc23f`](https://github.com/jbcom/vendor-connectors/commit/2edc23f3e706919dff4196c489773442cdf8cb31))
+
+
 ## v0.1.1 (2025-12-07)
 
 ### Bug Fixes

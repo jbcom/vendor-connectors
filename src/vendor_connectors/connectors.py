@@ -9,7 +9,9 @@ from directed_inputs_class import DirectedInputsClass
 from extended_data_types import get_default_dict, get_unique_signature, make_hashable
 from lifecyclelogging import Logging
 
+from vendor_connectors.anthropic import AnthropicConnector
 from vendor_connectors.aws import AWSConnector
+from vendor_connectors.cursor import CursorConnector
 from vendor_connectors.github import GithubConnector
 from vendor_connectors.google import GoogleConnector
 from vendor_connectors.slack import SlackConnector
@@ -416,5 +418,100 @@ class VendorConnectors(DirectedInputsClass):
             client_id=client_id,
             client_secret=client_secret,
             account_id=account_id,
+        )
+        return connector
+
+    # -------------------------------------------------------------------------
+    # Cursor (AI Agent Management)
+    # -------------------------------------------------------------------------
+
+    def get_cursor_client(
+        self,
+        api_key: Optional[str] = None,
+        timeout: float = 60.0,
+    ) -> CursorConnector:
+        """Get a cached CursorConnector instance.
+
+        Args:
+            api_key: Cursor API key. Defaults to CURSOR_API_KEY env var.
+            timeout: Request timeout in seconds.
+
+        Returns:
+            CursorConnector instance for managing Cursor background agents.
+        """
+        api_key = api_key or self.get_input("CURSOR_API_KEY", required=False)
+
+        # Use hash of API key for cache key to avoid storing sensitive data
+        cache_key = hashlib.sha256((api_key or "").encode()).hexdigest()[:16] if api_key else None
+
+        cached = self._get_cached_client(
+            "cursor",
+            api_key_hash=cache_key,
+            timeout=timeout,
+        )
+        if cached:
+            return cached
+
+        connector = CursorConnector(
+            api_key=api_key,
+            timeout=timeout,
+            logger=self.logging,
+            inputs=self.inputs,
+        )
+        self._set_cached_client(
+            "cursor",
+            connector,
+            api_key_hash=cache_key,
+            timeout=timeout,
+        )
+        return connector
+
+    # -------------------------------------------------------------------------
+    # Anthropic (Claude AI)
+    # -------------------------------------------------------------------------
+
+    def get_anthropic_client(
+        self,
+        api_key: Optional[str] = None,
+        api_version: str = "2023-06-01",
+        timeout: float = 60.0,
+    ) -> AnthropicConnector:
+        """Get a cached AnthropicConnector instance.
+
+        Args:
+            api_key: Anthropic API key. Defaults to ANTHROPIC_API_KEY env var.
+            api_version: API version string.
+            timeout: Request timeout in seconds.
+
+        Returns:
+            AnthropicConnector instance for Claude AI interactions.
+        """
+        api_key = api_key or self.get_input("ANTHROPIC_API_KEY", required=False)
+
+        # Use hash of API key for cache key to avoid storing sensitive data
+        cache_key = hashlib.sha256((api_key or "").encode()).hexdigest()[:16] if api_key else None
+
+        cached = self._get_cached_client(
+            "anthropic",
+            api_key_hash=cache_key,
+            api_version=api_version,
+            timeout=timeout,
+        )
+        if cached:
+            return cached
+
+        connector = AnthropicConnector(
+            api_key=api_key,
+            api_version=api_version,
+            timeout=timeout,
+            logger=self.logging,
+            inputs=self.inputs,
+        )
+        self._set_cached_client(
+            "anthropic",
+            connector,
+            api_key_hash=cache_key,
+            api_version=api_version,
+            timeout=timeout,
         )
         return connector
