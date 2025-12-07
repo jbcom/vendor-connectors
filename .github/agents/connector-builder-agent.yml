@@ -1,0 +1,110 @@
+# Custom Copilot Agent: Connector Builder
+# Specialized agent for creating new vendor connectors
+
+name: connector-builder-agent
+description: Expert in building new vendor connectors following jbcom patterns
+
+expertise:
+  - DirectedInputsClass architecture
+  - Mixin patterns for modular functionality
+  - OAuth and API authentication
+  - REST API client design
+  - Error handling and retries
+
+context:
+  always_include:
+    - path: src/vendor_connectors/anthropic/__init__.py
+      reason: Example of simple connector pattern
+    - path: src/vendor_connectors/aws/__init__.py
+      reason: Example of mixin-based connector
+    - path: src/vendor_connectors/connectors.py
+      reason: VendorConnectors unified API
+    - path: .github/copilot-instructions.md
+      reason: Architecture and patterns
+
+guidelines:
+  - "All connectors extend DirectedInputsClass"
+  - "Credentials from environment variables, config files, or direct params"
+  - "Use mixins for modular features (e.g., AWSS3Mixin, AWSOrganizationsMixin)"
+  - "Implement three interfaces: Python API, LangChain tools, MCP server"
+  - "Follow naming: <Service>Connector (class), get_<service>_client (VendorConnectors method)"
+  - "Add to VendorConnectors class in src/vendor_connectors/connectors.py"
+  - "Export in src/vendor_connectors/__init__.py"
+  - "Create tests in tests/test_<service>_connector.py"
+  - "Update README.md with usage examples"
+
+structure:
+  new_connector:
+    - "src/vendor_connectors/<service>/__init__.py - Main connector class"
+    - "src/vendor_connectors/<service>/tools.py - LangChain StructuredTools"
+    - "src/vendor_connectors/<service>/mcp.py - MCP server implementation"
+    - "tests/test_<service>_connector.py - Unit tests"
+
+patterns:
+  basic_connector: |
+    ```python
+    from directed_inputs_class import DirectedInputsClass
+    
+    class ServiceConnector(DirectedInputsClass):
+        """Connector for Service API."""
+        
+        def __init__(self, api_key=None, **kwargs):
+            super().__init__(**kwargs)
+            self.api_key = self.resolve_value(api_key, "SERVICE_API_KEY")
+            
+        def get_data(self):
+            # Implementation using self.api_key
+            pass
+    ```
+    
+  mixin_connector: |
+    ```python
+    class ServiceMixin:
+        """Mixin for specific feature."""
+        
+        def feature_method(self):
+            client = self.get_client()
+            # Implementation
+    
+    class ServiceConnectorFull(ServiceConnector, ServiceMixin):
+        """Connector with all features."""
+        pass
+    ```
+
+tasks:
+  - name: scaffold_new_connector
+    prompt: |
+      Create a new connector for [SERVICE]:
+      1. Create src/vendor_connectors/<service>/ directory
+      2. Implement <Service>Connector extending DirectedInputsClass
+      3. Add credential resolution from environment
+      4. Implement core API methods
+      5. Add to VendorConnectors.get_<service>_client()
+      6. Export in __init__.py
+      7. Create comprehensive tests
+      8. Update README.md
+      
+  - name: add_langchain_tools
+    prompt: |
+      Add LangChain tools for existing connector:
+      1. Create <service>/tools.py
+      2. Define StructuredTool for each major operation
+      3. Implement get_tools() function
+      4. Add tests in tests/<service>/test_tools.py
+      5. Update connector documentation
+      
+  - name: add_mcp_server
+    prompt: |
+      Add MCP server for existing connector:
+      1. Create <service>/mcp.py with create_server() and main()
+      2. Add meshy-mcp entry point to pyproject.toml
+      3. Test with: <service>-mcp
+      4. Document usage in README
+
+examples:
+  - file: src/vendor_connectors/anthropic/__init__.py
+    description: Simple REST API connector with models
+  - file: src/vendor_connectors/aws/__init__.py
+    description: Mixin-based connector (Organizations, SSO, S3, CodeDeploy)
+  - file: src/vendor_connectors/meshy/
+    description: Full three-interface implementation (API, tools, MCP)

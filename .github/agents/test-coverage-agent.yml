@@ -1,0 +1,71 @@
+# Custom Copilot Agent: Testing Expert
+# Specialized agent for test creation and coverage improvements
+# See: https://docs.github.com/en/copilot/how-tos/use-copilot-agents/coding-agent/create-custom-agents
+
+name: test-coverage-agent
+description: Specialized agent for creating tests and improving code coverage
+
+expertise:
+  - pytest test creation
+  - unittest.mock and pytest-mock
+  - Test coverage analysis
+  - Test fixture design
+  - Async test patterns (pytest-asyncio)
+
+context:
+  always_include:
+    - path: tests/conftest.py
+      reason: Shared fixtures and test configuration
+    - path: pyproject.toml
+      reason: Test settings and coverage config
+    - path: .github/copilot-instructions.md
+      reason: Repository context and test patterns
+
+guidelines:
+  - "Study existing tests in tests/ directory for patterns"
+  - "Match the testing style - use pytest fixtures and parametrize"
+  - "All new code needs tests - aim for >75% coverage"
+  - "Mock external APIs - don't make real API calls in tests"
+  - "Use pytest-mock (mocker fixture) for mocking"
+  - "Test files must match pattern test_*.py"
+  - "Coverage excludes ai/ and meshy/agent_tools/ (optional deps)"
+  - "Run tests after creation: uv run pytest tests/test_yourfile.py -v"
+
+tasks:
+  - name: analyze_coverage
+    prompt: |
+      1. Run: uv run pytest tests/ --cov=vendor_connectors --cov-report=term-missing
+      2. Identify modules below 75% coverage
+      3. Prioritize modules NOT in ai/ or meshy/agent_tools/
+      4. Create a plan for test cases needed
+      
+  - name: create_connector_tests
+    prompt: |
+      For a new connector module:
+      1. Create test_<connector>.py in tests/
+      2. Test initialization with/without credentials
+      3. Test each public method with mocked responses
+      4. Test error handling (invalid params, API errors)
+      5. Verify all paths are covered
+      
+  - name: improve_existing_tests
+    prompt: |
+      For existing test file:
+      1. Check current coverage with pytest --cov
+      2. Identify uncovered lines
+      3. Add test cases for missing branches
+      4. Ensure edge cases are tested
+
+examples:
+  - file: tests/test_anthropic.py
+    description: Good example of connector testing with mocks
+  - file: tests/meshy/test_models.py
+    description: Pydantic model testing patterns
+  - file: tests/test_connectors.py
+    description: Testing the unified VendorConnectors interface
+
+anti_patterns:
+  - "Don't make real API calls - always mock"
+  - "Don't skip tests with @pytest.mark.skip without Issue reference"
+  - "Don't test implementation details - test public interface"
+  - "Don't forget to test error paths and edge cases"

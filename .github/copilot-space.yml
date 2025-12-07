@@ -1,0 +1,113 @@
+# GitHub Copilot Space Configuration for vendor-connectors
+# This file configures a persistent workspace context for Copilot
+# See: https://docs.github.com/en/copilot/how-tos/provide-context/use-copilot-spaces
+
+name: vendor-connectors-workspace
+
+description: |
+  Vendor connectors development workspace with context about the jbcom ecosystem,
+  Python package management with uv, and the current AI tooling refactor.
+
+# Context files to always include
+context:
+  files:
+    - path: memory-bank/activeContext.md
+      priority: high
+      description: Current development context and active work
+    - path: .github/copilot-instructions.md
+      priority: high
+      description: Repository onboarding and build instructions
+    - path: README.md
+      priority: medium
+      description: Public API documentation
+    - path: pyproject.toml
+      priority: high
+      description: Dependencies, build config, tool settings
+    - path: CHANGELOG.md
+      priority: low
+      description: Version history and changes
+  
+  # Key directories to index
+  directories:
+    - path: src/vendor_connectors
+      priority: high
+      description: Main source code
+      exclude:
+        - "**/__pycache__"
+        - "**/*.pyc"
+    - path: tests
+      priority: medium
+      description: Test suite
+    - path: .github/workflows
+      priority: medium
+      description: CI/CD pipelines
+
+# Knowledge base - common patterns and FAQs
+knowledge:
+  - question: How do I add a new dependency?
+    answer: |
+      Add to pyproject.toml in either `dependencies` (required) or 
+      `[project.optional-dependencies]` (optional), then run `uv sync`.
+      
+  - question: How do I run tests?
+    answer: |
+      Always use: `uv run pytest tests/ -v`
+      With coverage: `uv run pytest tests/ -v --cov=vendor_connectors`
+      
+  - question: What's the current architecture direction?
+    answer: |
+      We're moving from a central ai/ package to tools living alongside each 
+      connector (e.g., meshy/tools.py instead of ai/tools/meshy_tools.py).
+      Each connector should provide: Python API, LangChain tools, MCP server.
+      
+  - question: Why is coverage failing?
+    answer: |
+      Coverage threshold is 45% (target 75%). Current is ~47%. This is tracked 
+      in Issue #21. The ai/ and meshy/agent_tools/ packages are excluded from 
+      coverage because they require optional dependencies.
+      
+  - question: What Python version do I need?
+    answer: |
+      Python 3.10+ required (due to crewai dependency). CI tests on 3.10 and 3.13.
+      Use `uv` package manager, not pip.
+
+# Common tasks
+tasks:
+  - name: setup-dev
+    description: Set up development environment
+    commands:
+      - curl -LsSf https://astral.sh/uv/install.sh | sh
+      - export PATH="$HOME/.local/bin:$PATH"
+      - uv sync --extra tests
+      
+  - name: run-tests
+    description: Run test suite with coverage
+    commands:
+      - uv run pytest tests/ -v --cov=vendor_connectors
+      
+  - name: lint-and-format
+    description: Check and fix code style
+    commands:
+      - uvx ruff check src/ tests/
+      - uvx ruff format src/ tests/
+      
+  - name: build-package
+    description: Build distribution packages
+    commands:
+      - uv build
+
+# Workspace preferences
+preferences:
+  language: python
+  package_manager: uv
+  test_framework: pytest
+  linter: ruff
+  style_guide: "PEP 8 with 120 char line length"
+  
+  # Important patterns
+  patterns:
+    - "Use DirectedInputsClass for all connectors"
+    - "Extend with mixins for modular functionality"
+    - "Tools live with their connector, not in central package"
+    - "Always use `uv run` prefix for Python commands"
+    - "Conventional commits for semantic versioning"
