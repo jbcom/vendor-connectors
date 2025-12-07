@@ -49,7 +49,7 @@ from vendor_connectors.ai.base import (
 
 __all__ = [
     "ToolCategory",
-    "ToolDefinition", 
+    "ToolDefinition",
     "ToolParameter",
     "ToolResult",
 ]
@@ -64,4 +64,3 @@ warnings.warn(
     DeprecationWarning,
     stacklevel=2,
 )
-

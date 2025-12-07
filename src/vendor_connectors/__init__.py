@@ -38,7 +38,6 @@ from vendor_connectors.aws import (
     AWSS3Mixin,
     AWSSSOmixin,
 )
-from vendor_connectors.meshy import MeshyConnector
 from vendor_connectors.cloud_params import (
     get_aws_call_params,
     get_cloud_call_params,
@@ -54,6 +53,7 @@ from vendor_connectors.google import (
     GoogleServicesMixin,
     GoogleWorkspaceMixin,
 )
+from vendor_connectors.meshy import MeshyConnector
 from vendor_connectors.slack import SlackConnector
 from vendor_connectors.vault import VaultConnector
 from vendor_connectors.zoom import ZoomConnector

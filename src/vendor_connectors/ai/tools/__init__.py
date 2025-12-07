@@ -8,7 +8,7 @@ Available tool modules:
 
 Example:
     from vendor_connectors.ai.tools.meshy_tools import get_meshy_tools
-    
+
     tools = get_meshy_tools()
 """
 

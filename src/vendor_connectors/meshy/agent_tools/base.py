@@ -5,7 +5,7 @@ enabling a consistent API across different agent frameworks (CrewAI, MCP, etc.).
 
 ALIGNMENT NOTE:
 This module uses naming aligned with PR #20's vendor_connectors.ai.base module:
-- ToolParameter (was ParameterDefinition) 
+- ToolParameter (was ParameterDefinition)
 - ToolDefinition with connector_class and method_name fields
 
 This ensures compatibility regardless of which PR merges first.

@@ -27,7 +27,7 @@ if TYPE_CHECKING:
 
 class ToolCategory(str, Enum):
     """Categories for vendor connector tools.
-    
+
     Used to organize tools by their source connector or function type.
     Compatible with PR #20's ToolCategory enum.
     """
@@ -42,7 +42,7 @@ class ToolCategory(str, Enum):
     MESHY = "meshy"
     CURSOR = "cursor"
     ANTHROPIC = "anthropic"
-    
+
     # Meshy-specific subcategories (for internal use)
     GENERATION = "generation"  # Create new 3D assets
     RIGGING = "rigging"  # Add skeletons/rigs
