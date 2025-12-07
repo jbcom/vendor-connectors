@@ -58,14 +58,14 @@ class TestCrewAIE2E:
         6. Verifies the GLB file exists and has content
         """
         from crewai import Agent, Crew, Task
-        from crewai.tools import LangChainTool
+        from crewai.tools.structured_tool import CrewStructuredTool
 
         from vendor_connectors.meshy import base
         from vendor_connectors.meshy.tools import get_tools
 
-        # Wrap our tools for CrewAI
+        # Wrap our LangChain tools for CrewAI using CrewStructuredTool
         langchain_tools = get_tools()
-        crewai_tools = [LangChainTool(tool=t) for t in langchain_tools]
+        crewai_tools = [CrewStructuredTool.from_langchain(t) for t in langchain_tools]
 
         # Create agent
         artist = Agent(

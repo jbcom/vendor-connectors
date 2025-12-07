@@ -68,9 +68,11 @@ tests = [
     "pytest-timeout>=2.4.0",
     "pytest-vcr>=1.0.0",
     "vcrpy>=6.0.0",
-    # E2E test dependencies
+    # E2E test dependencies - all three AI agent frameworks
     "langchain-anthropic>=0.3.0",
     "langgraph>=0.2.0",
+    "crewai[tools]>=1.5.0",
+    "strands-agents>=0.1.0",
 ]
 # Meshy webhooks support
 webhooks = [
