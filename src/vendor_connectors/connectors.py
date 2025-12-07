@@ -14,7 +14,6 @@ from vendor_connectors.aws import AWSConnector
 from vendor_connectors.cursor import CursorConnector
 from vendor_connectors.github import GithubConnector
 from vendor_connectors.google import GoogleConnector
-from vendor_connectors.meshy import MeshyConnector
 from vendor_connectors.slack import SlackConnector
 from vendor_connectors.vault import VaultConnector
 from vendor_connectors.zoom import ZoomConnector
@@ -37,6 +36,10 @@ class VendorConnectors(DirectedInputsClass):
         slack = vc.get_slack_client(token="...", bot_token="...")
         github = vc.get_github_client(github_owner="org", github_token="...")
         aws_client = vc.get_aws_client("s3")
+
+    For Meshy AI, use the functional interface directly:
+        from vendor_connectors.meshy import text3d, image3d, rigging, animate
+        model = text3d.generate("a medieval sword")
     """
 
     def __init__(
@@ -422,32 +425,3 @@ class VendorConnectors(DirectedInputsClass):
         )
         return connector
 
-    # -------------------------------------------------------------------------
-    # Meshy AI
-    # -------------------------------------------------------------------------
-
-    def get_meshy_client(
-        self,
-        api_key: Optional[str] = None,
-    ) -> MeshyConnector:
-        """Get a cached MeshyConnector instance.
-
-        Args:
-            api_key: Meshy API key. Defaults to MESHY_API_KEY env var.
-
-        Returns:
-            MeshyConnector instance for 3D asset generation.
-        """
-        api_key = api_key or self.get_input("MESHY_API_KEY", required=False)
-
-        cached = self._get_cached_client("meshy", api_key=api_key)
-        if cached:
-            return cached
-
-        connector = MeshyConnector(
-            api_key=api_key,
-            logger=self.logging,
-            inputs=self.inputs,
-        )
-        self._set_cached_client("meshy", connector, api_key=api_key)
-        return connector
