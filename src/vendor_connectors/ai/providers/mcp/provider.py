@@ -9,13 +9,13 @@ from __future__ import annotations
 import json
 from typing import Any
 
-# Import to register tools
-import vendor_connectors.ai.tools.meshy_tools  # noqa: F401
+# Import meshy tools module
 from vendor_connectors.ai.base import (
     BaseToolProvider,
     get_tool_definition,
     get_tool_definitions,
 )
+from vendor_connectors.ai.tools.meshy_tools import _ensure_tools_registered
 
 
 class MCPToolProvider(BaseToolProvider):
@@ -65,6 +65,9 @@ class MCPToolProvider(BaseToolProvider):
             from mcp.types import Tool
         except ImportError:
             return []
+
+        # Ensure tools are registered before getting definitions
+        _ensure_tools_registered()
 
         tools = []
         for definition in get_tool_definitions():
@@ -126,6 +129,8 @@ class MCPToolProvider(BaseToolProvider):
         async def call_tool(name: str, arguments: dict[str, Any]) -> list[Any]:
             from mcp.types import TextContent
 
+            # Ensure tools are registered before lookup
+            _ensure_tools_registered()
             definition = get_tool_definition(name)
             if not definition:
                 return [

@@ -55,7 +55,10 @@ def __getattr__(name: str):
         if name not in _tool_classes:
             from vendor_connectors.ai.base import get_tool_definition
             from vendor_connectors.ai.providers.crewai.provider import _create_tool_class
+            from vendor_connectors.ai.tools.meshy_tools import _ensure_tools_registered
 
+            # Ensure tools are registered before lookup
+            _ensure_tools_registered()
             definition = get_tool_definition(tool_names[name])
             if definition:
                 _tool_classes[name] = _create_tool_class(definition)
