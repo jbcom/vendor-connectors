@@ -14,6 +14,7 @@ from vendor_connectors.aws import AWSConnector
 from vendor_connectors.cursor import CursorConnector
 from vendor_connectors.github import GithubConnector
 from vendor_connectors.google import GoogleConnector
+from vendor_connectors.meshy import MeshyConnector
 from vendor_connectors.slack import SlackConnector
 from vendor_connectors.vault import VaultConnector
 from vendor_connectors.zoom import ZoomConnector
@@ -422,96 +423,31 @@ class VendorConnectors(DirectedInputsClass):
         return connector
 
     # -------------------------------------------------------------------------
-    # Cursor (AI Agent Management)
+    # Meshy AI
     # -------------------------------------------------------------------------
 
-    def get_cursor_client(
+    def get_meshy_client(
         self,
         api_key: Optional[str] = None,
-        timeout: float = 60.0,
-    ) -> CursorConnector:
-        """Get a cached CursorConnector instance.
+    ) -> MeshyConnector:
+        """Get a cached MeshyConnector instance.
 
         Args:
-            api_key: Cursor API key. Defaults to CURSOR_API_KEY env var.
-            timeout: Request timeout in seconds.
+            api_key: Meshy API key. Defaults to MESHY_API_KEY env var.
 
         Returns:
-            CursorConnector instance for managing Cursor background agents.
+            MeshyConnector instance for 3D asset generation.
         """
-        api_key = api_key or self.get_input("CURSOR_API_KEY", required=False)
+        api_key = api_key or self.get_input("MESHY_API_KEY", required=False)
 
-        # Use hash of API key for cache key to avoid storing sensitive data
-        cache_key = hashlib.sha256((api_key or "").encode()).hexdigest()[:16] if api_key else None
-
-        cached = self._get_cached_client(
-            "cursor",
-            api_key_hash=cache_key,
-            timeout=timeout,
-        )
+        cached = self._get_cached_client("meshy", api_key=api_key)
         if cached:
             return cached
 
-        connector = CursorConnector(
+        connector = MeshyConnector(
             api_key=api_key,
-            timeout=timeout,
             logger=self.logging,
             inputs=self.inputs,
         )
-        self._set_cached_client(
-            "cursor",
-            connector,
-            api_key_hash=cache_key,
-            timeout=timeout,
-        )
-        return connector
-
-    # -------------------------------------------------------------------------
-    # Anthropic (Claude AI)
-    # -------------------------------------------------------------------------
-
-    def get_anthropic_client(
-        self,
-        api_key: Optional[str] = None,
-        api_version: str = "2023-06-01",
-        timeout: float = 60.0,
-    ) -> AnthropicConnector:
-        """Get a cached AnthropicConnector instance.
-
-        Args:
-            api_key: Anthropic API key. Defaults to ANTHROPIC_API_KEY env var.
-            api_version: API version string.
-            timeout: Request timeout in seconds.
-
-        Returns:
-            AnthropicConnector instance for Claude AI interactions.
-        """
-        api_key = api_key or self.get_input("ANTHROPIC_API_KEY", required=False)
-
-        # Use hash of API key for cache key to avoid storing sensitive data
-        cache_key = hashlib.sha256((api_key or "").encode()).hexdigest()[:16] if api_key else None
-
-        cached = self._get_cached_client(
-            "anthropic",
-            api_key_hash=cache_key,
-            api_version=api_version,
-            timeout=timeout,
-        )
-        if cached:
-            return cached
-
-        connector = AnthropicConnector(
-            api_key=api_key,
-            api_version=api_version,
-            timeout=timeout,
-            logger=self.logging,
-            inputs=self.inputs,
-        )
-        self._set_cached_client(
-            "anthropic",
-            connector,
-            api_key_hash=cache_key,
-            api_version=api_version,
-            timeout=timeout,
-        )
+        self._set_cached_client("meshy", connector, api_key=api_key)
         return connector

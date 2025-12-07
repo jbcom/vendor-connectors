@@ -54,6 +54,7 @@ from vendor_connectors.aws import (
     AWSS3Mixin,
     AWSSSOmixin,
 )
+from vendor_connectors.meshy import MeshyConnector
 from vendor_connectors.cloud_params import (
     get_aws_call_params,
     get_cloud_call_params,
@@ -102,5 +103,6 @@ __all__ = [
     "get_aws_call_params",
     "get_google_call_params",
     # Meshy AI (3D asset generation)
+    "MeshyConnector",
     "meshy",
 ]
