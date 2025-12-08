@@ -68,8 +68,7 @@ def configure(api_key: str | None = None, **kwargs) -> None:
 def get_api_key() -> str:
     """Get API key from DirectedInputsClass (env vars, direct inputs, or stdin)."""
     inputs = _get_inputs()
-    api_key = inputs.get_input("MESHY_API_KEY", required=True)
-    return api_key
+    return inputs.get_input("MESHY_API_KEY", required=True)
 
 
 def get_client() -> httpx.Client:
