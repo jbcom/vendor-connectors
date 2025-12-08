@@ -399,13 +399,7 @@ class TestCrewAITools:
     def test_get_crewai_tools_requires_crewai(self):
         """Test that get_crewai_tools raises ImportError without crewai."""
         with patch.dict("sys.modules", {"crewai": None, "crewai.tools": None}):
-            # Reload to clear imports
-            import importlib
-
             from vendor_connectors.meshy import tools as meshy_tools
-
-            importlib.reload(meshy_tools)
-
             with pytest.raises(ImportError, match="crewai is required"):
                 meshy_tools.get_crewai_tools()
 
