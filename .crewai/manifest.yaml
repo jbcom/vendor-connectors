@@ -1,0 +1,17 @@
+name: vendor-connectors
+version: "1.0"
+description: Universal vendor connectors with AI-powered connector generation
+
+llm:
+  provider: anthropic
+  model: claude-sonnet-4-20250514
+
+crews:
+  connector_builder:
+    description: >
+      Generate HTTP connector code from API documentation.
+      Scrapes API docs, analyzes structure, and generates typed Python HTTP clients
+      following vendor-connectors patterns.
+    agents: crews/connector_builder/agents.yaml
+    tasks: crews/connector_builder/tasks.yaml
+    preferred_framework: crewai  # Needs scraping tools from crewai_tools
