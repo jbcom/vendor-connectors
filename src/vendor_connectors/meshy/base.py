@@ -1,14 +1,20 @@
 """Base HTTP client - auth, retries, rate limiting.
 
 This module handles ALL the HTTP infrastructure. API modules import this.
+
+Uses DirectedInputsClass for credential loading, consistent with all other
+vendor-connectors. Credentials can come from:
+- Environment variables (MESHY_API_KEY)
+- Direct parameters
+- stdin JSON input
 """
 
 from __future__ import annotations
 
-import os
 import time
 
 import httpx
+from directed_inputs_class import DirectedInputsClass
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
 
 
@@ -28,22 +34,41 @@ class MeshyAPIError(Exception):
 
 # Global client state
 _client: httpx.Client | None = None
-_api_key: str | None = None
+_inputs: DirectedInputsClass | None = None
 _last_request_time: float = 0
 _min_request_interval: float = 0.5  # 500ms between requests
 
 BASE_URL = "https://api.meshy.ai"
 
 
+def _get_inputs() -> DirectedInputsClass:
+    """Get or create the DirectedInputsClass instance."""
+    global _inputs
+    if _inputs is None:
+        _inputs = DirectedInputsClass()
+    return _inputs
+
+
+def configure(api_key: str | None = None, **kwargs) -> None:
+    """Configure Meshy API credentials.
+
+    Args:
+        api_key: Meshy API key (overrides environment variable)
+        **kwargs: Additional inputs to merge
+    """
+    global _inputs
+    inputs = {"MESHY_API_KEY": api_key} if api_key else {}
+    inputs.update(kwargs)
+    if _inputs is None:
+        _inputs = DirectedInputsClass(inputs=inputs)
+    else:
+        _inputs.merge_inputs(inputs)
+
+
 def get_api_key() -> str:
-    """Get API key from env or cached value."""
-    global _api_key
-    if _api_key is None:
-        _api_key = os.getenv("MESHY_API_KEY")
-    if not _api_key:
-        msg = "MESHY_API_KEY not set"
-        raise ValueError(msg)
-    return _api_key
+    """Get API key from DirectedInputsClass (env vars, direct inputs, or stdin)."""
+    inputs = _get_inputs()
+    return inputs.get_input("MESHY_API_KEY", required=True)
 
 
 def get_client() -> httpx.Client:

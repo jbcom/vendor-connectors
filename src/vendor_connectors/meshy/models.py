@@ -17,11 +17,15 @@ class TaskStatus(str, Enum):
 
 
 class ArtStyle(str, Enum):
+    """Art style for text-to-3D generation.
+
+    Per Meshy API docs:
+    - realistic: Realistic style
+    - sculpture: Sculpture style (PBR not recommended but not enforced)
+    """
+
     REALISTIC = "realistic"
-    CARTOON = "cartoon"
-    LOW_POLY = "low-poly"
-    SCULPT = "sculpt"
-    PBR = "pbr"
+    SCULPTURE = "sculpture"
 
 
 class TexturePBRMapType(str, Enum):

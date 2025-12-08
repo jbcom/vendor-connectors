@@ -21,17 +21,18 @@ Usage:
     # Retexture
     retextured = retexture.apply(model.id, "golden with gems")
 
-    # AI agent integration
-    from vendor_connectors.ai.tools.meshy_tools import get_meshy_tools
-    tools = get_meshy_tools()
+    # LangChain tools
+    from vendor_connectors.meshy.tools import get_tools
+    tools = get_tools()
 
-    # For CrewAI
-    from vendor_connectors.ai.providers.crewai import get_tools
-    crewai_tools = get_tools()
+    # CrewAI tools
+    from vendor_connectors.meshy.tools import get_crewai_tools
+    crewai_tools = get_crewai_tools()
 
-    # For MCP
-    from vendor_connectors.ai.providers.mcp import create_server
+    # MCP server
+    from vendor_connectors.meshy.mcp import create_server, run_server
     server = create_server()
+    run_server(server)
 """
 
 from __future__ import annotations

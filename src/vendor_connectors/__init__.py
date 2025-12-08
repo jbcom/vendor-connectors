@@ -46,8 +46,8 @@ Usage:
     animated = animate.apply(rigged.id, animation_id=0)
 
     # AI tools for agents
-    from vendor_connectors.ai.tools.meshy_tools import get_meshy_tools
-    from vendor_connectors.ai.providers.crewai import get_tools
+    from vendor_connectors.meshy.tools import get_tools, get_crewai_tools
+    from vendor_connectors.meshy.mcp import create_server, run_server
 """
 
 from __future__ import annotations
@@ -55,7 +55,8 @@ from __future__ import annotations
 __version__ = "0.2.0"
 
 # Sub-packages
-from vendor_connectors import ai, meshy
+from vendor_connectors import meshy
+from vendor_connectors.anthropic import AnthropicConnector
 from vendor_connectors.aws import (
     AWSConnector,
     AWSConnectorFull,
@@ -63,6 +64,7 @@ from vendor_connectors.aws import (
     AWSS3Mixin,
     AWSSSOmixin,
 )
+from vendor_connectors.base import VendorConnectorBase
 from vendor_connectors.cloud_params import (
     get_aws_call_params,
     get_cloud_call_params,
@@ -84,6 +86,8 @@ from vendor_connectors.vault import VaultConnector
 from vendor_connectors.zoom import ZoomConnector
 
 __all__ = [
+    # Base class for all connectors
+    "VendorConnectorBase",
     # AI/Agent connectors
     "AnthropicConnector",
     "CursorConnector",
@@ -112,6 +116,4 @@ __all__ = [
     "get_google_call_params",
     # Meshy AI (3D asset generation) - functional interface
     "meshy",
-    # AI tools sub-package
-    "ai",
 ]

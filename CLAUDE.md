@@ -2,14 +2,35 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+> **CRITICAL:** See `AGENTS.md` for comprehensive instructions including GitHub authentication patterns.
+
 ## Overview
 
 Universal vendor connectors for the jbcom ecosystem, providing standardized access to cloud providers (AWS, Google Cloud), services (GitHub, Slack, Vault, Zoom), and AI APIs (Anthropic Claude, Cursor agents, Meshy 3D).
 
+## CRITICAL: GitHub Authentication
+
+```bash
+# ALWAYS use this pattern for jbcom repos
+GH_TOKEN="$GITHUB_JBCOM_TOKEN" gh <command>
+
+# Examples
+GH_TOKEN="$GITHUB_JBCOM_TOKEN" gh pr list
+GH_TOKEN="$GITHUB_JBCOM_TOKEN" gh issue view 33
+```
+
+**NEVER** use `$GITHUB_TOKEN` directly.
+
+## Before Starting
+
+```bash
+cat memory-bank/activeContext.md  # Check current context
+```
+
 ## Development Commands
 
 ```bash
-# Install dependencies
+# Install dependencies (REQUIRED)
 uv sync --extra tests
 
 # Run all tests
@@ -22,7 +43,7 @@ uv run pytest tests/test_aws_connector.py -v
 uv run pytest tests/test_aws_connector.py::TestAWSConnector::test_specific -v
 
 # Lint and format
-uvx ruff check src/ tests/
+uvx ruff check src/ tests/ --fix
 uvx ruff format src/ tests/
 
 # Type checking
@@ -31,8 +52,8 @@ uv run mypy src/
 # Build package
 uv build
 
-# Run tests across Python versions (3.9-3.13)
-tox
+# Run E2E tests (requires API keys, takes 5-10 min)
+uv run pytest tests/e2e/ -v --timeout=600
 ```
 
 ## Architecture
@@ -97,8 +118,8 @@ Use conventional commits:
 - `feat(meshy): Meshy feature` - minor version
 - `fix(connector): bug fix` - patch version
 
-## GitHub Authentication
+## Related Documentation
 
-```bash
-GH_TOKEN="$GITHUB_TOKEN" gh <command>
-```
+- `AGENTS.md` - Comprehensive agent instructions
+- `.cursor/rules/` - Cursor rules and agent profiles
+- `memory-bank/activeContext.md` - Current development context

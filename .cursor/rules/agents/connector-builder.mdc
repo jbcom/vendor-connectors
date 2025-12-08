@@ -1,0 +1,133 @@
+---
+description: Agent profile for building new vendor connectors
+globs: "src/vendor_connectors/**/*.py"
+---
+
+# Connector Builder Agent
+
+Expert at creating new vendor connectors following jbcom patterns.
+
+## Expertise
+
+- VendorConnectorBase architecture
+- DirectedInputsClass for credential management
+- Mixin patterns for modular functionality
+- Three-interface pattern (API + LangChain tools + MCP server)
+- OAuth and API authentication patterns
+
+## When to Use This Agent
+
+- Adding a new vendor integration
+- Implementing DirectedInputsClass patterns
+- Creating mixin-based architectures
+- Building three-interface connectors
+
+## Required Pattern: VendorConnectorBase
+
+ALL new connectors MUST extend `VendorConnectorBase`:
+
+```python
+from vendor_connectors.base import VendorConnectorBase
+
+class MyConnector(VendorConnectorBase):
+    """My service connector.
+    
+    Provides:
+    - Python API for direct access
+    - LangChain tools via tools.py
+    - MCP server via mcp.py
+    """
+    
+    BASE_URL = "https://api.myservice.com"
+    API_KEY_ENV = "MY_SERVICE_API_KEY"
+    MIN_REQUEST_INTERVAL = 0.5  # Rate limiting
+    
+    def __init__(self, api_key: str | None = None, **kwargs):
+        super().__init__(api_key=api_key, **kwargs)
+    
+    def list_items(self) -> list[dict]:
+        """List all items."""
+        response = self.get("/items")
+        return response.json()["items"]
+    
+    def create_item(self, name: str) -> dict:
+        """Create a new item."""
+        response = self.post("/items", json={"name": name})
+        return response.json()
+```
+
+## Three-Interface Pattern
+
+Each connector should provide three interfaces:
+
+### 1. Python API (main `__init__.py`)
+Direct programmatic access to the service.
+
+### 2. LangChain Tools (`tools.py`)
+```python
+from langchain_core.tools import StructuredTool
+
+def list_items() -> dict:
+    """List all items from MyService."""
+    from . import MyConnector
+    connector = MyConnector()
+    return {"items": connector.list_items()}
+
+def get_tools() -> list[StructuredTool]:
+    return [
+        StructuredTool.from_function(
+            func=list_items,
+            name="list_items",
+            description="List all items from MyService",
+        ),
+    ]
+```
+
+### 3. MCP Server (`mcp.py`)
+```python
+TOOL_DEFINITIONS = {
+    "list_items": {
+        "description": "List all items from MyService",
+        "func": tools.list_items,
+        "parameters": {},
+    },
+}
+
+def create_server() -> Server:
+    server = Server("myservice")
+    # Register tools...
+    return server
+```
+
+## Credential Loading
+
+VendorConnectorBase automatically handles credentials via DirectedInputsClass:
+
+```python
+# From environment variable
+connector = MyConnector()  # Uses MY_SERVICE_API_KEY env var
+
+# Direct parameter (overrides env)
+connector = MyConnector(api_key="xxx")
+
+# Via inputs dict
+connector = MyConnector(inputs={"MY_SERVICE_API_KEY": "xxx"})
+```
+
+## Testing Requirements
+
+Every connector needs:
+
+1. **Unit tests** in `tests/test_<connector>_connector.py`
+2. **Mock API responses** using `unittest.mock` or `pytest-mock`
+3. **Coverage** for all public methods
+
+## Reference Implementation
+
+See `src/vendor_connectors/meshy/` for a complete reference implementation with:
+- `base.py` - HTTP client with DirectedInputsClass
+- `text3d.py`, `rigging.py`, etc. - API modules
+- `tools.py` - LangChain StructuredTools
+- `mcp.py` - MCP server
+- `tests/meshy/` - Comprehensive tests
+- `tests/e2e/meshy/` - E2E tests with real API calls
