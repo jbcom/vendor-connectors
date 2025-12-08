@@ -82,6 +82,10 @@ agents = [
     "crewai[tools]>=1.5.0",
     "mcp>=1.0.0",
 ]
+# AI crew orchestration for connector generation
+crews = [
+    "agentic-crew[crewai,scraping]>=0.1.0",
+]
 # Vector store for Meshy RAG embeddings
 vector = [
     "sqlite-vec>=0.1.0",
