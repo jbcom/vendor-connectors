@@ -38,9 +38,7 @@ class TestSSOIdentityStore:
         result = aws_connector.get_identity_store_id()
 
         assert result == "d-1234567890"
-        aws_connector.get_aws_client.assert_called_once_with(
-            client_name="sso-admin", execution_role_arn=None
-        )
+        aws_connector.get_aws_client.assert_called_once_with(client_name="sso-admin", execution_role_arn=None)
 
     def test_get_identity_store_id_no_instance(self, aws_connector):
         """Test getting identity store ID with no instances."""
@@ -103,9 +101,7 @@ class TestSSOUsers:
             if client_name == "identitystore":
                 return mock_identitystore
             mock_sso_admin = MagicMock()
-            mock_sso_admin.list_instances.return_value = {
-                "Instances": [{"IdentityStoreId": "d-1234567890"}]
-            }
+            mock_sso_admin.list_instances.return_value = {"Instances": [{"IdentityStoreId": "d-1234567890"}]}
             return mock_sso_admin
 
         aws_connector.get_aws_client = MagicMock(side_effect=get_client)
@@ -134,16 +130,12 @@ class TestSSOUsers:
             if client_name == "identitystore":
                 return mock_identitystore
             mock_sso_admin = MagicMock()
-            mock_sso_admin.list_instances.return_value = {
-                "Instances": [{"IdentityStoreId": "d-1234567890"}]
-            }
+            mock_sso_admin.list_instances.return_value = {"Instances": [{"IdentityStoreId": "d-1234567890"}]}
             return mock_sso_admin
 
         aws_connector.get_aws_client = MagicMock(side_effect=get_client)
 
-        result = aws_connector.list_sso_users(
-            unhump_users=False, flatten_name=True, identity_store_id="d-1234567890"
-        )
+        result = aws_connector.list_sso_users(unhump_users=False, flatten_name=True, identity_store_id="d-1234567890")
 
         assert len(result) == 1
         assert result["user-1"]["GivenName"] == "John"
@@ -162,9 +154,7 @@ class TestSSOUsers:
 
         aws_connector.get_aws_client = MagicMock(return_value=mock_identitystore)
 
-        result = aws_connector.list_sso_users(
-            identity_store_id="d-1234567890", unhump_users=False, flatten_name=False
-        )
+        result = aws_connector.list_sso_users(identity_store_id="d-1234567890", unhump_users=False, flatten_name=False)
 
         assert len(result) == 2
         assert mock_identitystore.list_users.call_count == 2
@@ -211,9 +201,7 @@ class TestSSOUsers:
     def test_get_sso_user_not_found(self, aws_connector):
         """Test getting a non-existent SSO user."""
         mock_identitystore = MagicMock()
-        error = ClientError(
-            {"Error": {"Code": "ResourceNotFoundException"}}, "DescribeUser"
-        )
+        error = ClientError({"Error": {"Code": "ResourceNotFoundException"}}, "DescribeUser")
         mock_identitystore.describe_user.side_effect = error
 
         aws_connector.get_aws_client = MagicMock(return_value=mock_identitystore)
@@ -251,9 +239,7 @@ class TestSSOGroups:
             if client_name == "identitystore":
                 return mock_identitystore
             mock_sso_admin = MagicMock()
-            mock_sso_admin.list_instances.return_value = {
-                "Instances": [{"IdentityStoreId": "d-1234567890"}]
-            }
+            mock_sso_admin.list_instances.return_value = {"Instances": [{"IdentityStoreId": "d-1234567890"}]}
             return mock_sso_admin
 
         aws_connector.get_aws_client = MagicMock(side_effect=get_client)
@@ -282,9 +268,7 @@ class TestSSOGroups:
     def test_get_sso_group_not_found(self, aws_connector):
         """Test getting a non-existent SSO group."""
         mock_identitystore = MagicMock()
-        error = ClientError(
-            {"Error": {"Code": "ResourceNotFoundException"}}, "DescribeGroup"
-        )
+        error = ClientError({"Error": {"Code": "ResourceNotFoundException"}}, "DescribeGroup")
         mock_identitystore.describe_group.side_effect = error
 
         aws_connector.get_aws_client = MagicMock(return_value=mock_identitystore)

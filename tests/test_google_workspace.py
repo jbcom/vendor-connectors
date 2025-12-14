@@ -49,9 +49,7 @@ class TestWorkspaceUsers:
         """Test listing users filtered by domain."""
         mock_service = MagicMock()
         mock_users = mock_service.users.return_value
-        mock_users.list.return_value.execute.return_value = {
-            "users": [{"primaryEmail": "user1@example.com"}]
-        }
+        mock_users.list.return_value.execute.return_value = {"users": [{"primaryEmail": "user1@example.com"}]}
         google_connector.get_admin_directory_service = MagicMock(return_value=mock_service)
 
         result = google_connector.list_users(domain="example.com")
@@ -182,9 +180,7 @@ class TestWorkspaceGroups:
         """Test listing groups filtered by domain."""
         mock_service = MagicMock()
         mock_groups = mock_service.groups.return_value
-        mock_groups.list.return_value.execute.return_value = {
-            "groups": [{"email": "group1@example.com"}]
-        }
+        mock_groups.list.return_value.execute.return_value = {"groups": [{"email": "group1@example.com"}]}
         google_connector.get_admin_directory_service = MagicMock(return_value=mock_service)
 
         result = google_connector.list_groups(domain="example.com")
