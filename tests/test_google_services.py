@@ -40,9 +40,7 @@ class TestComputeEngine:
                         {"name": "instance-2", "zone": "us-central1-a"},
                     ]
                 },
-                "zones/us-east1-b": {
-                    "instances": [{"name": "instance-3", "zone": "us-east1-b"}]
-                },
+                "zones/us-east1-b": {"instances": [{"name": "instance-3", "zone": "us-east1-b"}]},
             }
         }
         google_connector.get_compute_service = MagicMock(return_value=mock_service)
@@ -76,19 +74,11 @@ class TestComputeEngine:
         mock_instances = mock_service.instances.return_value
         mock_instances.aggregatedList.return_value.execute.side_effect = [
             {
-                "items": {
-                    "zones/us-central1-a": {
-                        "instances": [{"name": "instance-1"}]
-                    }
-                },
+                "items": {"zones/us-central1-a": {"instances": [{"name": "instance-1"}]}},
                 "nextPageToken": "token123",
             },
             {
-                "items": {
-                    "zones/us-east1-b": {
-                        "instances": [{"name": "instance-2"}]
-                    }
-                },
+                "items": {"zones/us-east1-b": {"instances": [{"name": "instance-2"}]}},
             },
         ]
         google_connector.get_compute_service = MagicMock(return_value=mock_service)
@@ -282,7 +272,9 @@ class TestCloudKMS:
     def test_create_kms_key(self, google_connector):
         """Test creating a crypto key."""
         mock_service = MagicMock()
-        mock_keys = mock_service.projects.return_value.locations.return_value.keyRings.return_value.cryptoKeys.return_value
+        mock_keys = (
+            mock_service.projects.return_value.locations.return_value.keyRings.return_value.cryptoKeys.return_value
+        )
         mock_keys.create.return_value.execute.return_value = {
             "name": "projects/test-project/locations/us/keyRings/kr1/cryptoKeys/new-key"
         }

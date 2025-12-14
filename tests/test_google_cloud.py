@@ -33,9 +33,7 @@ class TestOrganization:
         mock_service = MagicMock()
         mock_orgs = mock_service.organizations.return_value
         mock_orgs.search.return_value.execute.return_value = {
-            "organizations": [
-                {"name": "organizations/123456789", "displayName": "Test Org"}
-            ]
+            "organizations": [{"name": "organizations/123456789", "displayName": "Test Org"}]
         }
         google_connector.get_cloud_resource_manager_service = MagicMock(return_value=mock_service)
 
@@ -108,9 +106,7 @@ class TestProjects:
         """Test listing projects with parent filter."""
         mock_service = MagicMock()
         mock_projects = mock_service.projects.return_value
-        mock_projects.search.return_value.execute.return_value = {
-            "projects": [{"projectId": "project-1"}]
-        }
+        mock_projects.search.return_value.execute.return_value = {"projects": [{"projectId": "project-1"}]}
         google_connector.get_cloud_resource_manager_service = MagicMock(return_value=mock_service)
 
         result = google_connector.list_projects(parent="organizations/123456")
@@ -123,9 +119,7 @@ class TestProjects:
         """Test listing projects with filter query."""
         mock_service = MagicMock()
         mock_projects = mock_service.projects.return_value
-        mock_projects.search.return_value.execute.return_value = {
-            "projects": [{"projectId": "project-1"}]
-        }
+        mock_projects.search.return_value.execute.return_value = {"projects": [{"projectId": "project-1"}]}
         google_connector.get_cloud_resource_manager_service = MagicMock(return_value=mock_service)
 
         result = google_connector.list_projects(filter_query="lifecycleState:ACTIVE")
